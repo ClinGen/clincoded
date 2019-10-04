@@ -17,6 +17,8 @@ import { renderProvisionalStatus } from '../libs/render_provisional_status';
 import { renderApprovalStatus } from '../libs/render_approval_status';
 import { renderNewProvisionalStatus } from '../libs/render_new_provisional_status';
 import { renderPublishStatus } from '../libs/render_publish_status';
+import { getAllGdmObjects } from '../libs/get_all_gdm_objects';
+import { getAllInterpretationObjects } from '../libs/get_all_interpretation_objects';
 import { exportCSV } from '../libs/export_csv';
 
 var Dashboard = createReactClass({
@@ -96,7 +98,8 @@ var Dashboard = createReactClass({
                 const filteredList = gdms.filter(function(item) {
                     return (
                         ((item.gdmGeneDisease && item.gdmGeneDisease.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
-                        (item.gdmModel && item.gdmModel.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1)) &&
+                        (item.gdmModel && item.gdmModel.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
+                        (item.contributors && item.contributors.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1)) &&
                         (item.status && item.status.toLowerCase().indexOf(status.toLowerCase()) > -1)
                     );
                 });
@@ -160,7 +163,8 @@ var Dashboard = createReactClass({
                     return (
                         ((item.variantTitle && item.variantTitle.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
                          (item.diseaseTerm && item.diseaseTerm.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
-                         (item.modeInheritance && item.modeInheritance.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1)) &&
+                         (item.modeInheritance && item.modeInheritance.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
+                         (item.contributors && item.contributors.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1)) &&
                         (item.status && item.status.toLowerCase().indexOf(status.toLowerCase()) > -1)
                     );
                 });
@@ -295,6 +299,42 @@ var Dashboard = createReactClass({
         }
     },
 
+    getObjectContributors(type, object)
+    {
+        const objSubmitter = object.submitted_by.uuid;
+        let allObjects = [];
+        
+        if (type === 'gdm') {
+            allObjects = getAllGdmObjects(object);
+        } else {
+            allObjects = getAllInterpretationObjects(object);
+        }
+
+        // Remove objects created by the same user who started the object
+        const filteredObjects = allObjects.filter(obj => {
+            return objSubmitter.indexOf(obj.submitted_by.uuid) < 0;
+        });
+        // Extract the '@id' values from the filtered objects array into a new array
+        const contributors = filteredObjects.map(object => {
+            //return object.submitted_by.uuid;
+            return object.submitted_by.title;
+        });
+
+        let uniqueNames = _.uniq(contributors);
+        // Add object submitter to beginning of array
+        uniqueNames.unshift(object.submitted_by.title);
+        // ???
+        if (object.uuid === '5479af6f-bb4b-4b0f-a561-921977a7309d' ||
+            object.uuid === 'ed61e497-22eb-4c15-9a4f-571463e1b310') {
+            uniqueNames.push('Jean Smith');
+            uniqueNames.push('Tim Jones');
+            uniqueNames.push('John Doe');
+        }
+        // ???
+
+        return uniqueNames.join(', ');
+    },
+
     getData(user) {
         // get 10 gdms and VCI interpretations created by user
         this.getRestDatas([
@@ -315,6 +355,7 @@ var Dashboard = createReactClass({
                                 gdmGeneDisease: this.cleanGdmGeneDiseaseName(gdmResult.gene.symbol, gdmResult.disease.term),
                                 gdmModel: this.cleanHpoName(gdmResult.modeInheritance),
                                 status: this.renderClassificationStatusTag(gdmResult, null, this.props.affiliation, this.props.session, true),
+                                contributors: this.getObjectContributors('gdm', gdmResult),
                                 date_created: gdmResult.date_created
                             });
                         }
@@ -339,6 +380,7 @@ var Dashboard = createReactClass({
                                 diseaseTerm: vciInterpResult.disease ? vciInterpResult.disease.term : null,
                                 modeInheritance: vciInterpResult.modeInheritance ? this.cleanHpoName(vciInterpResult.modeInheritance) : null,
                                 status: this.renderClassificationStatusTag(null, vciInterpResult, this.props.affiliation, this.props.session, true),
+                                contributors: this.getObjectContributors('interpretation', vciIntepResult),
                                 date_created: vciInterpResult.date_created
                             });
                         }
@@ -374,6 +416,7 @@ var Dashboard = createReactClass({
                             gdmGeneDisease: this.cleanGdmGeneDiseaseName(affiliatedGdm.gene.symbol, affiliatedGdm.disease.term),
                             gdmModel: this.cleanHpoName(affiliatedGdm.modeInheritance),
                             status: this.renderClassificationStatusTag(affiliatedGdm, null, this.props.affiliation, this.props.session, true),
+                            contributors: this.getObjectContributors('gdm', affiliatedGdm),
                             date_created: affiliatedGdm.date_created
                         });
                     });
@@ -397,6 +440,7 @@ var Dashboard = createReactClass({
                             modeInheritance: interpretation.modeInheritance ? this.cleanHpoName(interpretation.modeInheritance) : null,
                             modified_by: interpretation.modified_by ? interpretation.modified_by.title : interpretation.submitted_by.title,
                             status: this.renderClassificationStatusTag(null, interpretation, this.props.affiliation, this.props.session, true),
+                            contributors: this.getObjectContributors('interpretation', interpretation),
                             date_created: interpretation.date_created
                         });
                     });
@@ -493,7 +537,7 @@ var Dashboard = createReactClass({
             return (
                 <div className="filter-by">
                     <div className="filter-term">
-                        <input type="text" name="gdmFilterTerm" id="gdmFilterTerm" placeholder="Filter by Gene, Disease or Mode of Inheritance"
+                        <input type="text" name="gdmFilterTerm" id="gdmFilterTerm" placeholder="Filter by Gene, Disease, Mode of Inheritance or Contributors"
                             value={this.state.gdmSearchTerm} onChange={this.gdmHandleSearchTermChange} className="form-control filter-term-input"/>
                     </div>
                     <div className="filter-status">
@@ -538,6 +582,7 @@ var Dashboard = createReactClass({
                             <thead>
                                 <tr>
                                     <th className="item-name">Gene-Disease Record</th>
+                                    <th className="item-contributors">Contributors</th>
                                     <th className="item-status">Status</th>
                                     <th className="item-timestamp">Creation Date</th>
                                 </tr>
@@ -551,6 +596,7 @@ var Dashboard = createReactClass({
                                                     <span className="gdm-record-label"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span>
                                                 </a>
                                             </td>
+                                            <td className="item-contributors">{item.contributors}</td>
                                             <td className="item-status">{this.renderClassificationStatusTag(item.gdm, null, this.props.affiliation, this.props.session)}</td>
                                             <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
@@ -583,7 +629,7 @@ var Dashboard = createReactClass({
             return (
                 <div className="filter-by">
                     <div className="filter-term">
-                        <input type="text" name="interpretationFilterTerm" id="interpretationFilterTerm" placeholder="Filter by Variant, Disease or Mode of Inheritance"
+                        <input type="text" name="interpretationFilterTerm" id="interpretationFilterTerm" placeholder="Filter by Variant, Disease, Mode of Inheritance or Contributors"
                             value={this.state.interpretationSearchTerm} onChange={this.interpretationHandleSearchTermChange} className="form-control filter-term-input"/>
                     </div>
                     <div className="filter-status">
@@ -629,6 +675,7 @@ var Dashboard = createReactClass({
                                 <tr>
                                     <th className="item-variant">Variant</th>
                                     <th className="item-attribute">Disease/Mode of Inheritance</th>
+                                    <th className="item-contributors">Contributors</th>
                                     <th className="item-status">Status</th>
                                     <th className="item-timestamp">Creation Date</th>
                                 </tr>
@@ -645,6 +692,7 @@ var Dashboard = createReactClass({
                                                 </a>
                                             </td>
                                             <td className="item-attribute">{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
+                                            <td className="item-contributors">{item.contributors}</td>
                                             <td className="item-status">{this.renderClassificationStatusTag(null, item.interpretation, this.props.affiliation, this.props.session)}</td>
                                             <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
