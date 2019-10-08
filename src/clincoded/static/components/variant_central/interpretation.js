@@ -44,7 +44,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         ext_clinvarInterpretationSummary: PropTypes.object,
         ext_ensemblGeneId: PropTypes.string,
         ext_geneSynonyms: PropTypes.array,
-        ext_ldhFuncData: PropTypes.object,
+        ext_ldhData: PropTypes.object,
         ext_singleNucleotide: PropTypes.bool,
         ext_gnomadExac: PropTypes.bool,
         loading_clinvarEutils: PropTypes.bool,
@@ -55,6 +55,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         loading_pageData: PropTypes.bool,
         loading_myVariantInfo: PropTypes.bool,
         loading_myGeneInfo: PropTypes.bool,
+        loading_ldhData: PropTypes.bool,
         loading_ldhFuncData: PropTypes.bool,
         error_ldhFuncData: PropTypes.object,
         setCalculatedPathogenicity: PropTypes.func,
@@ -79,7 +80,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_clinVarSCV: this.props.ext_clinVarSCV,
             ext_clinvarInterpretationSummary: this.props.ext_clinvarInterpretationSummary,
             ext_ensemblGeneId: this.props.ext_ensemblGeneId,
-            ext_ldhFuncData: this.props.ext_ldhFuncData,
+            ext_ldhData: this.props.ext_ldhData,
             ext_geneSynonyms: this.props.ext_geneSynonyms,
             ext_singleNucleotide: this.props.ext_singleNucleotide,
             ext_gnomadExac: this.props.ext_gnomadExac,
@@ -91,6 +92,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             loading_pageData: this.props.loading_pageData,
             loading_myVariantInfo: this.props.loading_myVariantInfo,
             loading_myGeneInfo: this.props.loading_myGeneInfo,
+            loading_ldhData: this.props.loading_ldhData,
             loading_ldhFuncData: this.props.loading_ldhFuncData,
             error_ldhFuncData: this.props.error_ldhFuncData,
             //remember current tab/subtab so user will land on that tab when interpretation starts
@@ -135,8 +137,8 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         if (nextProps.ext_ensemblGeneId) {
             this.setState({ext_ensemblGeneId: nextProps.ext_ensemblGeneId});
         }
-        if (nextProps.ext_ldhFuncData) {
-            this.setState({ext_ldhFuncData: nextProps.ext_ldhFuncData});
+        if (nextProps.ext_ldhData) {
+            this.setState({ext_ldhData: nextProps.ext_ldhData});
         }
         if (nextProps.ext_geneSynonyms) {
             this.setState({ext_geneSynonyms: nextProps.ext_geneSynonyms});
@@ -161,6 +163,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             loading_clinvarEutils: nextProps.loading_clinvarEutils,
             loading_clinvarEsearch: nextProps.loading_clinvarEsearch,
             loading_clinvarSCV: nextProps.loading_clinvarSCV,
+            loading_ldhData: nextProps.loading_ldhData,
             loading_ldhFuncData: nextProps.loading_ldhFuncData,
             error_ldhFuncData: nextProps.error_ldhFuncData,
         });
@@ -255,7 +258,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationFunctional data={variant} href_url={this.props.href_url} session={this.props.session}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                            ext_ldhFuncData={this.state.ext_ldhFuncData}
+                            ext_ldhData={this.state.ext_ldhData}
                             loading_ldhFuncData={this.state.loading_ldhFuncData}
                             error_ldhFuncData={this.state.error_ldhFuncData}
                             affiliation={this.props.affiliation}

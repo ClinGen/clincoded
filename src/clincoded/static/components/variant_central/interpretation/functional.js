@@ -24,7 +24,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         data: PropTypes.object,
         interpretation: PropTypes.object,
         updateInterpretationObj: PropTypes.func,
-        ext_ldhFuncData: PropTypes.object,
+        ext_ldhData: PropTypes.object,
         loading_ldhFuncData: PropTypes.bool,
         error_ldhFuncData: PropTypes.object,
         href_url: PropTypes.object,
@@ -50,8 +50,8 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         if (this.state.selectedCriteria) {
             setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
         }
-        if (this.props.ext_ldhFuncData && this.state.interpretation && this.state.interpretation.evaluations) {
-            this.compareFunctionalData(this.props.ext_ldhFuncData, this.state.interpretation.evaluations);
+        if (this.props.ext_ldhData && this.state.interpretation && this.state.interpretation.evaluations) {
+            this.compareFunctionalData(this.props.ext_ldhData, this.state.interpretation.evaluations);
         }
     },
 
@@ -62,13 +62,13 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                 setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
             });
         }
-        if (this.props.ext_ldhFuncData && nextProps.interpretation && nextProps.interpretation.evaluations) {
-            this.compareFunctionalData(this.props.ext_ldhFuncData, nextProps.interpretation.evaluations);
+        if (this.props.ext_ldhData && nextProps.interpretation && nextProps.interpretation.evaluations) {
+            this.compareFunctionalData(this.props.ext_ldhData, nextProps.interpretation.evaluations);
         }
     },
 
     compareFunctionalData: function(newFuncData, savedEvals) {
-        // Returns true if @newData is different from @oldData, otherwise returns false
+        // Returns true if @newData is different from @oldData based on the unique @rev, otherwise returns false
         const isDiffAfisVersion = (newData, oldData) => {
             const oldAfis = _.property(['ld', 'AlleleFunctionalImpactStatement'])(oldData);
             const newAfis = _.property(['ld', 'AlleleFunctionalImpactStatement'])(newData);
@@ -98,18 +98,18 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         });
     },
 
+    // Match the material in the ldSet to determine if material is patient sourced
     isPatientSourced: function(materialId, ldSet = []) {
         return ldSet.some(set => {
             const ldSetMaterialId = _.property(['entContent', 'entities', 'Material', 0, 'ldhId'])(set);
             if (ldSetMaterialId === materialId) {
                 const isPatientSourced = _.property(['entContent', 'relation', 'value'])(set);
-                if (isPatientSourced === 'Yes') {
-                    return true;
-                }
+                return isPatientSourced === 'Yes';
             }
         });
     },
 
+    // Match the material ID and the genotype ID to determine the genotype label
     getGenotypeLabel: function(materialId, ldSet = [], genotypes = []) {
         let genotypeLabel = 'none';
         ldSet.some(set => {
@@ -127,12 +127,20 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         return genotypeLabel;
     },
 
+    // Create the link to OLS based on the code and iri
     getOntologiesUrl: function(code = '', iri = '') {
-        if (iri.includes('geneontology.org')) {
-            return iri;
+        // The ontology iri's for effects in the LDH contain a colon instead of an underscore. An underscore is needed to create the link to OLS
+        // This is a temporary workaround until the LDH is updated
+        const iriWithColon = iri.split(':');
+        let newIri = iri;
+        if (iriWithColon[2]) {
+            newIri = `${iriWithColon[0]}:${iriWithColon[1]}_${iriWithColon[2]}`;
         }
-        const ontologyId = code.split(':')[0];
-        return `https://www.ebi.ac.uk/ols/ontologies/${ontologyId}/terms?iri=${encodeURIComponent(iri)}`;
+        let ontologyId = code.split(':')[0];
+        if (ontologyId.includes('EFO> ')) {
+            ontologyId = ontologyId.substring(5);
+        }
+        return `https://www.ebi.ac.uk/ols/ontologies/${ontologyId}/terms?iri=${encodeURIComponent(newIri)}`;
     },
 
     handleTabSelect: function(selectedFunctionalTab) {
@@ -142,7 +150,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
     render() {
         const affiliation = this.props.affiliation, session = this.props.session;
         const {
-            ext_ldhFuncData,
+            ext_ldhData,
             loading_ldhFuncData,
             error_ldhFuncData,
         } = this.props;
@@ -173,7 +181,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         <div className="row">
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup2} criteria={['BS3', 'PS3']}
-                                    evidenceData={ext_ldhFuncData} evidenceDataUpdated={funcDataObjDiffFlag} criteriaCrossCheck={[['BS3', 'PS3']]}
+                                    evidenceData={ext_ldhData} evidenceDataUpdated={funcDataObjDiffFlag} criteriaCrossCheck={[['BS3', 'PS3']]}
                                     formDataUpdater={criteriaGroup2Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                     affiliation={affiliation} session={session} />
@@ -189,7 +197,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         : null}
                     <FunctionalDataTable
                         selectedTab={selectedFunctionalTab}
-                        ext_ldhFuncData={ext_ldhFuncData}
+                        ext_ldhData={ext_ldhData}
                         loading_ldhFuncData={loading_ldhFuncData}
                         error_ldhFuncData={error_ldhFuncData}
                         handleTabSelect={this.handleTabSelect}

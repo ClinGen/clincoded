@@ -19,15 +19,15 @@ import { external_url_map } from '../../../globals';
  * @path may be specified as a simple key, or as an array of object keys or array indexes, for deep property fetching.
  * 
  * Ex:
- * property(['entContent', 'PatientSourced', 'Genotype', 'label'])(material)
- * if every key in the path is defined, this will return the value of "label"
+ * property(['statements', 0, 'fdr', 'ld', 'Affiliation', 0, 'entId'])(currentSource);
+ * if every key in the path is defined, this will return the value of "entId"
  * if an undefined key is encountered, this will return undefined
  * 
  */
 
 const propTypes = {
     selectedTab: PropTypes.number,
-    ext_ldhFuncData: PropTypes.object,
+    ext_ldhData: PropTypes.object,
     loading_ldhFuncData: PropTypes.bool.isRequired,
     error_ldhFuncData: PropTypes.object,
     handleTabSelect: PropTypes.func.isRequired,
@@ -38,13 +38,13 @@ const propTypes = {
 
 const defaultProps = {
     selectedTab: 0,
-    ext_ldhFuncData: {},
+    ext_ldhData: {},
     error_ldhFuncData: null,
 };
 
 const FunctionalDataTable = ({
     selectedTab,
-    ext_ldhFuncData,
+    ext_ldhData,
     loading_ldhFuncData,
     error_ldhFuncData,
     handleTabSelect,
@@ -52,7 +52,7 @@ const FunctionalDataTable = ({
     getGenotypeLabel,
     getOntologiesUrl,
 }) => {
-    const sourceArticles = property(['ld', 'AlleleFunctionalImpactStatement'])(ext_ldhFuncData);
+    const sourceArticles = property(['ld', 'AlleleFunctionalImpactStatement'])(ext_ldhData);
     const articleKeys = sourceArticles && Object.keys(sourceArticles);
     const currentKey = articleKeys && articleKeys[selectedTab];
     const currentSource = sourceArticles && sourceArticles[currentKey];
@@ -60,7 +60,7 @@ const FunctionalDataTable = ({
     const pubmedSource = property(['pubmedSource'])(currentSource);
     const afisStatements = property(['statements'])(currentSource);
     const additionalNotes = property(['statements', 0, 'entContent', 'Notes'])(currentSource) || 'None';
-    const contributor = property(['statements', 0, 'fdr', 0, 'ld', 'Affiliation', 0, 'entId'])(currentSource);
+    const contributor = property(['statements', 0, 'fdr', 'ld', 'Affiliation', 0, 'entId'])(currentSource);
     return (
         <div className="panel panel-info functional-impact-panel">
             <div className="panel-heading">
@@ -107,18 +107,17 @@ const FunctionalDataTable = ({
                                             afisStatements && Array.isArray(afisStatements)
                                                 && afisStatements.map((experiment, experimentIndex) => {
                                                     const experimentId = property(['ldhId'])(experiment);
-                                                    const methodIri = property(['fdr', 0, 'ld', 'Method', 0, 'entIri'])(experiment);
-                                                    const methodCode = property(['fdr', 0, 'ld', 'Method', 0, 'entContent', 'code'])(experiment);
+                                                    const methodIri = property(['fdr', 'ld', 'Method', 0, 'entIri'])(experiment);
+                                                    const methodCode = property(['fdr', 'ld', 'Method', 0, 'entContent', 'code'])(experiment);
                                                     const methodUrl = getOntologiesUrl(methodCode, methodIri);
-                                                    const methodEntId = property(['fdr', 0, 'ld', 'Method', 0, 'entId'])(experiment);
-                                                    const materials = property(['fdr', 0, 'ld', 'Material'])(experiment);
-                                                    const genotypes = property(['fdr', 0, 'ld', 'Genotype'])(experiment);
-                                                    const ldSet = property(['fdr', 0, 'ld', 'LdSet'])(experiment);
+                                                    const methodEntId = property(['fdr', 'ld', 'Method', 0, 'entId'])(experiment);
+                                                    const materials = property(['fdr', 'ld', 'Material'])(experiment);
+                                                    const genotypes = property(['fdr', 'ld', 'Genotype'])(experiment);
+                                                    const ldSet = property(['fdr', 'ld', 'LdSet'])(experiment);
                                                     const effects = property(['entContent', 'Effect'])(experiment);
                                                     const comments = property(['entContent', 'comments'])(experiment) || 'None';
                                                     const experimentalRepeats = property(['entContent', 'QC', 'ExperimentalRepeats'])(experiment);
-                                                    const experimentalControlNormal = property(['entContent', 'QC', 'ExperimentalControl', 'normal'])(experiment);
-                                                    const experimentalControlNegative = property(['entContent', 'QC', 'ExperimentalControl', 'negative'])(experiment);
+                                                    const experimentalControlNormal = property(['entContent', 'QC', 'NormalControl'])(experiment);
                                                     const validationControlValue = property(['entContent', 'QC', 'ValidationControl', 'value'])(experiment);
                                                     const validationControlStatement = property(['entContent', 'QC', 'ValidationControl', 'statement'])(experiment);
                                                     const statisticalAnalysisValue = property(['entContent', 'QC', 'StatisticalAnalysis', 'value'])(experiment);
@@ -202,14 +201,6 @@ const FunctionalDataTable = ({
                                                                 {
                                                                     experimentalControlNormal
                                                                         && <span><i>Normal: </i>{ experimentalControlNormal }</span>
-                                                                }
-                                                                {
-                                                                    experimentalControlNormal && experimentalControlNegative
-                                                                        && <span>; </span>
-                                                                }
-                                                                {
-                                                                    experimentalControlNegative
-                                                                        && <span><i>Negative: </i>{ experimentalControlNegative }</span>
                                                                 }
                                                             </span>
                                                             <span className="col-md-12">

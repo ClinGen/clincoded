@@ -57,7 +57,7 @@ var VariantCurationHub = createReactClass({
             ext_myGeneInfo_ClinVar: null,
             ext_ensemblGeneId: null,
             ext_geneSynonyms: null,
-            ext_ldhFuncData: null,
+            ext_ldhData: null,
             ext_singleNucleotide: true,
             ext_gnomadExac: false,
             loading_clinvarEutils: true,
@@ -68,6 +68,7 @@ var VariantCurationHub = createReactClass({
             loading_pageData: true,
             loading_myVariantInfo: true,
             loading_myGeneInfo: true,
+            loading_ldhData: true,
             loading_ldhFuncData: true,
             error_ldhFuncData: null,
             calculated_pathogenicity: null,
@@ -182,7 +183,9 @@ var VariantCurationHub = createReactClass({
                 this.fetchMyVariantInfo(this.state.variantObj);
                 this.fetchEnsemblVariation(this.state.variantObj);
                 this.fetchEnsemblHGVSVEP(this.state.variantObj);
-                this.fetchFunctionalData(this.state.variantObj);
+                this.fetchLdhData(this.state.variantObj).then(ldhData => {
+                    this.fetchFunctionalData(ldhData);
+                });
                 this.parseVariantType(this.state.variantObj);
                 const session = this.props.session;
                 if (session && session.user_properties && session.user_properties.email !== 'clingen.demo.curator@genome.stanford.edu') {
@@ -324,12 +327,44 @@ var VariantCurationHub = createReactClass({
         }
     },
 
-    fetchFunctionalData: function(variant) {
+    fetchLdhData: function(variant) {
+        if (variant) {
+            const { carId, clinvarVariantId } = variant;
+            const variantId = carId ? carId : clinvarVariantId;
+            if (variantId) {
+                return this.getRestData('/ldh/' + variantId).then(ldhData => {
+                    this.setState({ ext_ldhData: ldhData, loading_ldhData: false });
+                    return ldhData;
+                }).catch(err => {
+                    this.setState({ loading_ldhData: false });
+                    console.log('LDH Fetch Error: ', err);
+                });
+            } else {
+                this.setState({ loading_ldhData: false });
+            }
+        } else {
+            this.setState({ loading_ldhData: false });
+        }
+    },
+
+    fetchFunctionalData: function(ldhData) {
         // Returns the AFIS records as an object with the pubmedId as the key
         const getAfisObject = (afisRecords) => {
             const afisObject = {};
             afisRecords.forEach(record => {
                 const pubmedId = _.property(['entContent', 'Experiment', 'Source', 'entId'])(record);
+                const effects = _.property(['entContent', 'Effect'])(record) || [];
+                if (effects.length && effects.length > 1) {
+                    effects.sort((a, b) => {
+                        if (a.number < b.number) {
+                            return -1;
+                        }
+                        if (a.number > b.number) {
+                            return 1;
+                        }
+                        return 0;
+                    });
+                }
                 if (pubmedId) {
                     if (afisObject[pubmedId] && afisObject[pubmedId].statements) {
                         afisObject[pubmedId].statements.push(record);
@@ -354,23 +389,6 @@ var VariantCurationHub = createReactClass({
             return afisObject;
         };
 
-        // Sets pubmed articles in the @afisObject and replaces the AFIS with the completed @afisObject
-        const setPubmedArticles = (functionalData, afisObject, articles) => {
-            if (!Array.isArray(articles)) {
-                return;
-            }
-            articles.forEach((article, articleIdx) => {
-                afisObject[article.pmid].pubmedSource = article;
-                const lastRecord = (articleIdx === articles.length - 1);
-                if (lastRecord) {
-                    functionalData.ld.AlleleFunctionalImpactStatement = afisObject;
-                    this.setState({ext_ldhFuncData: functionalData}, () => {
-                        this.setState({loading_ldhFuncData: false});
-                    });
-                }
-            });
-        };
-
         // Fetches pubmed data for each source article
         const getPubmedArticles = (afisObject) => {
             const pubmedUrls = [];
@@ -391,12 +409,12 @@ var VariantCurationHub = createReactClass({
                         pubmedUrls.push(external_url_map['PubMedSearch'] + id);
                     });
                     return this.getRestDatasXml(pubmedUrls).then(xmls => {
-                        xmls.forEach((xml, xmlIndex) => {
+                        xmls.forEach(xml => {
                             const data = parsePubmed(xml);
                             if (data.pmid) {
                                 foundArticles.push(data);
                             } else {
-                                throw {statusText: 'Missing PMID articles'};
+                                throw { statusText: 'Missing PMID articles' };
                             }
                         });
                         return foundArticles;
@@ -405,36 +423,54 @@ var VariantCurationHub = createReactClass({
                     });
                 });
             } else {
-                this.setState({loading_ldhFuncData: false});
+                this.setState({ loading_ldhFuncData: false });
             }
         };
 
-        if (variant) {
-            const { carId, clinvarVariantId } = variant;
-            const variantId = carId ? carId : clinvarVariantId;
-            if (variantId) {
-                this.getRestData('/functional_data/' + variantId).then(functionalData => {
-                    const afisRecords = _.property(['ld', 'AlleleFunctionalImpactStatement'])(functionalData) || [];
-                    if (afisRecords && afisRecords.length > 0) {
-                        const afisObject = getAfisObject(afisRecords);
-                        getPubmedArticles(afisObject).then(articles => {
-                            setPubmedArticles(functionalData, afisObject, articles);
-                        }).catch(err => {
-                            this.setState({loading_ldhFuncData: false, error_ldhFuncData: err});
-                            console.log('Pubmed Fetch Error', err);
-                        });
-                    } else {
-                        this.setState({loading_ldhFuncData: false});
-                    }
-                }).catch(err => {
-                    this.setState({loading_ldhFuncData: false, error_ldhFuncData: err});
-                    console.log('LDH Functional Data Fetch Error: ', err);
-                });
-            } else {
-                this.setState({loading_ldhFuncData: false});
+        // Sets pubmed articles in the @afisObject and replaces the AFIS with the completed @afisObject
+        const setPubmedArticles = (afisObject, articles) => {
+            if (!Array.isArray(articles)) {
+                return;
             }
+            articles.forEach((article, articleIdx) => {
+                afisObject[article.pmid].pubmedSource = article;
+                const lastRecord = (articleIdx === articles.length - 1);
+                if (lastRecord) {
+                    const ldhData = JSON.parse(JSON.stringify(this.state.ext_ldhData));
+                    ldhData.ld.AlleleFunctionalImpactStatement = afisObject;
+                    this.setState({ ext_ldhData: ldhData }, () => {
+                        this.setState({ loading_ldhFuncData: false });
+                    });
+                }
+            });
+        };
+
+        const afisRecords = _.property(['ld', 'AlleleFunctionalImpactStatement'])(ldhData) || [];
+        const afisUrls = [];
+        if (afisRecords.length > 0) {
+            afisRecords.forEach(record => {
+                afisUrls.push(`/afis/${record.entId}`);
+            });
+            this.getRestDatas(afisUrls).then(fdrData => {
+                fdrData.forEach((results, index) => {
+                    afisRecords[index].fdr = results;
+                });
+                const afisObject = getAfisObject(afisRecords);
+                getPubmedArticles(afisObject).then(articles => {
+                    setPubmedArticles(afisObject, articles);
+                }).catch(err => {
+                    this.setState({ loading_ldhFuncData: false, error_ldhFuncData: err });
+                    console.log('Pubmed Fetch Error', err);
+                });
+            }).catch(err => {
+                this.setState({ loading_ldhFuncData: false, error_ldhFuncData: err });
+                console.log('Func Data Fetch Error: ', err);
+            });
         } else {
-            this.setState({loading_ldhFuncData: false});
+            this.setState({
+                loading_ldhFuncData: false,
+                error_ldhFuncData: { statusText: 'No Allele Frequency Impact Statements' }
+            });
         }
     },
 
@@ -721,7 +757,7 @@ var VariantCurationHub = createReactClass({
                             ext_clinVarSCV={this.state.ext_clinVarSCV}
                             ext_clinvarInterpretationSummary={this.state.ext_clinvarInterpretationSummary}
                             ext_ensemblGeneId={this.state.ext_ensemblGeneId}
-                            ext_ldhFuncData={this.state.ext_ldhFuncData}
+                            ext_ldhData={this.state.ext_ldhData}
                             ext_geneSynonyms={this.state.ext_geneSynonyms}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
                             ext_gnomadExac={this.state.ext_gnomadExac}
@@ -730,6 +766,7 @@ var VariantCurationHub = createReactClass({
                             loading_clinvarSCV={this.state.loading_clinvarSCV}
                             loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP}
                             loading_ensemblVariation={this.state.loading_ensemblVariation}
+                            loading_ldhData={this.state.loading_ldhData}
                             loading_ldhFuncData={this.state.loading_ldhFuncData}
                             loading_pageData={this.state.loading_pageData}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
