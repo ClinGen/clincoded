@@ -27,7 +27,7 @@ import { external_url_map } from '../../../globals';
 
 const propTypes = {
     selectedTab: PropTypes.number,
-    ext_ldhData: PropTypes.object,
+    functionalData: PropTypes.object,
     loading_ldhFuncData: PropTypes.bool.isRequired,
     error_ldhFuncData: PropTypes.object,
     handleTabSelect: PropTypes.func.isRequired,
@@ -38,13 +38,13 @@ const propTypes = {
 
 const defaultProps = {
     selectedTab: 0,
-    ext_ldhData: {},
+    functionalData: {},
     error_ldhFuncData: null,
 };
 
 const FunctionalDataTable = ({
     selectedTab,
-    ext_ldhData,
+    functionalData,
     loading_ldhFuncData,
     error_ldhFuncData,
     handleTabSelect,
@@ -52,10 +52,9 @@ const FunctionalDataTable = ({
     getGenotypeLabel,
     getOntologiesUrl,
 }) => {
-    const sourceArticles = property(['ld', 'AlleleFunctionalImpactStatement'])(ext_ldhData);
-    const articleKeys = sourceArticles && Object.keys(sourceArticles);
+    const articleKeys = functionalData && Object.keys(functionalData);
     const currentKey = articleKeys && articleKeys[selectedTab];
-    const currentSource = sourceArticles && sourceArticles[currentKey];
+    const currentSource = functionalData && functionalData[currentKey];
     const pmid = property(['pubmedSource', 'pmid'])(currentSource);
     const pubmedSource = property(['pubmedSource'])(currentSource);
     const afisStatements = property(['statements'])(currentSource);

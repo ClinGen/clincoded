@@ -190,6 +190,10 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         var interpretation = this.state.interpretation;
         var completedSections = this.state.interpretation && this.state.interpretation.completed_sections ? this.state.interpretation.completed_sections : [];
         var populationTabChecked = false;
+        let functionalData = _.property(['ld', 'AlleleFunctionalImpactStatement'])(this.state.ext_ldhData);
+        if (Array.isArray(functionalData)) {
+            functionalData = {};
+        }
 
         // The ordering of TabPanels are corresponding to that of tabs
         // Adding or deleting a tab also requires its corresponding TabPanel to be added/deleted
@@ -258,7 +262,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationFunctional data={variant} href_url={this.props.href_url} session={this.props.session}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                            ext_ldhData={this.state.ext_ldhData}
+                            functionalData={functionalData}
                             loading_ldhFuncData={this.state.loading_ldhFuncData}
                             error_ldhFuncData={this.state.error_ldhFuncData}
                             affiliation={this.props.affiliation}

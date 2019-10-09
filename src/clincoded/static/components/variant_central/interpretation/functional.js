@@ -24,7 +24,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         data: PropTypes.object,
         interpretation: PropTypes.object,
         updateInterpretationObj: PropTypes.func,
-        ext_ldhData: PropTypes.object,
+        functionalData: PropTypes.object,
         loading_ldhFuncData: PropTypes.bool,
         error_ldhFuncData: PropTypes.object,
         href_url: PropTypes.object,
@@ -50,8 +50,8 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         if (this.state.selectedCriteria) {
             setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
         }
-        if (this.props.ext_ldhData && this.state.interpretation && this.state.interpretation.evaluations) {
-            this.compareFunctionalData(this.props.ext_ldhData, this.state.interpretation.evaluations);
+        if (this.props.functionalData && this.state.interpretation && this.state.interpretation.evaluations) {
+            this.compareFunctionalData(this.props.functionalData, this.state.interpretation.evaluations);
         }
     },
 
@@ -62,17 +62,15 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                 setTimeout(scrollElementIntoView(evaluation_section_mapping[this.state.selectedCriteria], 'class'), 200);
             });
         }
-        if (this.props.ext_ldhData && nextProps.interpretation && nextProps.interpretation.evaluations) {
-            this.compareFunctionalData(this.props.ext_ldhData, nextProps.interpretation.evaluations);
+        if (this.props.functionalData && nextProps.interpretation && nextProps.interpretation.evaluations) {
+            this.compareFunctionalData(this.props.functionalData, nextProps.interpretation.evaluations);
         }
     },
 
     compareFunctionalData: function(newFuncData, savedEvals) {
         // Returns true if @newData is different from @oldData based on the unique @rev, otherwise returns false
-        const isDiffAfisVersion = (newData, oldData) => {
-            const oldAfis = _.property(['ld', 'AlleleFunctionalImpactStatement'])(oldData);
-            const newAfis = _.property(['ld', 'AlleleFunctionalImpactStatement'])(newData);
-            if (!oldAfis || !newAfis || oldAfis.length !== newAfis.length) {
+        const isDiffAfisVersion = (newAfis, oldAfis) => {
+            if (_.isEmpty(oldAfis) || _.isEmpty(newAfis)) {
                 return true;
             }
             const afisKeys = newAfis && Object.keys(newAfis);
@@ -150,7 +148,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
     render() {
         const affiliation = this.props.affiliation, session = this.props.session;
         const {
-            ext_ldhData,
+            functionalData,
             loading_ldhFuncData,
             error_ldhFuncData,
         } = this.props;
@@ -181,7 +179,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         <div className="row">
                             <div className="col-sm-12">
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup2} criteria={['BS3', 'PS3']}
-                                    evidenceData={ext_ldhData} evidenceDataUpdated={funcDataObjDiffFlag} criteriaCrossCheck={[['BS3', 'PS3']]}
+                                    evidenceData={functionalData} evidenceDataUpdated={funcDataObjDiffFlag} criteriaCrossCheck={[['BS3', 'PS3']]}
                                     formDataUpdater={criteriaGroup2Update} variantUuid={this.state.data['@id']}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                     affiliation={affiliation} session={session} />
@@ -197,7 +195,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                         : null}
                     <FunctionalDataTable
                         selectedTab={selectedFunctionalTab}
-                        ext_ldhData={ext_ldhData}
+                        functionalData={functionalData}
                         loading_ldhFuncData={loading_ldhFuncData}
                         error_ldhFuncData={error_ldhFuncData}
                         handleTabSelect={this.handleTabSelect}
