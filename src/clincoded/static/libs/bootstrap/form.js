@@ -387,10 +387,11 @@ var Input = module.exports.Input = createReactClass({
             case 'text':
             case 'email':
             case 'number':
+                var inputType = this.props.type === 'number' ? 'text' : this.props.type;
                 inputClasses = 'form-control' + (this.props.error ? ' error' : '') + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 var innerInput = (
                     <span>
-                        <input className={inputClasses} type={this.props.type} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder}
+                        <input className={inputClasses} type={inputType} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder}
                             ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} maxLength={this.props.maxLength}
                             disabled={this.props.inputDisabled} aria-describedby={this.props.helpText ? this.props.helpTextId : null} 
                             style={this.props.fieldStyle}

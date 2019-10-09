@@ -25,16 +25,15 @@ let MasterEvidenceTable = createReactClass({
 
     getInitialState() {
         return {
-            rows: this.props.evidence_objects
+            rows: this.props.evidence_arr
         };
     },
 
     componentWillReceiveProps(nextProps) {
-        if (nextProps.evidence_arr != null &&
-            nextProps.evidence_arr != this.state.rows) {
-                this.setState({
-                    rows: nextProps.evidence_arr
-                });
+        if (nextProps.evidence_arr != null) {
+            this.setState({
+                rows: nextProps.evidence_arr
+            });
         }
     },
 
@@ -58,7 +57,7 @@ let MasterEvidenceTable = createReactClass({
         if (this.props.viewOnly === true) {
             return false;
         }
-        return this.props.canCurrUserModifyEvidence(row);;
+        return this.props.canCurrUserModifyEvidence(row);
     },
 
     /**
@@ -157,7 +156,7 @@ let MasterEvidenceTable = createReactClass({
                             const pmid = row.source.metadata.pmid ? row.source.metadata.pmid : (row.articles.length > 0 ? row.articles[0].pmid : '');
                             let authorYear = '';
                             let evidence_detail = '';
-                            if (row.articles.length > 0) {
+                            if (row.articles && row.articles.length > 0) {
                                 let article = row.articles[0];
                                 let date = article && article.date ? (/^([\d]{4})/).exec(article.date) : [];
                                 authorYear = date ? date[0] + '.' : '';
@@ -179,7 +178,7 @@ let MasterEvidenceTable = createReactClass({
                                         <div className='evidence-detail'>{authorYear}&nbsp;{evidence_detail}</div>
                                         <div className='evidence-links'>{editButton}{deleteButton}</div>
                                     </div>
-                            </th>)
+                            </th>);
                         } else {
                             let identifier = extraEvidence.typeMapping[row.source.metadata['_kind_key']].fields.filter(o => o.identifier === true)[0];
                             let evidence_detail = `${row.source.metadata[identifier.name]}`;
@@ -204,7 +203,7 @@ let MasterEvidenceTable = createReactClass({
                 });
             }
         });
-        header.push(<tr key="header_row_1">{first_row}</tr>)
+        header.push(<tr key="header_row_1">{first_row}</tr>);
         header.push(<tr key="header_row_2">{second_row}</tr>);
         header.push(<tr key="header_row_3">{third_row}</tr>);
         return header;

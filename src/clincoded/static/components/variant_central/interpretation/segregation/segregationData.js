@@ -243,7 +243,7 @@ const evidenceInputs = [{
                 name: 'num_de_novo_unconfirmed_comment',
                 kind: 'text',
                 width: 8
-            },
+            }
         ]
     },
     {
@@ -373,7 +373,7 @@ const sharedEvidenceInputs = ['label',
     'proband_hpo_ids',
     'proband_free_text',
     'comments'
-]
+];
 
 
 const subcategories = [
@@ -544,7 +544,7 @@ const sheetToTableMapping = [
             }
         ]
     },
-]
+];
 
 /**
  * Example object within the `allCols` array:

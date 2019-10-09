@@ -83,6 +83,7 @@ export default class ModalComponent extends Component {
 ModalComponent.propTypes = {
     modalTitle: PropTypes.string, // Title in modal's header
     modalClass: PropTypes.string, // CSS class for modal header
+    modalOpen: PropTypes.bool, // If ready to invoke modal dialog
     modalWidthPct: PropTypes.number, // Percentage width of screen, e.g. `90` for 90% width
     modalWrapperClass: PropTypes.string, // CSS class for modal DOM wrapper
     bootstrapBtnClass: PropTypes.string, // Bootstrap class for button (e.g. btn-default, btn-primary)
@@ -95,7 +96,7 @@ ModalComponent.propTypes = {
     children: PropTypes.node // JSX such as input field(s), dropdown(s), buttons
 };
 
-export class Modal extends Component {
+class Modal extends Component {
     render() {
         if (this.props.isOpen === false) {
             return null;

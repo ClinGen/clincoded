@@ -66,8 +66,6 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
      * @param {object} evidence     // Evidence to be deleted
      */
     deleteEvidenceFunc: function(evidence) {
-        //TODO: Update evidence object or re-create it so that it passes the update validation.  See the open screenshot for details.
-
         this.setState({deleteBusy: true});
 
         let deleteTargetId = evidence['@id'];
@@ -78,9 +76,11 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
             variant: evidence.variant,
             category: evidence.category,
             subcategory: evidence.subcategory,
-            articles: [],
+            articles: evidence.articles && evidence.articles[0] ? [evidence.articles[0]['@id']] : [],
             evidenceCriteria: evidence.evidenceCriteria,
             evidenceDescription: evidence.evidenceDescription,
+            affiliation: evidence.affiliation,
+            source: evidence.source,
             status: 'deleted'
         };
 
@@ -129,8 +129,6 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
 
             let flatInterpretation = null;
             let freshInterpretation = null;
-            // TODO - not sure if need to find criteria that has value from source.data
-            let evidenceCriteria = 'none';
 
             this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
                 // get updated interpretation object, then flatten it
@@ -143,7 +141,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                     category: 'case-segregation',
                     subcategory: subcategory,
                     articles: evidence.metadata._kind_key === 'PMID' ? [evidence.metadata.pmid] : [],
-                    evidenceCriteria: evidenceCriteria,  // criteria has value which is not used for case gegregation
+                    evidenceCriteria: '',  // criteria has value which is not used for case segregation
                     evidenceDescription: '',
                     source: evidence
                 };
@@ -186,10 +184,10 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         }
                         flatInterpretation.extra_evidence_list.push(result['@graph'][0]['@id']);
                         // update interpretation object
-                        return this.recordHistory('modify-hide', result['@graph'][0])
+                        return this.recordHistory('modify-hide', result['@graph'][0]);
                     });
                 }
-            }).then(interpretation => {
+            }).then(result => {
                 // upon successful save, set everything to default state, and trigger updateInterptationObj callback
                 this.setState({editBusy: false, descriptionInput: null});
                 this.props.updateInterpretationObj();
@@ -208,11 +206,11 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
     canCurrUserModifyEvidence(evidence) {
         let created_affiliation = evidence.affiliation;
         let curr_affiliation = this.props.affiliation;
-        let created_user = evidence.submitted_by['@id'];
-        let curr_user = this.props.session.user_properties['@id'];
+        let created_user = evidence.submitted_by ? evidence.submitted_by['@id'] : null;
+        let curr_user = this.props.session && this.props.session.user_properties ? this.props.session.user_properties['@id'] : null;
 
         if ((created_affiliation && curr_affiliation && created_affiliation === curr_affiliation.affiliation_id) ||
-            (!created_affiliation && !curr_affiliation && created_user === curr_user)) {
+            (!created_affiliation && !curr_affiliation && created_user === curr_user && created_user != undefined)) {
                 return true;
         }
         return false;
@@ -262,7 +260,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
     },
 
     render() {
-        const variantUUID = this.state && this.state.data ? this.state.data['@id'] : null;
+        const variantUUID = this.state.data ? this.state.data['@id'] : null;
         const affiliation = this.props.affiliation, session = this.props.session;
         let panel_data = [
             {

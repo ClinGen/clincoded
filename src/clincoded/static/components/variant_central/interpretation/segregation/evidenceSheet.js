@@ -124,7 +124,7 @@ let EvidenceSheet = createReactClass({
      */
     allowedFields() {
         let tableObj = _.find(extraEvidence.tableCols(), o => o.subcategory === this.props.subcategory);
-        let fields = tableObj.cols.map(col => col.key);
+        let fields = tableObj && tableObj.cols ? tableObj.cols.map(col => col.key) : [];
         if (fields.indexOf('comments') != -1) {
             fields.splice(fields.indexOf('comments'), 1);
         }
@@ -182,11 +182,12 @@ let EvidenceSheet = createReactClass({
                         label = {label}
                         name = {col.name}
                         ref = {col.name}
-                        value = { col.kind != 'checkbox' ? value : null}
-                        checked = { col.name === 'is_disease_associated_with_probands' && this.state.hpoUnaffected != undefined ? this.state.hpoUnaffected : false }
-                        handleChange = { col.kind === 'checkbox' ? this.handleCheckboxChange : null }
-                        error = { col.name === 'proband_hpo_ids' ? this.getFormError('proband_hpo_ids') : null }
-                        fieldStyle = { fields.indexOf(col.name) == -1 || this.props.isFromMaster ? null : {backgroundColor: this.state.backgroundGreen} }
+                        value = {col.kind != 'checkbox' ? value : null}
+                        checked = {col.name === 'is_disease_associated_with_probands' && this.state.hpoUnaffected != undefined ? this.state.hpoUnaffected : false}
+                        handleChange = {col.kind === 'checkbox' ? this.handleCheckboxChange : null}
+                        error = {this.getFormError(col.name)}
+                        clearError = {this.clrFormErrors.bind(null, col.name)}
+                        fieldStyle = {fields.indexOf(col.name) == -1 || this.props.isFromMaster ? null : {backgroundColor: this.state.backgroundGreen}}
                     />
                 </div>]
                 // if ('lookup' in col) {
@@ -270,7 +271,7 @@ let EvidenceSheet = createReactClass({
             modalClass="modal-default"
             modalWrapperClass="input-inline add-resource-id-modal"
             onRef={ref => (this.child = ref)}
-            disabled={!this.props.ready}
+            actuatorDisabled={!this.props.ready}
             modalOpen={this.props.ready}
             modalWidthPct={90}
         >

@@ -10,26 +10,7 @@
         ],
         "submitted_by": "812b6327-b35b-4759-b08e-687be57460fe",
         "date_created": "2016-05-10T22:47:10.000000+00:00",
-        "last_modified": "2016-05-10T22:59:10.000000+00:00",
-        "extra_evidence_list": [
-            "95db0843-1a5c-4ab1-a5ce-b62b269e42d3"
-        ]
-    },
-    {
-        "uuid": "6519eb0f-ba6b-46bb-b393-6f0754ee0f0e",
-        "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a",
-        "transcripts": [
-            "80b09246-29fd-4658-9799-158d9ecd00e2"
-        ],
-        "proteins": [
-            "7e437957-4dfa-4d17-97b2-57fc6784b5f4"
-        ],
-        "submitted_by": "add95449-476e-443f-9d01-4bbd7766eeed",
-        "date_created": "2019-06-11T20:33:20.000000+00:00",
-        "last_modified": "2019-06-11T20:45:34.000000+00:00",
-        "extra_evidence_list": [
-            "28bcc5ab-317f-49a1-9447-e32299e21a10"
-        ]
+        "last_modified": "2016-05-10T22:59:10.000000+00:00"
     },
     {
         "uuid": "b3e105b5-d08a-4520-9305-c1419d9027d4",

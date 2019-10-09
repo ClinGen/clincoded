@@ -50,7 +50,7 @@ let EvidenceTable = createReactClass({
         if (this.props.viewOnly === true) {
             return false;
         }
-        return this.props.canCurrUserModifyEvidence(row);;
+        return this.props.canCurrUserModifyEvidence(row);
     },
 
     /**
@@ -98,22 +98,19 @@ let EvidenceTable = createReactClass({
         let metadata = row.source.metadata;
 
         if (metadata['_kind_key'] === 'PMID') {
-            let pmid = metadata.pmid ? metadata.pmid : (row.articles.length > 0 ? row.articles[0].pmid : null);
             if (row.articles.length > 0) {
                 nodeContent = <PmidSummary
                     article = {row.articles[0]}
                     pmidLinkout
                 />
-            } else { 
-                if (pmid) {
-                    nodeContent = <a
-                        href = {external_url_map['PubMed'] + metadata.pmid}
-                        target = "_blank"
-                        title = {`PubMed Article ID: ${metadata.pmid}`}
-                    >
-                        PMID {pmid}
-                    </a>
-                }
+            } else if (metadata.pmid) { 
+                nodeContent = <a
+                    href = {external_url_map['PubMed'] + metadata.pmid}
+                    target = "_blank"
+                    title = {`PubMed Article ID: ${metadata.pmid}`}
+                >
+                    PMID {pmid}
+                </a>
             }
         } else {
             let content = null;
@@ -196,10 +193,10 @@ let EvidenceTable = createReactClass({
     },
 
     /**
-     * Return the add/edit buttons for given row if current user can modify this evidencew.
+     * Return the add/edit buttons for given row if current user can modify this evidence.
      * If not, return empty column.
      * 
-     * @param {string} key       Table Column unique key
+     * @param {string} id       Table Column unique key
      * @param {object} row       Evidence in this row
      * @param {array}  rowTDs    The table row columns content
      * @param {number} rowspan   Number of rows to span in this button column
@@ -278,7 +275,7 @@ let EvidenceTable = createReactClass({
         let i = 0;  // Hack for unique key
         let rows = [];
 
-        let colNames = this.state.tableFormat.cols.map(col => col.key);
+        let colNames = this.state.tableFormat && this.state.tableFormat.cols ? this.state.tableFormat.cols.map(col => col.key) : [];
         // Don't read the kind_title property so we can handle each case separately.
         colNames.splice(colNames.indexOf('_kind_title'), 1);
         let tableData = this.props.tableData.filter(item => item.status != 'deleted');
@@ -399,14 +396,14 @@ let EvidenceTable = createReactClass({
      * Set the evidence table headers
      */
     tableHeader() {
-        let cols = this.state.tableFormat.cols.map(col => {
+        let cols = this.state.tableFormat && this.state.tableFormat.cols ? this.state.tableFormat.cols.map(col => {
             let criteriaCodes = this.getCriteriaCodes(col.key);
             if (criteriaCodes.length > 0) {
                 criteriaCodes = criteriaCodes[0].codes;
                 return <th key={col.key}>{`${col.title} [${criteriaCodes.join(',')}]`}</th>
             }
             return <th key={col.key}>{col.title}</th>;
-        });
+        }) : [];
         cols.push(<th key="editDelete"></th>)
         return cols;
     },

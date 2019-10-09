@@ -11,7 +11,7 @@
 // stdlib
 import React from 'react';
 import PropTypes from 'prop-types';
-import createReactClass from 'create-react-class'
+import createReactClass from 'create-react-class';
 
 // Third-party lib
 import { FormMixin } from '../../../../libs/bootstrap/form';
@@ -50,7 +50,7 @@ let EvidenceModalManager = createReactClass({
             // If pmid is not set in source metadata, check current evidence articles array
             if (source.metadata['_kind_key'] === 'PMID') {
                 if (source.metadata.pmid == undefined) {
-                    source.metadata.pmid = this.props.data.articles.length > 0 ? this.props.data.articles[0].pmid : '';
+                    source.metadata.pmid = this.props.data.articles && this.props.data.articles.length > 0 ? this.props.data.articles[0].pmid : '';
                 }
             }
         }
@@ -78,7 +78,7 @@ let EvidenceModalManager = createReactClass({
     },
 
     componentWillReceiveProps(nextProps) {
-        if(nextProps.data != null && nextProps.data.source != null && nextProps.data.source !== this.state.sourceData) {
+        if(nextProps.data != null && nextProps.data.source != null) {
             this.setState({
                 sourceData: nextProps.data.source
             });
@@ -122,9 +122,9 @@ let EvidenceModalManager = createReactClass({
             .map(o => o.name);
 
         // Determine if this is meant to be linked to an existing piece of evidence that current user can modify
-        let candidates = this.props.allData
+        let candidates = this.props.allData ? this.props.allData
             .filter(o => identifierCol in o.source.metadata
-                && o.source.metadata[identifierCol] === metadata[identifierCol]);
+                && o.source.metadata[identifierCol] === metadata[identifierCol]) : [];
         let result = null;
         if (candidates.length > 0) {
             candidates.forEach(candidate => {
