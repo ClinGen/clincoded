@@ -80,7 +80,11 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
             subcategory: evidence.subcategory,
             articles: [],
             evidenceCriteria: evidence.evidenceCriteria,
+            articles: evidence.articles && evidence.articles[0] ? [evidence.articles[0]['@id']] : [],
+            evidenceCriteria: evidence.evidenceCriteria,
             evidenceDescription: evidence.evidenceDescription,
+            affiliation: evidence.affiliation,
+            source: evidence.source,
             status: 'deleted'
         };
 
