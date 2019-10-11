@@ -10,10 +10,12 @@ import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
 import { RestMixin } from '../../rest';
 import { CompleteSection } from './shared/complete_section';
 import { scrollElementIntoView } from '../../../libs/helpers/scroll_into_view';
+import { extraEvidenceHasSource } from '../../../libs/extra_evidence_version.js';
 
 const vciFormHelper = require('./shared/form');
 const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
 const evaluation_section_mapping = require('./mapping/evaluation_section.json');
+const extraEvidence = require('./shared/extra_evidence');
 var curator = require('../../curator');
 var CuratorHistory = require('../../curator_history');
 import { ExtraEvidenceTable } from './segregation/addEvidence';
@@ -246,7 +248,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 if (interpretation.extra_evidence_list) {
                     interpretation.extra_evidence_list.forEach(extra_evidence => {
                         // temporary codes
-                        if (extra_evidence.category === 'case-segregation') {
+                        if (extra_evidence.category === 'case-segregation' &&
+                            extraEvidenceHasSource(extra_evidence)) {
                             relevantEvidenceListRaw.push(extra_evidence);
                         }
                     });
@@ -411,7 +414,20 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 deleteEvidenceFunc={this.deleteEvidenceFunc}
                 evidenceCollectionDone = {this.evidenceCollectionDone}
                 canCurrUserModifyEvidence={this.canCurrUserModifyEvidence}
-            />
+            />;
+            let oldExtraEvidenceTable = <extraEvidence.ExtraEvidenceTable 
+                category="case-segregation"
+                subcategory={panel.extraEvidence.subcategory}
+                session={this.props.session}
+                href_url={this.props.href_url}
+                tableName={panel.extraEvidence.tableName}
+                variant={this.state.data}
+                interpretation={this.state.interpretation}
+                updateInterpretationObj={this.props.updateInterpretationObj}
+                viewOnly={this.state.data && !this.state.interpretation}
+                affiliation={affiliation}
+                criteriaList={panel.criteria}
+                deleteOnly={true} />
             return <PanelGroup accordion key={panel.key}>
                 <Panel
                     title={panel.title}
@@ -421,6 +437,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                     >
                         {interpretationForm}
                         {extraEvidenceForm}
+                        {oldExtraEvidenceTable}
                 </Panel>
             </PanelGroup>
         });

@@ -12,6 +12,7 @@ import { RestMixin } from '../../../rest';
 import { AddResourceId } from '../../../add_external_resource';
 import { getAffiliationName } from '../../../../libs/get_affiliation_name';
 import { ConfirmDelete } from './confirm_delete';
+import { extraEvidenceHasSource } from '../../../../libs/extra_evidence_version.js';
 
 var curator = require('../../../curator');
 var PmidSummary = curator.PmidSummary;
@@ -32,7 +33,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         interpretation: PropTypes.object, // parent interpretation object
         updateInterpretationObj: PropTypes.func, // function from index.js; this function will pass the updated interpretation object back to index.js
         affiliation: PropTypes.object, // user's affiliation data object
-        criteriaList: PropTypes.array // criteria code(s) pertinent to the category/subcategory
+        criteriaList: PropTypes.array, // criteria code(s) pertinent to the category/subcategory
+        deleteOnly: PropTypes.bool
     },
 
     contextTypes: {
@@ -53,7 +55,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             editCriteriaInput: 'none', // state to store one or more edited criteria
             variant: this.props.variant, // parent variant object
             interpretation: this.props.interpretation ? this.props.interpretation : null, // parent interpretation object
-            criteriaList: this.props.criteriaList ? this.props.criteriaList : []
+            criteriaList: this.props.criteriaList ? this.props.criteriaList : [],
+            deleteOnly: this.props.deleteOnly ? this.props.deleteOnly : false
         };
     },
 
@@ -263,7 +266,9 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                         {!this.props.viewOnly && ((affiliation && extra_evidence.affiliation && extra_evidence.affiliation === affiliation.affiliation_id) ||
                             (!affiliation && !extra_evidence.affiliation && session && session.user_properties && extra_evidence.submitted_by['@id'] === session.user_properties['@id'])) ?
                             <div>
-                                <button className="btn btn-primary btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
+                                {!this.state.deleteOnly ?
+                                    <button className="btn btn-primary btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
+                                    : null}
                                 <ConfirmDelete evidence={extra_evidence} deleteEvidence={this.deleteEvidence}></ConfirmDelete>
                             </div>
                             : null}
@@ -356,7 +361,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             this.state.variant.associatedInterpretations.map(interpretation => {
                 if (interpretation.extra_evidence_list) {
                     interpretation.extra_evidence_list.map(extra_evidence => {
-                        if (extra_evidence.subcategory === this.props.subcategory) {
+                        if (extra_evidence.subcategory === this.props.subcategory &&
+                            !extraEvidenceHasSource(extra_evidence)) {
                             relevantEvidenceListRaw.push(extra_evidence);
                         }
                     });
@@ -391,7 +397,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                             </thead>
                             : null}
                         <tbody>
-                            {!this.props.viewOnly ?
+                            {!this.props.viewOnly && !this.state.deleteOnly ?
                                 <tr>
                                     <td colSpan="6">
                                         {this.state.tempEvidence ?

@@ -8,6 +8,7 @@ import { FormMixin, Input } from '../../../../libs/bootstrap/form';
 
 // Internal libs
 import { RestMixin } from '../../../rest';
+import { extraEvidenceHasSource } from '../../../../libs/extra_evidence_version.js';
 var CuratorHistory = require('../../../curator_history');
 
 import { EvidenceTable } from './evidenceTable';
@@ -94,7 +95,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                     interpretation.extra_evidence_list.forEach(extra_evidence => {
                         // temporary codes
                         //relevantEvidenceListRaw.push(extra_evidence);
-                        if (extra_evidence.category === 'case-segregation') {
+                        if (extra_evidence.category === 'case-segregation' &&
+                            extraEvidenceHasSource(extra_evidence)) {
                             relevantEvidenceListRaw.push(extra_evidence);
                         }
                     });
@@ -116,7 +118,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             let extraEvidenceData = [];
             if (this.state.interpretation.extra_evidence_list) {
                 this.state.interpretation.extra_evidence_list.forEach(extra_evidence => {
-                    if (extra_evidence.category === 'case-segregation') {
+                    if (extra_evidence.category === 'case-segregation' &&
+                        extraEvidenceHasSource(extra_evidence)) {
                         extraEvidenceData.push(extra_evidence);
                     }
                 });

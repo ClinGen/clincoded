@@ -79,7 +79,8 @@ let EvidenceTable = createReactClass({
                 let relevantData = _.find(extraEvidence.sheetToTableMapping, o => o.subcategory === this.props.subcategory);
                 let cols = relevantData.cols.map(o => o.key);
                 cols.forEach(col => {
-                    if (source[col] && source[col] != '') {
+                    const colComment = col + '_comment';
+                    if ((source[col] && source[col] != '') || (source[colComment] && source[colComment] != '')) {
                         count++;
                     }
                 });
@@ -324,27 +325,29 @@ let EvidenceTable = createReactClass({
                     // For other panels, put each criteria on separate row.
                     // Add first available criteria in this evidence to the first row
                     colNames.forEach(col => {
+                        const colComment = col + '_comment';
                         let node = null;
                         let nodeContent = null;
-                        if (col in sourceData) {
-                            nodeContent = sourceData[col];
-                            node = <td key={`cell_${i++}`}>
-                                {nodeContent}
-                            </td>
-                        }
                         let criteriaCodes = this.getCriteriaCodes(col);
                         // If this is a criteria column, display the first criteria only
                         if (criteriaCodes.length > 0) {
-                            if (nodeContent) {
+                            // If this criteria column or its comment has value
+                            if ((col in sourceData) || (colComment in sourceData)) {
                                 // If this is the first criteria column that has value, display in first row
                                 if (criteriaName === '') {
-                                    node = <td key={`cell_${i++}`}>
-                                        {nodeContent}
-                                    </td>
+                                    // Display the criteria value
+                                    if (col in sourceData) {
+                                        nodeContent = sourceData[col];
+                                        node = <td key={`cell_${i++}`}>
+                                            {nodeContent}
+                                        </td>
+                                    }
+                                    else {
+                                        node = <td key={`empty_cell_${i++}`}></td>;
+                                    }
                                     // Set the criteria name which is used to get its comment later
                                     criteriaName = col;
-                                }
-                                else {
+                                } else {
                                     // If first row criteria has been set, display empty column
                                     // And add this criteria to the list that will be added later
                                     node = <td key={`empty_cell_${i++}`}></td>;
@@ -352,7 +355,7 @@ let EvidenceTable = createReactClass({
                                 }
                             }
                             else {
-                                // If criteria has no value, display empty column
+                                // If criteria or its comment has no value, display empty column
                                 node = <td key={`empty_cell_${i++}`}></td>;
                             }
                         }
@@ -368,6 +371,10 @@ let EvidenceTable = createReactClass({
                             </td>
                         } else {
                             // Display value for other columns
+                            nodeContent = null;
+                            if (col in sourceData) {
+                                nodeContent = sourceData[col];
+                            }
                             node = <td key={`cell_${i++}`} rowSpan={subRows}>
                                 {nodeContent}
                             </td>
@@ -409,26 +416,31 @@ let EvidenceTable = createReactClass({
     },
 
     /**
+     * Get the columns that are avaiable for this subcategory including their comment columns
+     */
+    getSubcategoryPanelColumns() {
+        let relevantData = _.find(extraEvidence.sheetToTableMapping, o => o.subcategory === this.props.subcategory);
+        let cols = relevantData && relevantData.cols ? relevantData.cols.map(o => o.key) : [];
+        let commentCols = [];
+        cols.forEach(o => {
+            commentCols.push(o + '_comment');
+        });
+        cols = cols.concat(commentCols);
+
+        return cols;
+    },
+
+    /**
      * Check if there is evidence to be displayed for this panel.
      */
     hasTableData() {
         // relevant columns non empty -> return true
         // relevant columns empty -> return False
-        let relevantData = _.find(extraEvidence.sheetToTableMapping, o => o.subcategory === this.props.subcategory);
-        let cols = relevantData.cols.map(o => o.key);
         let foundData = false;
         this.props.tableData.some(row => {
-            if (foundData) {
+            // Check if this row's columns has data to show
+            if (foundData = this.showRow(row)) {
                 return true;
-            }
-            if (row.source && row.source.data) {
-                let sourceData = row.source.data;
-                cols.some(col => {
-                    if (sourceData[col] && sourceData[col] != '') {
-                        foundData = true;
-                        return true;
-                    }
-                });
             }
         });
         return foundData;
@@ -440,10 +452,7 @@ let EvidenceTable = createReactClass({
      * @param {object} row The evidecne row
      */
     showRow(row) {
-        // relevant columns non empty -> return True
-        // relevant columns empty -> return False
-        let relevantData = _.find(extraEvidence.sheetToTableMapping, o => o.subcategory === this.props.subcategory);
-        let cols = relevantData.cols.map(o => o.key);
+        let cols = this.getSubcategoryPanelColumns();
         const show = cols.some(col => {
             if (row.source && row.source.data && row.source.data[col] && row.source.data[col] != '') {
                 return true;
