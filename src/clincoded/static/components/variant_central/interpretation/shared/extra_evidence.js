@@ -379,6 +379,10 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         const criteriaList = this.state.criteriaList;
         const criteriaInput = this.state.criteriaInput;
 
+        if (relevantEvidenceList.length == 0 && this.state.deleteOnly) {
+            return null;
+        }
+        else {
         return (
             <div className="panel panel-info">
                 <div className="panel-heading"><h3 className="panel-title">{this.props.tableName}</h3></div>
@@ -456,5 +460,6 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                 </div>
             </div>
         );
+        }
     }
 });
