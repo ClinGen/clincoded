@@ -335,7 +335,7 @@ let EvidenceTable = createReactClass({
                             if ((col in sourceData) || (colComment in sourceData)) {
                                 // If this is the first criteria column that has value, display in first row
                                 if (criteriaName === '') {
-                                    // Display the criteria value
+                                    // Display the criteria value if exists
                                     if (col in sourceData) {
                                         nodeContent = sourceData[col];
                                         node = <td key={`cell_${i++}`}>
@@ -353,13 +353,11 @@ let EvidenceTable = createReactClass({
                                     node = <td key={`empty_cell_${i++}`}></td>;
                                     otherCriteria.push(col);
                                 }
-                            }
-                            else {
+                            } else {
                                 // If criteria or its comment has no value, display empty column
                                 node = <td key={`empty_cell_${i++}`}></td>;
                             }
-                        }
-                        else if (col === 'comments') {
+                        } else if (col === 'comments') {
                             // Display the comment for current criteria in this column
                             let commentCol = criteriaName + '_comment';
                             nodeContent = null;
