@@ -228,6 +228,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     <div role="tabpanel" className="tab-panel">
                         <CurationInterpretationPopulation data={variant} href_url={this.props.href_url} session={this.props.session}
                             interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                            ext_ldhData={this.state.ext_ldhData}
                             ext_pageData={this.state.ext_pageData}
                             ext_myVariantInfo={this.state.ext_myVariantInfo}
                             ext_myVariantInfo_metadata={this.state.ext_myVariantInfo_metadata}
@@ -238,6 +239,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                             loading_pageData={this.state.pageData}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_ensemblVariation={this.state.loading_ensemblVariation}
+                            loading_ldhData={this.state.loading_ldhData}
                             affiliation={this.props.affiliation}
                             selectedCriteria={this.state.selectedCriteria} />
                     </div>

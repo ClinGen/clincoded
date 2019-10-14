@@ -62,11 +62,13 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         ext_myVariantInfo_metadata: PropTypes.object,
         ext_ensemblHgvsVEP: PropTypes.array,
         ext_ensemblVariation: PropTypes.object,
+        ext_ldhData: PropTypes.object,
         ext_singleNucleotide: PropTypes.bool,
         ext_gnomadExac: PropTypes.bool,
         loading_pageData: PropTypes.bool,
         loading_myVariantInfo: PropTypes.bool,
         loading_ensemblVariation: PropTypes.bool,
+        loading_ldhData: PropTypes.bool,
         href_url: PropTypes.object,
         affiliation: PropTypes.object,
         session: PropTypes.object,
@@ -141,7 +143,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
         if (this.props.ext_myVariantInfo) {
             this.parseExacData(this.props.ext_myVariantInfo, this.props.ext_myVariantInfo_metadata);
-            this.parseGnomadData(this.props.ext_myVariantInfo, this.props.ext_myVariantInfo_metadata);
             this.parseEspData(this.props.ext_myVariantInfo);
             this.calculateHighestMAF();
         }
@@ -153,6 +154,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         if (this.props.ext_ensemblVariation) {
             this.parseTGenomesData(this.props.ext_ensemblVariation);
             this.calculateHighestMAF();
+        }
+        if (this.props.ext_ldhData) {
+            this.parseGnomadData(this.props.ext_ldhData);
         }
         if (this.state.interpretation && this.state.interpretation.evaluations) {
             this.compareExternalDatas(this.state.populationObj, this.state.interpretation.evaluations);
@@ -172,7 +176,6 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
         if (nextProps.ext_myVariantInfo) {
             this.parseExacData(nextProps.ext_myVariantInfo, nextProps.ext_myVariantInfo_metadata);
-            this.parseGnomadData(nextProps.ext_myVariantInfo, nextProps.ext_myVariantInfo_metadata);
             this.parseEspData(nextProps.ext_myVariantInfo);
             this.calculateHighestMAF();
         }
@@ -183,6 +186,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         if (nextProps.ext_ensemblVariation) {
             this.parseTGenomesData(nextProps.ext_ensemblVariation);
             this.calculateHighestMAF();
+        }
+        if (nextProps.ext_ldhData) {
+            this.parseGnomadData(nextProps.ext_ldhData);
         }
         if (nextProps.interpretation && nextProps.interpretation.evaluations) {
             this.compareExternalDatas(this.state.populationObj, nextProps.interpretation.evaluations);
@@ -278,8 +284,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
             }
             // get the source version
-            if (metadata && metadata.src_version && metadata.src_version.exac) {
-                populationObj.exac._version = metadata.src_version.exac;
+            if (metadata && metadata.src && metadata.src.exac && metadata.src.exac.version) {
+                populationObj.exac._version = metadata.src.exac.version;
             }
             // update populationObj, and set flag indicating that we have ExAC data
             this.setState({hasExacData: true, populationObj: populationObj});
@@ -287,197 +293,107 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     },
 
     // Method to assign gnomAD population data to global population object
-    parseGnomadData: function(response, metadata) {
-        let populationObj = this.state.populationObj;
-
-        // Parse gnomAD exome data in myvariant.info response
-        if (response.gnomad_exome && (response.gnomad_exome.ac || response.gnomad_exome.an || response.gnomad_exome.hom)) {
-            let indexHOM = -2;
-            let gnomADExomeAC, gnomADExomeAN, gnomADExomeHOM, gnomADExomeAF;
-
-            populationObj.gnomAD._extra.hasExomeData = true;
-
-            // Possible resulting values for indexHOM (and what each indicates):
-            // -2  - default set above, response data either doesn't exist or isn't in tested format (variant likely isn't multi-allelic),
-            //       so any homozygote numbers would be in response.gnomad_*.hom['hom_' + key] ("default" location)
-            // -1  - response data exists, but current minor allele (response.gnomad_*.alt) not found within it,
-            //       so homozygote numbers are not available
-            // >=0 - response data exists and current minor allele (response.gnomad_*.alt) found within it,
-            //       so homozygote numbers should be in response.gnomad_*.hom['hom_' + key][indexHOM]
-            if (Array.isArray(response.gnomad_exome.alleles) && response.gnomad_exome.hom && Array.isArray(response.gnomad_exome.hom.hom)) {
-                indexHOM = response.gnomad_exome.alleles.indexOf(response.gnomad_exome.alt);
+    parseGnomadData: function(response) {
+        const populationObj = JSON.parse(JSON.stringify(this.state.populationObj));
+        const populations = _.property(['ld', 'PopulationAlleleFrequencyStatement'])(response);
+        if (populations) {
+            // Split up the variant alias and store each part separately
+            let variantAlias = _.property([0, 'entContent', 'PopulationAlleleFrequencySource', 'entId'])(populations);
+            if (variantAlias) {
+                variantAlias = variantAlias.split('-');
+                populationObj.gnomAD._extra.chrom = variantAlias[0] || '';
+                populationObj.gnomAD._extra.pos = variantAlias[1] || '';
+                populationObj.gnomAD._extra.ref = variantAlias[2] || '';
+                populationObj.gnomAD._extra.alt = variantAlias[3] || '';
             }
-
-            // Retrieve allele and homozygote exome data for each population
-            populationStatic.gnomAD._order.map(key => {
-                gnomADExomeAC = response.gnomad_exome.ac ? parseInt(response.gnomad_exome.ac['ac_' + key]) : null;
-                populationObj.gnomAD[key].ac = isNaN(gnomADExomeAC) ? null : gnomADExomeAC;
-
-                gnomADExomeAN = response.gnomad_exome.an ? parseInt(response.gnomad_exome.an['an_' + key]) : null;
-                populationObj.gnomAD[key].an = isNaN(gnomADExomeAN) ? null : gnomADExomeAN;
-
-                if (indexHOM < -1) {
-                    gnomADExomeHOM = response.gnomad_exome.hom ? parseInt(response.gnomad_exome.hom['hom_' + key]) : null;
-                    populationObj.gnomAD[key].hom = isNaN(gnomADExomeHOM) ? null : gnomADExomeHOM;
-                } else if (indexHOM > -1) {
-                    gnomADExomeHOM = parseInt(response.gnomad_exome.hom['hom_' + key][indexHOM]);
-                    populationObj.gnomAD[key].hom = isNaN(gnomADExomeHOM) ? null : gnomADExomeHOM;
+            // Find out if there are genomes or exomes. If both, break out of the loop
+            populations.some(population => {
+                const populationData = population.entContent;
+                if (populationData.method === 'gnomad-exomes') {
+                    populationObj.gnomAD._extra.hasExomeData = true;
                 }
-
-                gnomADExomeAF = populationObj.gnomAD[key].ac / populationObj.gnomAD[key].an;
-                populationObj.gnomAD[key].af = isFinite(gnomADExomeAF) ? gnomADExomeAF : null;
+                if (populationData.method === 'gnomad-genomes') {
+                    populationObj.gnomAD._extra.hasGenomeData = true;
+                }
+                if (populationObj.gnomAD._extra.hasExomeData && populationObj.gnomAD._extra.hasGenomeData) {
+                    return true;
+                }
             });
-
-            // Retrieve allele and homozygote exome totals
-            gnomADExomeAC = response.gnomad_exome.ac ? parseInt(response.gnomad_exome.ac.ac) : null;
-            populationObj.gnomAD._tot.ac = isNaN(gnomADExomeAC) ? null : gnomADExomeAC;
-
-            gnomADExomeAN = response.gnomad_exome.an ? parseInt(response.gnomad_exome.an.an) : null;
-            populationObj.gnomAD._tot.an = isNaN(gnomADExomeAN) ? null : gnomADExomeAN;
-
-            if (indexHOM < -1) {
-                gnomADExomeHOM = response.gnomad_exome.hom ? parseInt(response.gnomad_exome.hom.hom) : null;
-                populationObj.gnomAD._tot.hom = isNaN(gnomADExomeHOM) ? null : gnomADExomeHOM;
-            } else if (indexHOM > -1) {
-                gnomADExomeHOM = parseInt(response.gnomad_exome.hom.hom[indexHOM]);
-                populationObj.gnomAD._tot.hom = isNaN(gnomADExomeHOM) ? null : gnomADExomeHOM;
-            }
-
-            gnomADExomeAF = populationObj.gnomAD._tot.ac / populationObj.gnomAD._tot.an;
-            populationObj.gnomAD._tot.af = isFinite(gnomADExomeAF) ? gnomADExomeAF : null;
-
-            // Retrieve variant information
-            populationObj.gnomAD._extra.chrom = response.gnomad_exome.chrom;
-            populationObj.gnomAD._extra.pos = response.gnomad_exome.pos;
-            populationObj.gnomAD._extra.ref = response.gnomad_exome.ref;
-            populationObj.gnomAD._extra.alt = response.gnomad_exome.alt;
-
-            // Retrieve any available filter information
-            if (response.gnomad_exome.filter) {
-                if (Array.isArray(response.gnomad_exome.filter)) {
-                    populationObj.gnomAD._extra.exome_filter = response.gnomad_exome.filter;
-                } else {
-                    populationObj.gnomAD._extra.exome_filter = [response.gnomad_exome.filter];
+            const populationTypes = populationStatic.gnomAD._order;
+            populationTypes.forEach(popType => {
+                // Find the exome and genome data for each population type and calculate each value
+                const exome = populations.find(pop => {
+                    const { method, population } = pop.entContent;
+                    return (method === 'gnomad-exomes' && population === popType);
+                });
+                const genome = populations.find(pop => {
+                    const { method, population } = pop.entContent;
+                    return (method === 'gnomad-genomes' && population === popType);
+                });
+                let alleleCount = 0;
+                let alleleNumber = 0;
+                let homozygousAlleleIndividualCount = 0;
+                if (exome) {
+                    alleleCount += exome.entContent.alleleCount;
+                    alleleNumber += exome.entContent.alleleNumber;
+                    homozygousAlleleIndividualCount += exome.entContent.homozygousAlleleIndividualCount;
                 }
-            }
+                if (genome) {
+                    alleleCount += genome.entContent.alleleCount;
+                    alleleNumber += genome.entContent.alleleNumber;
+                    homozygousAlleleIndividualCount += genome.entContent.homozygousAlleleIndividualCount;
+                }
+                const alleleFrequency = alleleCount / alleleNumber;
+                populationObj.gnomAD[popType].ac = alleleCount;
+                populationObj.gnomAD[popType].an = alleleNumber;
+                populationObj.gnomAD[popType].af = (isFinite(alleleFrequency)) ? alleleFrequency : null;
+                populationObj.gnomAD[popType].hom = homozygousAlleleIndividualCount;
+            });
         }
-
-        // Parse gnomAD genome data in myvariant.info response
-        if (response.gnomad_genome && (response.gnomad_genome.ac || response.gnomad_genome.an || response.gnomad_genome.hom)) {
-            let indexHOM = -2;
-            let gnomADGenomeAC, gnomADGenomeAN, gnomADGenomeHOM, gnomADGenomeAF;
-            let hasExomeData = populationObj.gnomAD._extra.hasExomeData;
-
-            populationObj.gnomAD._extra.hasGenomeData = true;
-
-            if (Array.isArray(response.gnomad_genome.alleles) && response.gnomad_genome.hom && Array.isArray(response.gnomad_genome.hom.hom)) {
-                indexHOM = response.gnomad_genome.alleles.indexOf(response.gnomad_genome.alt);
-            }
-
-            // Retrieve allele and homozygote genome data for each population and add it to any corresponding exome data
-            populationStatic.gnomAD._order.map(key => {
-                gnomADGenomeAC = response.gnomad_genome.ac ? parseInt(response.gnomad_genome.ac['ac_' + key]) : null;
-                if (!(isNaN(gnomADGenomeAC) || gnomADGenomeAC == null)) {
-                    if (hasExomeData) {
-                        populationObj.gnomAD[key].ac += gnomADGenomeAC;
-                    } else {
-                        populationObj.gnomAD[key].ac = gnomADGenomeAC;
-                    }
+        let acTotal = 0;
+        let anTotal = 0;
+        let homTotal = 0;
+        const source = _.property(['ld', 'PopulationAlleleFrequencySource', 0, 'entContent', 0])(response);
+        if (source) {
+            if (source['gnomad-exomes']) {
+                // Parse the exome filters 
+                if (source['gnomad-exomes'].filters) {
+                    let filters = source['gnomad-exomes'].filters.split(';');
+                    filters = filters.filter(filter => filter !== 'PASS');
+                    filters = _.isEmpty(filters) ? null : filters;
+                    populationObj.gnomAD._extra.exome_filter = filters;
                 }
-
-                gnomADGenomeAN = response.gnomad_genome.an ? parseInt(response.gnomad_genome.an['an_' + key]) : null;
-                if (!(isNaN(gnomADGenomeAN) || gnomADGenomeAN == null)) {
-                    if (hasExomeData) {
-                        populationObj.gnomAD[key].an += gnomADGenomeAN;
-                    } else {
-                        populationObj.gnomAD[key].an = gnomADGenomeAN;
-                    }
-                }
-
-                if (indexHOM < -1) {
-                    gnomADGenomeHOM = response.gnomad_genome.hom ? parseInt(response.gnomad_genome.hom['hom_' + key]) : null;
-                } else if (indexHOM > -1) {
-                    gnomADGenomeHOM = parseInt(response.gnomad_genome.hom['hom_' + key][indexHOM]);
-                }
-
-                if (!(isNaN(gnomADGenomeHOM) || gnomADGenomeHOM == null)) {
-                    if (hasExomeData) {
-                        populationObj.gnomAD[key].hom += gnomADGenomeHOM;
-                    } else {
-                        populationObj.gnomAD[key].hom = gnomADGenomeHOM;
-                    }
-                }
-
-                gnomADGenomeAF = populationObj.gnomAD[key].ac / populationObj.gnomAD[key].an;
-                populationObj.gnomAD[key].af = isFinite(gnomADGenomeAF) ? gnomADGenomeAF : null;
-            });
-
-            // Retrieve allele and homozygote genome totals and add them to any corresponding exome totals
-            gnomADGenomeAC = response.gnomad_genome.ac ? parseInt(response.gnomad_genome.ac.ac) : null;
-            if (!(isNaN(gnomADGenomeAC) || gnomADGenomeAC == null)) {
-                if (hasExomeData) {
-                    populationObj.gnomAD._tot.ac += gnomADGenomeAC;
-                } else {
-                    populationObj.gnomAD._tot.ac = gnomADGenomeAC;
+                // Add exome totals
+                if (source['gnomad-exomes'].total) {
+                    acTotal += source['gnomad-exomes'].total.alleleCount;
+                    anTotal += source['gnomad-exomes'].total.alleleNumber;
+                    homTotal += source['gnomad-exomes'].total.homozygousAlleleIndividualCount;
                 }
             }
-
-            gnomADGenomeAN = response.gnomad_genome.an ? parseInt(response.gnomad_genome.an.an) : null;
-            if (!(isNaN(gnomADGenomeAN) || gnomADGenomeAN == null)) {
-                if (hasExomeData) {
-                    populationObj.gnomAD._tot.an += gnomADGenomeAN;
-                } else {
-                    populationObj.gnomAD._tot.an = gnomADGenomeAN;
+            if (source['gnomad-genomes']) {
+                // Parse the genome filters
+                if (source['gnomad-genomes'].filters) {
+                    let filters = source['gnomad-genomes'].filters.split(';');
+                    filters = filters.filter(filter => filter !== 'PASS');
+                    filters = _.isEmpty(filters) ? null : filters;
+                    populationObj.gnomAD._extra.genome_filter = filters;
+                }
+                // Add genome totals
+                if (source['gnomad-genomes'].total) {
+                    acTotal += source['gnomad-genomes'].total.alleleCount;
+                    anTotal += source['gnomad-genomes'].total.alleleNumber;
+                    homTotal += source['gnomad-genomes'].total.homozygousAlleleIndividualCount;
                 }
             }
-
-            if (indexHOM < -1) {
-                gnomADGenomeHOM = response.gnomad_genome.hom ? parseInt(response.gnomad_genome.hom.hom) : null;
-            } else if (indexHOM > -1) {
-                gnomADGenomeHOM = parseInt(response.gnomad_genome.hom.hom[indexHOM]);
-            }
-
-            if (!(isNaN(gnomADGenomeHOM) || gnomADGenomeHOM == null)) {
-                if (hasExomeData) {
-                    populationObj.gnomAD._tot.hom += gnomADGenomeHOM;
-                } else {
-                    populationObj.gnomAD._tot.hom = gnomADGenomeHOM;
-                }
-            }
-
-            gnomADGenomeAF = populationObj.gnomAD._tot.ac / populationObj.gnomAD._tot.an;
-            populationObj.gnomAD._tot.af = isFinite(gnomADGenomeAF) ? gnomADGenomeAF : null;
-
-            // Retrieve variant information (if not already collected)
-            if (!populationObj.gnomAD._extra.chrom) {
-                populationObj.gnomAD._extra.chrom = response.gnomad_genome.chrom;
-            }
-
-            if (!populationObj.gnomAD._extra.pos) {
-                populationObj.gnomAD._extra.pos = response.gnomad_genome.pos;
-            }
-
-            if (!populationObj.gnomAD._extra.ref) {
-                populationObj.gnomAD._extra.ref = response.gnomad_genome.ref;
-            }
-
-            if (!populationObj.gnomAD._extra.alt) {
-                populationObj.gnomAD._extra.alt = response.gnomad_genome.alt;
-            }
-
-            // Retrieve any available filter information
-            if (response.gnomad_genome.filter) {
-                if (Array.isArray(response.gnomad_genome.filter)) {
-                    populationObj.gnomAD._extra.genome_filter = response.gnomad_genome.filter;
-                } else {
-                    populationObj.gnomAD._extra.genome_filter = [response.gnomad_genome.filter];
-                }
-            }
-
-            // Get the source version
-            if (metadata && metadata.src_version && metadata.src_version.gnomad) {
-                populationObj.gnomAD._version = metadata.src_version.gnomad;
-            }
+            const afTotal = acTotal / anTotal;
+            populationObj.gnomAD._tot.ac = acTotal;
+            populationObj.gnomAD._tot.an = anTotal;
+            populationObj.gnomAD._tot.af = isFinite(afTotal) ? afTotal : null;
+            populationObj.gnomAD._tot.hom = homTotal;
+        }
+        const version = _.property(['ld', 'PopulationAlleleFrequencySource', 0, 'entContentSrc', 'ver'])(response);
+        if (version) {
+            populationObj.gnomAD._version = version.includes('v') ? version.substring(1) : version;
         }
 
         if (populationObj.gnomAD._extra.hasExomeData || populationObj.gnomAD._extra.hasGenomeData) {
@@ -498,7 +414,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             // get extra 1000Genome information
             populationObj.tGenomes._extra.name = response.name;
             populationObj.tGenomes._extra.var_class = response.var_class;
-            if (hgvs_GRCh37.indexOf('>') > -1 || hgvs_GRCh38.indexOf('>') > -1) {
+            if ((hgvs_GRCh37 && hgvs_GRCh37.indexOf('>') > -1) || (hgvs_GRCh38 && hgvs_GRCh38.indexOf('>') > -1)) {
                 // if SNP variant, extract allele information from hgvs names, preferring grch38
                 populationObj.tGenomes._extra.ref = hgvs_GRCh38 ? hgvs_GRCh38.charAt(hgvs_GRCh38.length - 3) : hgvs_GRCh37.charAt(hgvs_GRCh37.length - 3);
                 populationObj.tGenomes._extra.alt = hgvs_GRCh38 ? hgvs_GRCh38.charAt(hgvs_GRCh38.length - 1) : hgvs_GRCh37.charAt(hgvs_GRCh37.length - 1);
@@ -966,8 +882,10 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
 
         // Set the source version
-        if (metadata && metadata.src_version) {
-            version = (datasetName === 'ExAC') ? metadata.src_version.exac : (datasetName === 'gnomAD') ? metadata.src_version.gnomad : '';
+        if (datasetName === 'ExAC') {
+            version = (metadata && metadata.src.exac) ? metadata.src.exac.version : '';
+        } else if (datasetName === 'gnomAD') {
+            version = (dataset && dataset._version) ? dataset._version : '';
         }
 
         return (
@@ -1205,7 +1123,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                     </div>
                     <div className="panel panel-info datasource-gnomAD">
                         <div className="panel-heading">
-                            {this.renderExacGnomadHeader(this.state.hasGnomadData, this.state.loading_myVariantInfo, gnomAD, gnomadExac, this.props.ext_myVariantInfo, this.props.ext_myVariantInfo_metadata, 'gnomAD')}
+                            {this.renderExacGnomadHeader(this.state.hasGnomadData, this.state.loading_ldhData, gnomAD, gnomadExac, undefined, undefined, 'gnomAD')}
                         </div>
                         <div className="panel-content-wrapper">
                             {this.state.loading_myVariantInfo ? showActivityIndicator('Retrieving data... ') : null}
