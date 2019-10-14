@@ -293,7 +293,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 },
                 extraEvidence: {
                     subcategory: 'case-control',
-                    tableName: <span>Curated Literature Evidence (Case-control)</span>
+                    tableName: <span>Curated Evidence (Case-control)</span>
                 }
             },
             {
@@ -308,7 +308,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 },
                 extraEvidence: {
                     subcategory: 'segregation-data',
-                    tableName: <span>Curated Literature Evidence (Segregation data)</span>
+                    tableName: <span>Curated Evidence (Segregation data)</span>
                 }
             },
             {
@@ -323,7 +323,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 },
                 extraEvidence: {
                     subcategory: 'de-novo',
-                    tableName: <span>Curated Literature Evidence (<i>de novo</i> occurrence)</span>
+                    tableName: <span>Curated Evidence (<i>de novo</i> occurrence)</span>
                 }
             },
             {
@@ -338,7 +338,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 },
                 extraEvidence: {
                     subcategory: 'allele-data',
-                    tableName: <span>Curated Literature Evidence (Allele Data (<i>cis/trans</i>))</span>
+                    tableName: <span>Curated Evidence (Allele Data (<i>cis/trans</i>))</span>
                 }
             },
             {
@@ -353,7 +353,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 },
                 extraEvidence: {
                     subcategory: 'alternate-mechanism',
-                    tableName: <span>Curated Literature Evidence (Alternate mechanism for disease)</span>
+                    tableName: <span>Curated Evidence (Alternate mechanism for disease)</span>
                 }
             },
             {
@@ -368,7 +368,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 },
                 extraEvidence: {
                     subcategory: 'specificity-of-phenotype',
-                    tableName: <span>Curated Literature Evidence (Specificity of phenotype)</span>
+                    tableName: <span>Curated Evidence (Specificity of phenotype)</span>
                 }
             }
         ];
@@ -415,7 +415,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 evidenceCollectionDone = {this.evidenceCollectionDone}
                 canCurrUserModifyEvidence={this.canCurrUserModifyEvidence}
             />;
-            let oldExtraEvidenceTable = <extraEvidence.ExtraEvidenceTable 
+            let oldExtraEvidenceTable = <extraEvidence.ExtraEvidenceTable
                 category="case-segregation"
                 subcategory={panel.extraEvidence.subcategory}
                 session={this.props.session}
