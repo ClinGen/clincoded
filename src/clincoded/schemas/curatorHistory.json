@@ -14,7 +14,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "4"
+            "default": "5"
         },
         "operationType": {
             "title": "Curator operation type",
@@ -95,7 +95,8 @@
                             "type": "string",
                             "default": "add",
                             "enum": [
-                                "add"
+                                "add",
+                                "delete"
                             ]
                         },
                         "gdm": {

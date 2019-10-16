@@ -215,10 +215,15 @@ var CurationCentral = createReactClass({
                 const newAnnotations = gdmObj.annotations.filter(annotation => annotation !== currAnnotation['@id']);
                 gdmObj.annotations = newAnnotations;
             }
-
             return this.putRestData('/gdm/' + currGdm.uuid, gdmObj).then(data => {
                 return data['@graph'][0];
             }).then(updatedGdm => {
+                const meta = {
+                    article:{
+                        gdm: updatedGdm['@id']
+                    }
+                };
+                this.recordHistory('delete', currAnnotation.article, meta);
                 const pmid = _.property(['annotations', 0, 'article', 'pmid'])(updatedGdm);
                 return this.getGdm(updatedGdm.uuid, pmid);
             }).catch(err => {
@@ -480,11 +485,25 @@ class PmidGdmAddHistory extends Component {
 history_views.register(PmidGdmAddHistory, 'article', 'add');
 
 // Display a history item for deleting a PMID from a GDM
-class PmidGdmDeleteHistory extends Component {
-    render() {
-        return <div>PMIDGDMDELETE</div>;
-    }
-}
+// class PmidGdmDeleteHistory extends Component {
+//     render() {
+//         return <div>PMIDGDMDELETE</div>;
+//     }
+// }
+const PmidGdmDeleteHistory = ({ history }) => {
+    const article = history.primary;
+    const gdm = history.meta.article.gdm;
+
+    return (
+        <div>
+            <span>PMID:{article.pmid}</span>
+            <span> deleted from </span>
+            <a href={'/curation-central/?gdm=' + gdm.uuid}><strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong></a>
+            <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+            <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+        </div>
+    );
+};
 
 history_views.register(PmidGdmDeleteHistory, 'article', 'delete');
 
@@ -501,6 +520,6 @@ const AnnotationModifyHistory = ({ history }) => {
             <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
         </div>
     );
-}
+};
 
 history_views.register(AnnotationModifyHistory, 'annotation', 'modify');
