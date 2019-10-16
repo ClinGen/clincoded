@@ -278,7 +278,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 },
                 extraEvidence: {
                     subcategory: 'observed-in-healthy',
-                    tableName: <span>Curated Evidence (Observed in healthy adult(s))</span>
+                    tableName: <span>Curated Evidence (Observed in healthy adult(s))</span>,
+                    oldTableName: <span>Curated Evidence (Observed in healthy adult(s)) - Retired Format</span>
                 }
             },
             {
@@ -293,7 +294,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 },
                 extraEvidence: {
                     subcategory: 'case-control',
-                    tableName: <span>Curated Evidence (Case-control)</span>
+                    tableName: <span>Curated Evidence (Case-control)</span>,
+                    oldTableName: <span>Curated Evidence (Case-control) - Retired Format</span>
                 }
             },
             {
@@ -308,7 +310,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 },
                 extraEvidence: {
                     subcategory: 'segregation-data',
-                    tableName: <span>Curated Evidence (Segregation data)</span>
+                    tableName: <span>Curated Evidence (Segregation data)</span>,
+                    oldTableName: <span>Curated Evidence (Segregation data) - Retired Format</span>
                 }
             },
             {
@@ -323,7 +326,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 },
                 extraEvidence: {
                     subcategory: 'de-novo',
-                    tableName: <span>Curated Evidence (<i>de novo</i> occurrence)</span>
+                    tableName: <span>Curated Evidence (<i>de novo</i> occurrence)</span>,
+                    oldTableName: <span>Curated Evidence (<i>de novo</i> occurrence) - Retired Format</span>
                 }
             },
             {
@@ -338,7 +342,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 },
                 extraEvidence: {
                     subcategory: 'allele-data',
-                    tableName: <span>Curated Evidence (Allele Data (<i>cis/trans</i>))</span>
+                    tableName: <span>Curated Evidence (Allele Data (<i>cis/trans</i>))</span>,
+                    oldTableName: <span>Curated Evidence (Allele Data (<i>cis/trans</i>)) - Retired Format</span>
                 }
             },
             {
@@ -353,7 +358,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 },
                 extraEvidence: {
                     subcategory: 'alternate-mechanism',
-                    tableName: <span>Curated Evidence (Alternate mechanism for disease)</span>
+                    tableName: <span>Curated Evidence (Alternate mechanism for disease)</span>,
+                    oldTableName: <span>Curated Evidence (Alternate mechanism for disease) - Retired Format</span>
                 }
             },
             {
@@ -368,7 +374,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 },
                 extraEvidence: {
                     subcategory: 'specificity-of-phenotype',
-                    tableName: <span>Curated Evidence (Specificity of phenotype)</span>
+                    tableName: <span>Curated Evidence (Specificity of phenotype)</span>,
+                    oldTableName: <span>Curated Evidence (Specificity of phenotype) - Retired Format</span>
                 }
             }
         ];
@@ -414,13 +421,12 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 evidenceCollectionDone = {this.evidenceCollectionDone}
                 canCurrUserModifyEvidence={this.canCurrUserModifyEvidence}
             />;
-            const oldTableName = <span>{panel.extraEvidence.tableName.props.children + ' - Retired format'}</span>;
             let oldExtraEvidenceTable = <extraEvidence.ExtraEvidenceTable
                 category="case-segregation"
                 subcategory={panel.extraEvidence.subcategory}
                 session={this.props.session}
                 href_url={this.props.href_url}
-                tableName={oldTableName}
+                tableName={panel.extraEvidence.oldTableName}
                 variant={this.state.data}
                 interpretation={this.state.interpretation}
                 updateInterpretationObj={this.props.updateInterpretationObj}
