@@ -35,6 +35,7 @@ let EvidenceModalManager = createReactClass({
         subcategory: PropTypes.string,              // Subcategory (usually the panel) the evidence is part of
         evidenceCollectionDone: PropTypes.func,     // Function to call when we finish with modal 2
         isNew: PropTypes.bool,                      // If we are adding a new piece of evidence or editing an existing piece
+        btnTitle: PropTypes.string,                 // Custom link text for adding/editing evidence
         useIcon: PropTypes.bool,                    // Use an icon instead of text as link text  
         disableActuator: PropTypes.bool,            // Disable the actuator or not
         affiliation: PropTypes.object,              // The user's affiliation
@@ -95,8 +96,8 @@ let EvidenceModalManager = createReactClass({
      * If adding new one, return null.
      */
     getCurrentEvidenceId() {
-        // If editing existing evidence, return its id.
-        if (this.props.data) {
+        // If existing evidence has id, return its id.
+        if (this.props.data && this.props.data['@id']) {
             return (this.props.data['@id']);
         }
         else {
@@ -298,6 +299,7 @@ let EvidenceModalManager = createReactClass({
                 metadataDone = {this.metadataDone}
                 data = {this.getMetadata()}
                 isNew = {this.props.isNew}
+                btnTitle = {this.props.btnTitle}
                 useIcon = {this.props.useIcon}
                 disableActuator = {this.props.disableActuator}
             />

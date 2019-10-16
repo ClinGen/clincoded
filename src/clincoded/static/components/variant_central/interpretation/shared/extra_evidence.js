@@ -11,8 +11,9 @@ import { Form, FormMixin, Input } from '../../../../libs/bootstrap/form';
 import { RestMixin } from '../../../rest';
 import { AddResourceId } from '../../../add_external_resource';
 import { getAffiliationName } from '../../../../libs/get_affiliation_name';
+import { extraEvidenceHasSource } from '../../../../libs/extra_evidence_version';
 import { ConfirmDelete } from './confirm_delete';
-import { extraEvidenceHasSource } from '../../../../libs/extra_evidence_version.js';
+import { EvidenceModalManager } from '../segregation/evidenceModalManager';
 
 var curator = require('../../../curator');
 var PmidSummary = curator.PmidSummary;
@@ -34,7 +35,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         updateInterpretationObj: PropTypes.func, // function from index.js; this function will pass the updated interpretation object back to index.js
         affiliation: PropTypes.object, // user's affiliation data object
         criteriaList: PropTypes.array, // criteria code(s) pertinent to the category/subcategory
-        deleteOnly: PropTypes.bool
+        evidenceCollectionDone: PropTypes.func,  // function to call to add or edit an existing one
+        canCurrUserModifyEvidence: PropTypes.func // funcition to check if current logged in user can modify given evidence
     },
 
     contextTypes: {
@@ -246,11 +248,72 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         });
     },
 
-    renderInterpretationExtraEvidence: function(extra_evidence) {
+    // Return the "Add in New Format" button for case segregation old format evidences
+    getAddNewEvidenceButton: function(extra_evidence, newRelevantEvidenceList) {
+        let data = {};
+        let isNew = false;
+        const pmid = extra_evidence.articles && extra_evidence.articles.length > 0 ? extra_evidence.articles[0].pmid : '';
+
+        // Check if pmid/article has already exists in current case segregation evidences
+        let candidates = newRelevantEvidenceList ? newRelevantEvidenceList
+            .filter(o => 'pmid' in o.source.metadata
+                    && o.source.metadata['pmid'] === pmid) : [];
+        let foundCandidate = null;
+        if (candidates.length > 0) {
+            candidates.forEach(candidate => {
+                if (this.props.canCurrUserModifyEvidence(candidate)) {
+                    foundCandidate = candidate;
+                }
+            });
+        }
+        // If already exists, add old evidence comment to it and allow user to edit the evidence
+        if (foundCandidate != null) {
+            // deep copy the evidence data
+            data = JSON.parse(JSON.stringify(foundCandidate));
+            data.source.data['comments'] = (foundCandidate.source.data['comments'] && foundCandidate.source.data['comments'] != '') ?
+                foundCandidate.source.data['comments'] + '\n' + extra_evidence.evidenceDescription
+                :
+                extra_evidence.evidenceDescription;
+        } else {
+            // If not found, allow user to add evidence in new format
+            isNew = true;
+            data.source = {'metadata': {}, 'data': {}};
+            data.source.metadata['_kind_key'] = 'PMID';
+            data.source.metadata['_kind_title'] = 'Pubmed';
+            data.source.metadata['pmid'] = pmid;
+            data.source.data['comments'] = extra_evidence.evidenceDescription;
+        }
+        // Set the button
+        return (
+            <EvidenceModalManager
+                data = {data}
+                allData = {newRelevantEvidenceList}
+                criteriaList = {this.state.criteriaList}
+                evidenceType = 'PMID'
+                subcategory = {this.props.subcategory}
+                evidenceCollectionDone = {this.props.evidenceCollectionDone}
+                isNew = {isNew}
+                btnTitle = 'Add in New Format'
+                affiliation = {this.props.affiliation}
+                session = {this.props.session}
+                canCurrUserModifyEvidence = {this.props.canCurrUserModifyEvidence}
+            />
+        );
+    },
+
+    renderInterpretationExtraEvidence: function(extra_evidence, newRelevantEvidenceList) {
         let affiliation = this.props.affiliation, session = this.props.session;
         let creatorAffiliation = extra_evidence.affiliation ? getAffiliationName(extra_evidence.affiliation) : null;
         let title = extra_evidence.submitted_by && extra_evidence.submitted_by.title ? extra_evidence.submitted_by.title : '';
         let creator = creatorAffiliation ? creatorAffiliation + ' (' + title + ')' : title;
+
+        // Check if need to add 'Add in New Format' button for case segregation tab tables
+        let addNewFormatEvidence = null;
+        if (this.props.category === 'case-segregation' && !this.props.viewOnly &&
+            ((affiliation && extra_evidence.affiliation && extra_evidence.affiliation === affiliation.affiliation_id) ||
+            (!affiliation && !extra_evidence.affiliation && session && session.user_properties && extra_evidence.submitted_by['@id'] === session.user_properties['@id']))) {
+                addNewFormatEvidence = this.getAddNewEvidenceButton(extra_evidence, newRelevantEvidenceList);
+        }
 
         let criteriaInput = extra_evidence.evidenceCriteria && extra_evidence.evidenceCriteria !== 'none' ? extra_evidence.evidenceCriteria : '--';
         // for rendering the evidence in tabular format
@@ -266,9 +329,10 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                         {!this.props.viewOnly && ((affiliation && extra_evidence.affiliation && extra_evidence.affiliation === affiliation.affiliation_id) ||
                             (!affiliation && !extra_evidence.affiliation && session && session.user_properties && extra_evidence.submitted_by['@id'] === session.user_properties['@id'])) ?
                             <div>
-                                {!this.state.deleteOnly ?
+                                {this.props.category !== 'case-segregation' ?
                                     <button className="btn btn-primary btn-inline-spacer" onClick={() => this.editEvidenceButton(extra_evidence['@id'])}>Edit</button>
                                     : null}
+                                {addNewFormatEvidence}
                                 <ConfirmDelete evidence={extra_evidence} deleteEvidence={this.deleteEvidence}></ConfirmDelete>
                             </div>
                             : null}
@@ -357,13 +421,17 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
 
     render: function() {
         let relevantEvidenceListRaw = [];
+        let newRelevantEvidenceListRaw = [];
         if (this.state.variant && this.state.variant.associatedInterpretations) {
             this.state.variant.associatedInterpretations.map(interpretation => {
                 if (interpretation.extra_evidence_list) {
                     interpretation.extra_evidence_list.map(extra_evidence => {
-                        if (extra_evidence.subcategory === this.props.subcategory &&
-                            !extraEvidenceHasSource(extra_evidence)) {
-                            relevantEvidenceListRaw.push(extra_evidence);
+                        if (extra_evidence.subcategory === this.props.subcategory) {
+                            if (extraEvidenceHasSource(extra_evidence)) {
+                                newRelevantEvidenceListRaw.push(extra_evidence);
+                            } else {
+                                relevantEvidenceListRaw.push(extra_evidence);
+                            }
                         }
                     });
                 }
@@ -372,6 +440,9 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         let relevantEvidenceList = _(relevantEvidenceListRaw).sortBy(evidence => {
             return evidence.date_created;
         }).reverse();
+        let newRelevantEvidenceList = _(newRelevantEvidenceListRaw).sortBy(newEvidence => {
+            return newEvidence.date_created;
+        }).reverse();
         let parentObj = {/* // BEHAVIOR TBD
             '@type': ['evidenceList'],
             'evidenceList': relevantEvidenceList
@@ -379,87 +450,86 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         const criteriaList = this.state.criteriaList;
         const criteriaInput = this.state.criteriaInput;
 
-        if (relevantEvidenceList.length == 0 && this.state.deleteOnly) {
+        // If case segregation tab and no old format evidence, no table is displayed
+        if (relevantEvidenceList.length === 0 && this.props.category === 'case-segregation') {
             return null;
-        }
-        else {
-        return (
-            <div className="panel panel-info">
-                <div className="panel-heading"><h3 className="panel-title">{this.props.tableName}</h3></div>
-                <div className="panel-content-wrapper">
-                    <table className="table">
-                        {relevantEvidenceList.length > 0 ?
-                            <thead>
-                                <tr>
-                                    <th>Article</th>
-                                    <th>Criteria</th>
-                                    <th>Evidence</th>
-                                    <th>Last edited by</th>
-                                    <th>Last edited</th>
-                                    {!this.state.viewOnly? <th></th> : null}
-                                </tr>
-                            </thead>
-                            : null}
-                        <tbody>
-                            {!this.props.viewOnly && !this.state.deleteOnly ?
-                                <tr>
-                                    <td colSpan="6">
-                                        {this.state.tempEvidence ?
-                                            <span>
-                                                <PmidSummary article={this.state.tempEvidence} className="alert alert-info" pmidLinkout />
-                                                <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                                    <div className="pmid-evidence-form clearfix">
-                                                        <div className="col-xs-6 col-md-4 pmid-evidence-form-item criteria-selection">
-                                                            <Input type="select" ref="criteria-selection" defaultValue={criteriaInput} label="Criteria:" handleChange={this.handleCriteriaChange}
-                                                                error={this.getFormError("criteria-selection")} clearError={this.clrFormErrors.bind(null, "criteria-selection")}
-                                                                labelClassName="col-xs-6 col-md-3 control-label" wrapperClassName="col-xs-12 col-sm-6 col-md-9" groupClassName="form-group">
-                                                                <option value="none">Select criteria code</option>
-                                                                <option disabled="disabled"></option>
-                                                                {criteriaList.map((item, i) => {
-                                                                    return <option key={i} value={item}>{item}</option>;
-                                                                })}
-                                                            </Input>
-                                                        </div>
-                                                        <div className="col-xs-12 col-sm-6 col-md-8 pmid-evidence-form-item evidence-input">
-                                                            <Input type="textarea" ref="description" rows="2" label="Evidence:" handleChange={this.handleDescriptionChange}
-                                                                labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" />
-                                                        </div>
-                                                    </div>
-                                                    <div className="clearfix">
-                                                        <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} buttonClass="btn-info"
-                                                            buttonText="Edit PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
-                                                        <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelAddEvidenceButton}>Cancel</button>
-                                                        <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
-                                                            submitBusy={this.state.submitBusy} inputDisabled={this.shouldDisableSaveButton('add')} />
-                                                        {this.state.updateMsg ?
-                                                            <div className="submit-info pull-right">{this.state.updateMsg}</div>
-                                                            : null}
-                                                    </div>
-                                                </Form>
-                                            </span>
-                                            :
-                                            <span>
-                                                <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} buttonClass="btn-primary"
-                                                    buttonText="Add PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
-
-                                                &nbsp;&nbsp;Select "Add PMID" to curate and save a piece of evidence from a published article.
-                                            </span>
-                                        }
-                                    </td>
-                                </tr>
-                                : null}
+        } else {
+            return (
+                <div className="panel panel-info">
+                    <div className="panel-heading"><h3 className="panel-title">{this.props.tableName}</h3></div>
+                    <div className="panel-content-wrapper">
+                        <table className="table">
                             {relevantEvidenceList.length > 0 ?
-                                relevantEvidenceList.map(evidence => {
-                                    return (this.state.editEvidenceId === evidence['@id']
-                                        ? this.renderInterpretationExtraEvidenceEdit(evidence)
-                                        : this.renderInterpretationExtraEvidence(evidence));
-                                })
-                                : <tr><td colSpan={!this.props.viewOnly ? "5" : "4"}><span>&nbsp;&nbsp;No evidence added.</span></td></tr>}
-                        </tbody>
-                    </table>
+                                <thead>
+                                    <tr>
+                                        <th>Article</th>
+                                        <th>Criteria</th>
+                                        <th>Evidence</th>
+                                        <th>Last edited by</th>
+                                        <th>Last edited</th>
+                                        {!this.state.viewOnly? <th></th> : null}
+                                    </tr>
+                                </thead>
+                                : null}
+                            <tbody>
+                                {!this.props.viewOnly && this.props.category !== 'case-segregation' ?
+                                    <tr>
+                                        <td colSpan="6">
+                                            {this.state.tempEvidence ?
+                                                <span>
+                                                    <PmidSummary article={this.state.tempEvidence} className="alert alert-info" pmidLinkout />
+                                                    <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+                                                        <div className="pmid-evidence-form clearfix">
+                                                            <div className="col-xs-6 col-md-4 pmid-evidence-form-item criteria-selection">
+                                                                <Input type="select" ref="criteria-selection" defaultValue={criteriaInput} label="Criteria:" handleChange={this.handleCriteriaChange}
+                                                                    error={this.getFormError("criteria-selection")} clearError={this.clrFormErrors.bind(null, "criteria-selection")}
+                                                                    labelClassName="col-xs-6 col-md-3 control-label" wrapperClassName="col-xs-12 col-sm-6 col-md-9" groupClassName="form-group">
+                                                                    <option value="none">Select criteria code</option>
+                                                                    <option disabled="disabled"></option>
+                                                                    {criteriaList.map((item, i) => {
+                                                                        return <option key={i} value={item}>{item}</option>;
+                                                                    })}
+                                                                </Input>
+                                                            </div>
+                                                            <div className="col-xs-12 col-sm-6 col-md-8 pmid-evidence-form-item evidence-input">
+                                                                <Input type="textarea" ref="description" rows="2" label="Evidence:" handleChange={this.handleDescriptionChange}
+                                                                    labelClassName="col-xs-2 control-label" wrapperClassName="col-xs-10" groupClassName="form-group" />
+                                                            </div>
+                                                        </div>
+                                                        <div className="clearfix">
+                                                            <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} buttonClass="btn-info"
+                                                                buttonText="Edit PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
+                                                            <button className="btn btn-default pull-right btn-inline-spacer" onClick={this.cancelAddEvidenceButton}>Cancel</button>
+                                                            <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
+                                                                submitBusy={this.state.submitBusy} inputDisabled={this.shouldDisableSaveButton('add')} />
+                                                            {this.state.updateMsg ?
+                                                                <div className="submit-info pull-right">{this.state.updateMsg}</div>
+                                                                : null}
+                                                        </div>
+                                                    </Form>
+                                                </span>
+                                                :
+                                                <span>
+                                                    <AddResourceId resourceType="pubmed" protocol={this.props.href_url.protocol} parentObj={parentObj} buttonClass="btn-primary"
+                                                        buttonText="Add PMID" modalButtonText="Add Article" updateParentForm={this.updateTempEvidence} buttonOnly={true} />
+                                                    &nbsp;&nbsp;Select "Add PMID" to curate and save a piece of evidence from a published article.
+                                                </span>
+                                            }
+                                        </td>
+                                    </tr>
+                                    : null}
+                                {relevantEvidenceList.length > 0 ?
+                                    relevantEvidenceList.map(evidence => {
+                                        return (this.state.editEvidenceId === evidence['@id']
+                                            ? this.renderInterpretationExtraEvidenceEdit(evidence)
+                                            : this.renderInterpretationExtraEvidence(evidence, newRelevantEvidenceList));
+                                    })
+                                    : <tr><td colSpan={!this.props.viewOnly ? "5" : "4"}><span>&nbsp;&nbsp;No evidence added.</span></td></tr>}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-        );
+            );
         }
     }
 });

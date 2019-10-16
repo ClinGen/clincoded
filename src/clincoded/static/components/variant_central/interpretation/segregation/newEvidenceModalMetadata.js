@@ -23,6 +23,7 @@ let NewEvidenceModalMetadata = createReactClass({
         metadataDone: PropTypes.func,        // Function to call when input metadata modal is done; either Next or Cancel.
         data: PropTypes.object,              // Metadata - If null, adding.  Otherwise, editing.
         isNew: PropTypes.bool,               // If we are adding a new piece of evidence or editing an existing piece
+        btnTitle: PropTypes.string,          // Custom link text for adding/editing evidence
         useIcon: PropTypes.bool,             // Use an icon instead of text as link text
         disableActuator: PropTypes.bool      // Disable the actuator or not
     },
@@ -123,13 +124,18 @@ let NewEvidenceModalMetadata = createReactClass({
                         />
                     </div>];
                 if (key === 'PMID') {
+                    // If adding new pmid/article but has source data, enable pmid preview button
+                    let previewDisabled = this.state.pmidPreviewDisabled;
+                    if (this.props.isNew && this.props.data && this.props.data['pmid'] && this.props.data['pmid'] !== '') {
+                        previewDisabled = false;
+                    }
                     node.push(<Input
                             type = "button-button"
                             inputClassName = {(this.state.pmidPreviewDisabled ? "btn-default" : "btn-primary") + " btn-inline-spacer pull-right"}
                             clickHandler = {this.searchPMID}
                             title = "Preview PubMed Article"
                             submitBusy = {this.state.pmidLookupBusy}
-                            inputDisabled = {this.state.pmidPreviewDisabled}
+                            inputDisabled = {previewDisabled}
                             required
                         />);
                 }
@@ -147,7 +153,7 @@ let NewEvidenceModalMetadata = createReactClass({
      * @param {string} name     // field name
      */
     getInputValue(name) {
-        if (!this.props.isNew && this.props.data) {
+        if (this.props.data && this.props.data[name]) {
             return this.props.data[name];
         }
         return '';
@@ -343,13 +349,15 @@ let NewEvidenceModalMetadata = createReactClass({
      */
     actuatorTitle() {
         if (this.props.isNew) {
-            return 'Add Evidence';
+            return (this.props.btnTitle && this.props.btnTitle !== '') ? this.props.btnTitle
+                : 'Add Evidence';
         }
         // If for editing, check if using icon or text.
         if (this.props.useIcon) {
             return <i className="icon icon-pencil"></i>;
         } else {
-            return 'Edit';
+            return (this.props.btnTitle && this.props.btnTitle !== '') ? this.props.btnTitle
+                : 'Edit';
         }
 
     },

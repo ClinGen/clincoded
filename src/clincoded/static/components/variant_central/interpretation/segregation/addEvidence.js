@@ -8,7 +8,7 @@ import { FormMixin, Input } from '../../../../libs/bootstrap/form';
 
 // Internal libs
 import { RestMixin } from '../../../rest';
-import { extraEvidenceHasSource } from '../../../../libs/extra_evidence_version.js';
+import { extraEvidenceHasSource } from '../../../../libs/extra_evidence_version';
 var CuratorHistory = require('../../../curator_history');
 
 import { EvidenceTable } from './evidenceTable';

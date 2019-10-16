@@ -10,7 +10,7 @@ import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
 import { RestMixin } from '../../rest';
 import { CompleteSection } from './shared/complete_section';
 import { scrollElementIntoView } from '../../../libs/helpers/scroll_into_view';
-import { extraEvidenceHasSource } from '../../../libs/extra_evidence_version.js';
+import { extraEvidenceHasSource } from '../../../libs/extra_evidence_version';
 
 const vciFormHelper = require('./shared/form');
 const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
@@ -372,7 +372,6 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 }
             }
         ];
-
         const panels = panel_data.map(panel => {
             let interpretationForm = null;
             if (this.state.data && this.state.interpretation) {
@@ -415,19 +414,22 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 evidenceCollectionDone = {this.evidenceCollectionDone}
                 canCurrUserModifyEvidence={this.canCurrUserModifyEvidence}
             />;
+            const oldTableName = <span>{panel.extraEvidence.tableName.props.children + ' - Retired format'}</span>;
             let oldExtraEvidenceTable = <extraEvidence.ExtraEvidenceTable
                 category="case-segregation"
                 subcategory={panel.extraEvidence.subcategory}
                 session={this.props.session}
                 href_url={this.props.href_url}
-                tableName={panel.extraEvidence.tableName}
+                tableName={oldTableName}
                 variant={this.state.data}
                 interpretation={this.state.interpretation}
                 updateInterpretationObj={this.props.updateInterpretationObj}
                 viewOnly={this.state.data && !this.state.interpretation}
                 affiliation={affiliation}
                 criteriaList={panel.criteria}
-                deleteOnly={true} />
+                evidenceCollectionDone={this.evidenceCollectionDone}
+                canCurrUserModifyEvidence={this.canCurrUserModifyEvidence}
+                />;
             return <PanelGroup accordion key={panel.key}>
                 <Panel
                     title={panel.title}
