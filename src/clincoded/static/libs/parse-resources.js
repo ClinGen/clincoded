@@ -287,6 +287,9 @@ export function parseClinvar(xml, extended) {
                             variant.dbSNPIds.push(elementsXRef[i].getAttribute('ID'));
                         }
                     }
+                    if ($XRef[j].getAttribute('DB') === 'ClinGen') {
+                        variant.carId = $XRef[j].getAttribute('ID');
+                    }
                 }
 
                 // Extract additional data about the variant (if necessary)
