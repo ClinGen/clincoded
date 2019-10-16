@@ -238,10 +238,16 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     // Because myvariant.info doesn't always return ExAC allele frequency data
     parseAlleleFrequencyData: function(response) {
         let populationObj = this.state.populationObj;
+        const colocatedVariants = response && response[0] && response[0].colocated_variants && response[0].colocated_variants[0] ?
+            response[0].colocated_variants[0] : null;
         populationStatic.exac._order.map(key => {
-            populationObj.exac[key].af = typeof populationObj.exac[key].af !== 'undefined' ? (isNaN(populationObj.exac[key].af) ? null : populationObj.exac[key].af) : parseFloat(response[0].colocated_variants[0]['exac_' + key + '_maf']);
+            populationObj.exac[key].af = typeof populationObj.exac[key].af !== 'undefined' ?
+                (isNaN(populationObj.exac[key].af) ? null : populationObj.exac[key].af) :
+                (colocatedVariants ? parseFloat(colocatedVariants['exac_' + key + '_maf']) : NaN);
         });
-        populationObj.exac._tot.af = typeof populationObj.exac._tot.af !== 'undefined' ? (isNaN(populationObj.exac._tot.af) ? null : populationObj.exac._tot.af) : parseFloat(response[0].colocated_variants[0].exac_adj_maf);
+        populationObj.exac._tot.af = typeof populationObj.exac._tot.af !== 'undefined' ?
+            (isNaN(populationObj.exac._tot.af) ? null : populationObj.exac._tot.af) :
+            (colocatedVariants ? parseFloat(colocatedVariants.exac_adj_maf) : NaN);
 
         this.setState({populationObj: populationObj});
     },
