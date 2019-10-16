@@ -286,9 +286,10 @@ export function parseClinvar(xml, extended) {
                         if (elementsXRef[i].getAttribute('DB') === 'dbSNP') {
                             variant.dbSNPIds.push(elementsXRef[i].getAttribute('ID'));
                         }
-                    }
-                    if ($XRef[j].getAttribute('DB') === 'ClinGen') {
-                        variant.carId = $XRef[j].getAttribute('ID');
+
+                        if (elementsXRef[i].getAttribute('DB') === 'ClinGen') {
+                            variant.carId = elementsXRef[i].getAttribute('ID');
+                        }
                     }
                 }
 
