@@ -48,7 +48,7 @@ const GeneDiseaseEvidenceSummaryNonscorableEvidence = ({
                         </table>
                     ) : (
                         <div className="panel-body">
-                            <span>No scored non-scorable evidence was found.</span>
+                            <span>No non-scorable evidence was found.</span>
                         </div>
                     )
             }
