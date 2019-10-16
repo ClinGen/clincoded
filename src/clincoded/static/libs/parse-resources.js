@@ -235,7 +235,7 @@ export function parseClinvar(xml, extended) {
 
                             if (attributeAssembly) {
                                 variant.hgvsNames[attributeAssembly] = textNEExpression;
-                            } else {
+                            } else if (variant.hgvsNames.others.indexOf(textNEExpression) === -1) {
                                 variant.hgvsNames.others.push(textNEExpression);
                             }
 
@@ -253,7 +253,10 @@ export function parseClinvar(xml, extended) {
                         if (elementProteinExpression) {
                             const elementPEExpression = elementProteinExpression.getElementsByTagName('Expression')[0];
                             const textPEExpression = elementPEExpression ? elementPEExpression.textContent : '';
-                            variant.hgvsNames.others.push(textPEExpression);
+
+                            if (variant.hgvsNames.others.indexOf(textPEExpression) === -1) {
+                                variant.hgvsNames.others.push(textPEExpression);
+                            }
 
                             // Save protein change transcript data (for possible extended parsing)
                             if (attributeHGVSType === 'protein') {
