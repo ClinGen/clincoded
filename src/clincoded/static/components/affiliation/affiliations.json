@@ -703,7 +703,7 @@
         "affiliation_fullname": "Glaucoma",
         "publish_approval": true,
         "subgroups": {
-            "gcep": {
+            "vcep": {
                 "id": "50053",
                 "fullname": "Glaucoma VCEP"
             }
@@ -716,7 +716,6 @@
     {
         "affiliation_id": "10055",
         "affiliation_fullname": "Dosage Sensitivity"
-
     },
     {
         "affiliation_id": "10056",
@@ -753,7 +752,7 @@
         "publish_approval": true,
         "subgroups": {
             "gcep": {
-                "id": "50050",
+                "id": "40061",
                 "fullname": "Limb Girdle Muscular Dystrophy GCEP"
             }
         }
