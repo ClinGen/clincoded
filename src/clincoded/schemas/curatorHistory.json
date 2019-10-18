@@ -107,7 +107,7 @@
                     }
                 },
                 "annotation": {
-                    "title": "Annotation history",
+                    "title": "Annotation History",
                     "description": "History metadata for an annotation to a GDM",
                     "type": "object",
                     "additionalProperties": false,
@@ -129,7 +129,7 @@
                         },
                         "article": {
                             "title": "Article",
-                            "description": "GDM article the case control provides evidence for",
+                            "description": "GDM article that the annotation is for",
                             "type": "string",
                             "linkTo": "article"
                         }
@@ -522,11 +522,11 @@
             "type": "string"
         },
         "meta.annotation.gdm": {
-            "title": "GDM of annotation",
+            "title": "GDM of Annotation",
             "type": "string"
         },
         "meta.annotation.article": {
-            "title": "Annotation article",
+            "title": "Annotation Article",
             "type": "string"
         },
         "meta.caseControl.gdm": {
