@@ -204,21 +204,15 @@ var VariantCurationHub = createReactClass({
             if (variant.clinvarVariantId) {
                 this.setState({clinvar_id: variant.clinvarVariantId});
                 // Get ClinVar data via the parseClinvar method defined in parse-resources.js
-                this.getRestDataXml(external_url_map['ClinVarEutils'] + variant.clinvarVariantId).then(xml => {
+                this.getRestDataXml(external_url_map['ClinVarEutilsVCV'] + variant.clinvarVariantId).then(xmlClinVarVCV => {
                     // Passing 'true' option to invoke 'mixin' function
                     // To extract more ClinVar data for 'Basic Information' tab
-                    var variantData = parseClinvar(xml, true);
+                    var variantData = parseClinvar(xmlClinVarVCV, true);
                     // Won't show population/predictor data if variation type is 'Haplotype'
                     if (variantData.clinvarVariationType && variantData.clinvarVariationType === 'Haplotype') {
                         this.setState({ext_singleNucleotide: false});
                     }
-                    this.setState({
-                        ext_clinvarEutils: variantData,
-                        ext_clinvarInterpretationSummary: getClinvarInterpretations(xml),
-                        ext_clinVarSCV: parseClinvarSCVs(xml),
-                        loading_clinvarEutils: false,
-                        loading_clinvarSCV: false
-                    });
+                    this.setState({ext_clinvarEutils: variantData});
                     // Last alternative to get gene id and symbol from ClinVar
                     // for API call to mygene.info to retreive gene related data
                     if (variantData.gene && variantData.gene.id) {
@@ -230,13 +224,29 @@ var VariantCurationHub = createReactClass({
                         this.setState({loading_myGeneInfo: false});
                     }
                     this.handleCodonEsearch(variantData);
+                    // Retrieve data (in non-VCV format) for interpretations submitted to ClinVar
+                    this.getRestDataXml(external_url_map['ClinVarEutils'] + variant.clinvarVariantId).then(xmlClinVar => {
+                        this.setState({
+                            ext_clinvarInterpretationSummary: getClinvarInterpretations(xmlClinVar),
+                            ext_clinVarSCV: parseClinvarSCVs(xmlClinVar),
+                            loading_clinvarEutils: false,
+                            loading_clinvarSCV: false
+                        });
+                    }).catch(err => {
+                        this.setState({
+                            loading_clinvarEutils: false,
+                            loading_clinvarSCV: false,
+                            loading_clinvarEsearch: false
+                        });
+                        console.log('ClinVarEutils Fetch Error=: %o', err);
+                    });
                 }).catch(err => {
                     this.setState({
                         loading_clinvarEutils: false,
                         loading_clinvarSCV: false,
                         loading_clinvarEsearch: false
                     });
-                    console.log('ClinVarEutils Fetch Error=: %o', err);
+                    console.log('ClinVarEutilsVCV Fetch Error=: %o', err);
                 });
             } else {
                 this.setState({
@@ -607,9 +617,9 @@ var VariantCurationHub = createReactClass({
         const hostname = this.props.href_url && this.props.href_url.hostname;
         if (variant && (hostname && hostname !== 'localhost')) {
             let hgvs_notation = getHgvsNotation(variant, 'GRCh37', true);
-            let hgvsParts = hgvs_notation.split(':');
-            let position = hgvsParts[1].replace(/[^\d]/g, '');
-            let pageDataVariantId = hgvsParts[0] + ':' + position;
+            let hgvsParts = hgvs_notation ? hgvs_notation.split(':') : [];
+            let position = hgvsParts[1] ? hgvsParts[1].replace(/[^\d]/g, '') : '';
+            let pageDataVariantId = hgvsParts[0] && position ? hgvsParts[0] + ':' + position : '';
             if (pageDataVariantId) {
                 this.getRestData(external_url_map['PAGE'] + pageDataVariantId).then(response => {
                     this.setState({ext_pageData: response, loading_pageData: false});
