@@ -132,7 +132,9 @@
         "subgroups": {
             "vcep": {
                 "id": "50009",
-                "fullname": "Lysosomal Storage Disorders VCEP"
+                "fullname": "Lysosomal Storage Disorders VCEP",
+                "guildelines_name": "ClinGen Lysosomal Storage Disorders Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_url": "https://www.clinicalgenome.org/affiliation/50009/docs/assertion-criteria"
             }
         }
     },
@@ -182,7 +184,7 @@
             "vcep": {
                 "id": "50012",
                 "fullname": "PTEN VCEP",
-                "guidelines_name": "ClinGen PTEN Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_name": "ClinGen PTEN Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 2",
                 "guidelines_url": "https://www.clinicalgenome.org/affiliation/50012/docs/assertion-criteria"
             }
         },
@@ -197,7 +199,9 @@
         "subgroups": {
             "vcep": {
                 "id": "50013",
-                "fullname": "TP53 VCEP"
+                "fullname": "TP53 VCEP",
+                "guidelines_name": "ClinGen TP53 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines": "https://www.clinicalgenome.org/affiliation/50013/docs/assertion-criteria"
             }
         },
         "approver": [
@@ -214,7 +218,7 @@
             "vcep": {
                 "id": "50014",
                 "fullname": "CDH1 VCEP",
-                "guidelines_name": "ClinGen CDH1 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_name": "ClinGen CDH1 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 2",
                 "guidelines_url": "https://www.clinicalgenome.org/affiliation/50014/docs/assertion-criteria"
             }
         },
@@ -248,6 +252,10 @@
         "affiliation_fullname": "Monogenic Diabetes",
         "publish_approval": true,
         "subgroups": {
+            "gcep": {
+                "id": "40016",
+                "fullname": "Monogenic Diabetes GCEP"
+            },
             "vcep": {
                 "id": "50016",
                 "fullname": "Monogenic Diabetes VCEP"
@@ -420,7 +428,14 @@
                 "id": "40028",
                 "fullname": "Hemostasis Thrombosis GCEP"
             }
-        }
+        },
+        "approver": [
+            "Kristy Lee",
+            "Justyne Ross",
+            "Shruthi Mohan",
+            "Kathleen Freson",
+            "Michele Lambert"
+        ]
     },
     {
         "affiliation_id": "10029",
@@ -444,7 +459,8 @@
             }
         },
         "approver": [
-            "Ozge Birsoy"
+            "Chandler Douglas",
+            "Carsten Bonnemann"
         ]
     },
     {
@@ -463,16 +479,16 @@
         "subgroups": {
             "vcep": {
                 "id": "50034",
-                "fullname": "Myeloid Malignancy VCEP"
+                "fullname": "Myeloid Malignancy VCEP",
+                "guidelines_name": "ClinGen Myeloid Malignancy Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_url": "https://www.clinicalgenome.org/affiliation/50034/docs/assertion-criteria"
             }
         },
         "approver": [
             "David Wu",
-            "Justyne Ross",
             "Lucy Godley",
             "Sharon Plon",
             "Xi Luo",
-            "Ying Wang",
             "Shruthi Mohan",
             "Simone Feurstein"
         ]
@@ -488,11 +504,8 @@
             }
         },
         "approver": [
-            "Ray Hershberger",
-            "Peter van Tintelen",
-            "Jan Jongbloed",
-            "Cindy James",
-            "Lisa Kurtz"
+            "Lisa Kurtz",
+            "Courtney Thaxton"
         ]
     },
     {
@@ -530,7 +543,10 @@
                 "id": "50038",
                 "fullname": "Malignant Hyperthermia Susceptibility VCEP"
             }
-        }
+        },
+        "approver": [
+            "Jennifer Johnston"
+        ]
     },
     {
         "affiliation_id": "10039",
@@ -556,12 +572,12 @@
     },
     {
         "affiliation_id": "10041",
-        "affiliation_fullname": "Coagulation Factor Deficiencies",
+        "affiliation_fullname": "Coagulation Factor Deficiency",
         "publish_approval": true,
         "subgroups": {
             "vcep": {
                 "id": "50041",
-                "fullname": "Coagulation Factor Deficiencies VCEP"
+                "fullname": "Coagulation Factor Deficiency VCEP"
             }
         }
     },
@@ -647,6 +663,95 @@
             "vcep": {
                 "id": "50048",
                 "fullname": "ACADVL VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10049",
+        "affiliation_fullname": "Peroxisomal Disorders",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40049",
+                "fullname": "Peroxisomal Disorders GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10050",
+        "affiliation_fullname": "DICER1 and miRNA-Processing Gene",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50050",
+                "fullname": "DICER1 and miRNA-Processing Gene VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10051",
+        "affiliation_fullname": "Von Willebrand"
+    },
+    {
+        "affiliation_id": "10052",
+        "affiliation_fullname": "Hemoglobinopathies"
+    },
+    {
+        "affiliation_id": "10053",
+        "affiliation_fullname": "Glaucoma",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50053",
+                "fullname": "Glaucoma VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10054",
+        "affiliation_fullname": "Myopathies"
+    },
+    {
+        "affiliation_id": "10055",
+        "affiliation_fullname": "Dosage Sensitivity"
+    },
+    {
+        "affiliation_id": "10056",
+        "affiliation_fullname": "Actionability"
+    },
+    {
+        "affiliation_id": "10057",
+        "affiliation_fullname": "Somatic Cancer"
+    },
+    {
+        "affiliation_id": "10058",
+        "affiliation_fullname": "ABCD1",
+        "publish_approval": true
+    },
+    {
+        "affiliation_id": "10059",
+        "affiliation_fullname": "Craniosynostosis",
+        "publish_approval": true
+    },
+    {
+        "affiliation_id": "10060",
+        "affiliation_fullname": "Orphan Diseases",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40060",
+                "fullname": "Orphan Diseases GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10061",
+        "affiliation_fullname": "Limb Girdle Muscular Dystrophy",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40061",
+                "fullname": "Limb Girdle Muscular Dystrophy GCEP"
             }
         }
     }

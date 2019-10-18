@@ -1,6 +1,7 @@
 'use strict';
 
 export const AUTOSOMAL_DOMINANT = 'AUTOSOMAL_DOMINANT';
+export const SEMIDOMINANT = 'SEMIDOMINANT';
 export const AUTOSOMAL_RECESSIVE = 'AUTOSOMAL_RECESSIVE';
 export const X_LINKED = 'X_LINKED';
 export const FUNCTION = 'FUNCTION';
