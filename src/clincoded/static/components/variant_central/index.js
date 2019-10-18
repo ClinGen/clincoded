@@ -410,10 +410,10 @@ var VariantCurationHub = createReactClass({
                 });
                 const searchStr = '/search/?type=article&' + pubmedIds.map(pmid => 'pmid=' + pmid).join('&');
                 return this.getRestData(searchStr).then(articles => {
-                    if (articles['@graph'].length === pubmedIds.length) {
+                    if (articles['@graph'] && (articles['@graph'].length === pubmedIds.length)) {
                         return articles['@graph'];
                     }
-                    const foundArticles = _.property(['@graph'])(articles) ? articles['@graph'] : [];
+                    const foundArticles = articles['@graph'] ? articles['@graph'] : [];
                     const missingPmids = _.difference(pubmedIds, articles['@graph'].map(article => article.pmid));
                     missingPmids.forEach(id => {
                         pubmedUrls.push(external_url_map['PubMedSearch'] + id);
@@ -477,10 +477,7 @@ var VariantCurationHub = createReactClass({
                 console.log('Func Data Fetch Error: ', err);
             });
         } else {
-            this.setState({
-                loading_ldhFuncData: false,
-                error_ldhFuncData: { statusText: 'No Allele Frequency Impact Statements' }
-            });
+            this.setState({ loading_ldhFuncData: false });
         }
     },
 
