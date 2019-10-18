@@ -32,7 +32,9 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         criteriaList: PropTypes.array, // criteria code(s) pertinent to the category/subcategory
         deleteEvidenceFunc: PropTypes.func, // function to call to delete an evidence
         evidenceCollectionDone: PropTypes.func,  // function to call to add or edit an existing one
-        canCurrUserModifyEvidence: PropTypes.func // funcition to check if current logged in user can modify given evidence
+        canCurrUserModifyEvidence: PropTypes.func, // function to check if current logged in user can modify given evidence
+        isBusy: PropTypes.bool, // Ture if backend is busy
+        setBusy: PropTypes.func // function to set case segregation page busy state
     },
 
     getInitialState: function() {
@@ -160,9 +162,11 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                                                         subcategory = {this.props.subcategory}
                                                         evidenceCollectionDone = {this.props.evidenceCollectionDone}
                                                         isNew = {true}
+                                                        disableActuator = {this.props.isBusy}
                                                         affiliation = {this.props.affiliation}
                                                         session = {this.props.session}
                                                         canCurrUserModifyEvidence = {this.props.canCurrUserModifyEvidence}
+                                                        setBusy = {this.props.setBusy}
                                                     >
                                                     </EvidenceModalManager>
                                                     {this.addEvidenceText()}
@@ -185,6 +189,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                         affiliation = {this.props.affiliation}
                         viewOnly = {this.props.viewOnly}
                         canCurrUserModifyEvidence = {this.props.canCurrUserModifyEvidence}
+                        isBusy = {this.props.isBusy}
+                        setBusy = {this.props.setBusy}
                     >
                     </EvidenceTable>
                 </div>

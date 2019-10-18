@@ -63,12 +63,21 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
     },
 
     /**
+     * Set the EditBusy state
+     * 
+     * @param {boolean} flag 
+     */
+    setEditBusyFunc: function(flag) {
+        this.setState({editBusy: flag});
+    },
+
+    /**
      * Delete the given evidence from its interpretation.
      * 
      * @param {object} evidence     // Evidence to be deleted
      */
     deleteEvidenceFunc: function(evidence) {
-        this.setState({deleteBusy: true});
+        this.setState({deleteBusy: true, editBusy: true});
 
         let deleteTargetId = evidence['@id'];
         let flatInterpretation = null;
@@ -105,11 +114,11 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 });
             }).then(interpretation => {
                 // upon successful save, set everything to default state, and trigger updateInterptationObj callback
-                this.setState({deleteBusy: false});
+                this.setState({deleteBusy: false, editBusy: false});
                 this.props.updateInterpretationObj();
             });
         }).catch(error => {
-            this.setState({deleteBusy: false});
+            this.setState({deleteBusy: false, editBusy: false});
             console.error(error);
         });
     },
@@ -420,6 +429,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 deleteEvidenceFunc={this.deleteEvidenceFunc}
                 evidenceCollectionDone = {this.evidenceCollectionDone}
                 canCurrUserModifyEvidence={this.canCurrUserModifyEvidence}
+                isBusy={this.state.editBusy}
+                setBusy={this.setEditBusyFunc}
             />;
             let oldExtraEvidenceTable = <extraEvidence.ExtraEvidenceTable
                 category="case-segregation"
@@ -435,6 +446,8 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 criteriaList={panel.criteria}
                 evidenceCollectionDone={this.evidenceCollectionDone}
                 canCurrUserModifyEvidence={this.canCurrUserModifyEvidence}
+                isBusy={this.state.editBusy}
+                setBusy={this.setEditBusyFunc}
                 />;
             return <PanelGroup accordion key={panel.key}>
                 <Panel

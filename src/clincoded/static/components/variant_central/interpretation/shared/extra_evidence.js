@@ -36,7 +36,9 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         affiliation: PropTypes.object, // user's affiliation data object
         criteriaList: PropTypes.array, // criteria code(s) pertinent to the category/subcategory
         evidenceCollectionDone: PropTypes.func,  // function to call to add or edit an existing one
-        canCurrUserModifyEvidence: PropTypes.func // funcition to check if current logged in user can modify given evidence
+        canCurrUserModifyEvidence: PropTypes.func, // function to check if current logged in user can modify given evidence
+        isBusy: PropTypes.bool, // True if backend is busy
+        setBusy: PropTypes.func // function to set case segregation page edit state
     },
 
     contextTypes: {
@@ -249,13 +251,25 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
     },
 
     // Return the "Add in New Format" button for case segregation old format evidences
-    getAddNewEvidenceButton: function(extra_evidence, newRelevantEvidenceList) {
+    getAddNewEvidenceButton: function(extra_evidence) {
         let data = {};
         let isNew = false;
         const pmid = extra_evidence.articles && extra_evidence.articles.length > 0 ? extra_evidence.articles[0].pmid : '';
+        // Get extra evidences in new format for this interpretation
+        let extraEvidenceData = [];
+        if (this.state.interpretation != null && 'extra_evidence_list' in this.state.interpretation) {
+            if (this.state.interpretation.extra_evidence_list) {
+                this.state.interpretation.extra_evidence_list.forEach(extra_evidence => {
+                    if (extra_evidence.category === 'case-segregation' &&
+                        extraEvidenceHasSource(extra_evidence)) {
+                        extraEvidenceData.push(extra_evidence);
+                    }
+                });
+            }
+        }
 
         // Check if pmid/article has already exists in current case segregation evidences
-        let candidates = newRelevantEvidenceList ? newRelevantEvidenceList
+        let candidates = extraEvidenceData ? extraEvidenceData
             .filter(o => 'pmid' in o.source.metadata
                     && o.source.metadata['pmid'] === pmid) : [];
         let foundCandidate = null;
@@ -287,21 +301,23 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         return (
             <EvidenceModalManager
                 data = {data}
-                allData = {newRelevantEvidenceList}
+                allData = {extraEvidenceData}
                 criteriaList = {this.state.criteriaList}
                 evidenceType = 'PMID'
                 subcategory = {this.props.subcategory}
                 evidenceCollectionDone = {this.props.evidenceCollectionDone}
                 isNew = {isNew}
                 btnTitle = 'Add in New Format'
+                disableActuator = {this.props.isBusy ? true : false}
                 affiliation = {this.props.affiliation}
                 session = {this.props.session}
                 canCurrUserModifyEvidence = {this.props.canCurrUserModifyEvidence}
+                setBusy = {this.props.setBusy}
             />
         );
     },
 
-    renderInterpretationExtraEvidence: function(extra_evidence, newRelevantEvidenceList) {
+    renderInterpretationExtraEvidence: function(extra_evidence) {
         let affiliation = this.props.affiliation, session = this.props.session;
         let creatorAffiliation = extra_evidence.affiliation ? getAffiliationName(extra_evidence.affiliation) : null;
         let title = extra_evidence.submitted_by && extra_evidence.submitted_by.title ? extra_evidence.submitted_by.title : '';
@@ -312,7 +328,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         if (this.props.category === 'case-segregation' && !this.props.viewOnly &&
             ((affiliation && extra_evidence.affiliation && extra_evidence.affiliation === affiliation.affiliation_id) ||
             (!affiliation && !extra_evidence.affiliation && session && session.user_properties && extra_evidence.submitted_by['@id'] === session.user_properties['@id']))) {
-                addNewFormatEvidence = this.getAddNewEvidenceButton(extra_evidence, newRelevantEvidenceList);
+                addNewFormatEvidence = this.getAddNewEvidenceButton(extra_evidence);
         }
 
         let criteriaInput = extra_evidence.evidenceCriteria && extra_evidence.evidenceCriteria !== 'none' ? extra_evidence.evidenceCriteria : '--';
@@ -421,17 +437,14 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
 
     render: function() {
         let relevantEvidenceListRaw = [];
-        let newRelevantEvidenceListRaw = [];
         if (this.state.variant && this.state.variant.associatedInterpretations) {
             this.state.variant.associatedInterpretations.map(interpretation => {
                 if (interpretation.extra_evidence_list) {
                     interpretation.extra_evidence_list.map(extra_evidence => {
-                        if (extra_evidence.subcategory === this.props.subcategory) {
-                            if (extraEvidenceHasSource(extra_evidence)) {
-                                newRelevantEvidenceListRaw.push(extra_evidence);
-                            } else {
+                        // Get extra evidences in old format for this subcategory
+                        if (extra_evidence.subcategory === this.props.subcategory &&
+                            !extraEvidenceHasSource(extra_evidence)) {
                                 relevantEvidenceListRaw.push(extra_evidence);
-                            }
                         }
                     });
                 }
@@ -439,9 +452,6 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         }
         let relevantEvidenceList = _(relevantEvidenceListRaw).sortBy(evidence => {
             return evidence.date_created;
-        }).reverse();
-        let newRelevantEvidenceList = _(newRelevantEvidenceListRaw).sortBy(newEvidence => {
-            return newEvidence.date_created;
         }).reverse();
         let parentObj = {/* // BEHAVIOR TBD
             '@type': ['evidenceList'],
@@ -522,7 +532,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                                     relevantEvidenceList.map(evidence => {
                                         return (this.state.editEvidenceId === evidence['@id']
                                             ? this.renderInterpretationExtraEvidenceEdit(evidence)
-                                            : this.renderInterpretationExtraEvidence(evidence, newRelevantEvidenceList));
+                                            : this.renderInterpretationExtraEvidence(evidence));
                                     })
                                     : <tr><td colSpan={!this.props.viewOnly ? "5" : "4"}><span>&nbsp;&nbsp;No evidence added.</span></td></tr>}
                             </tbody>

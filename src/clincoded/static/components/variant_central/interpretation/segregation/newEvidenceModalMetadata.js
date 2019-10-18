@@ -27,6 +27,7 @@ let NewEvidenceModalMetadata = createReactClass({
         useIcon: PropTypes.bool,             // Use an icon instead of text as link text
         disableActuator: PropTypes.bool      // Disable the actuator or not
     },
+
     getInitialState() {
         return {
             loadNextModal: false,
@@ -36,6 +37,19 @@ let NewEvidenceModalMetadata = createReactClass({
             pmidPreviewDisabled: true,
             isNextDisabled: this.props.isNew ? true : false
         };
+    },
+
+    componentWillReceiveProps(nextProps) {
+        if(nextProps.data != null) {
+            this.setState({
+                data: nextProps.data
+            });
+        }
+        if (nextProps.isNew != null) {
+            this.setState({
+                isNextDisabled: nextProps.isNew ? true : false
+            });
+        }
     },
 
     /**

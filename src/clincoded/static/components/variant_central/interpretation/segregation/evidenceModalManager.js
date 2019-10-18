@@ -40,7 +40,8 @@ let EvidenceModalManager = createReactClass({
         disableActuator: PropTypes.bool,            // Disable the actuator or not
         affiliation: PropTypes.object,              // The user's affiliation
         session: PropTypes.object,                  // The session object
-        canCurrUserModifyEvidence: PropTypes.func   // Funcition to check if current logged in user can modify the given evidence
+        canCurrUserModifyEvidence: PropTypes.func,  // Function to check if current logged in user can modify the given evidence
+        setBusy: PropTypes.func                     // Function to set case segregation page edit state
     },
 
     getInitData(){
@@ -235,6 +236,7 @@ let EvidenceModalManager = createReactClass({
             this.props.evidenceCollectionDone(false, this.state.sourceData, this.getCurrentEvidenceId(), this.props.subcategory, null);
         }
         else {
+            this.props.setBusy(true);
             // Remove empty fields and unnecessary fields - submitted_by, last_modified, _kind_title from source data
             let hasData = Object.keys(data).reduce((object, key) => { 
                 if (data[key] !== '' && !key.startsWith('_') ) {
