@@ -288,7 +288,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 extraEvidence: {
                     subcategory: 'observed-in-healthy',
                     tableName: <span>Curated Evidence (Observed in healthy adult(s))</span>,
-                    oldTableName: <span>Curated Evidence (Observed in healthy adult(s)) - Retired Format</span>
+                    oldTableName: <span>Curated Literature Evidence (Observed in healthy adult(s)) - Retired Format</span>
                 }
             },
             {
@@ -304,7 +304,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 extraEvidence: {
                     subcategory: 'case-control',
                     tableName: <span>Curated Evidence (Case-control)</span>,
-                    oldTableName: <span>Curated Evidence (Case-control) - Retired Format</span>
+                    oldTableName: <span>Curated Literature Evidence (Case-control) - Retired Format</span>
                 }
             },
             {
@@ -320,7 +320,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 extraEvidence: {
                     subcategory: 'segregation-data',
                     tableName: <span>Curated Evidence (Segregation data)</span>,
-                    oldTableName: <span>Curated Evidence (Segregation data) - Retired Format</span>
+                    oldTableName: <span>Curated Literature Evidence (Segregation data) - Retired Format</span>
                 }
             },
             {
@@ -336,7 +336,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 extraEvidence: {
                     subcategory: 'de-novo',
                     tableName: <span>Curated Evidence (<i>de novo</i> occurrence)</span>,
-                    oldTableName: <span>Curated Evidence (<i>de novo</i> occurrence) - Retired Format</span>
+                    oldTableName: <span>Curated Literature Evidence (<i>de novo</i> occurrence) - Retired Format</span>
                 }
             },
             {
@@ -352,7 +352,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 extraEvidence: {
                     subcategory: 'allele-data',
                     tableName: <span>Curated Evidence (Allele Data (<i>cis/trans</i>))</span>,
-                    oldTableName: <span>Curated Evidence (Allele Data (<i>cis/trans</i>)) - Retired Format</span>
+                    oldTableName: <span>Curated Literature Evidence (Allele Data (<i>cis/trans</i>)) - Retired Format</span>
                 }
             },
             {
@@ -368,7 +368,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 extraEvidence: {
                     subcategory: 'alternate-mechanism',
                     tableName: <span>Curated Evidence (Alternate mechanism for disease)</span>,
-                    oldTableName: <span>Curated Evidence (Alternate mechanism for disease) - Retired Format</span>
+                    oldTableName: <span>Curated Literature Evidence (Alternate mechanism for disease) - Retired Format</span>
                 }
             },
             {
@@ -384,7 +384,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 extraEvidence: {
                     subcategory: 'specificity-of-phenotype',
                     tableName: <span>Curated Evidence (Specificity of phenotype)</span>,
-                    oldTableName: <span>Curated Evidence (Specificity of phenotype) - Retired Format</span>
+                    oldTableName: <span>Curated Literature Evidence (Specificity of phenotype) - Retired Format</span>
                 }
             }
         ];

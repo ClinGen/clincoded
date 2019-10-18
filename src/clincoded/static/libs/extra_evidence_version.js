@@ -5,7 +5,7 @@
  * @param {object} extraEvidence - Extra evidence object 
  */
 export function extraEvidenceHasSource(extraEvidence) {
-    if (extraEvidence.source && extraEvidence.source.data && extraEvidence.source.metadata) {
+    if (extraEvidence && extraEvidence.source && extraEvidence.source.data && extraEvidence.source.metadata) {
         return true;
     } else {
         return false;

@@ -360,7 +360,6 @@ let EvidenceTable = createReactClass({
                         } else if (col === 'comments') {
                             // Display the comment for current criteria in this column
                             let commentCol = criteriaName + '_comment';
-                            nodeContent = null;
                             if (commentCol in sourceData) {
                                 nodeContent = sourceData[commentCol];
                             }
@@ -369,7 +368,6 @@ let EvidenceTable = createReactClass({
                             </td>
                         } else {
                             // Display value for other columns
-                            nodeContent = null;
                             if (col in sourceData) {
                                 nodeContent = sourceData[col];
                             }
@@ -434,10 +432,9 @@ let EvidenceTable = createReactClass({
     hasTableData() {
         // relevant columns non empty -> return true
         // relevant columns empty -> return False
-        let foundData = false;
-        this.props.tableData.some(row => {
-            // Check if this row's columns has data to show
-            if (foundData = this.showRow(row)) {
+        const foundData = this.props.tableData.some(row => {
+            // Check if this row's columns have data to show
+            if (this.showRow(row)) {
                 return true;
             }
         });

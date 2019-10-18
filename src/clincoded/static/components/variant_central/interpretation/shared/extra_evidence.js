@@ -268,10 +268,10 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             }
         }
 
-        // Check if pmid/article has already exists in current case segregation evidences
-        let candidates = extraEvidenceData ? extraEvidenceData
+        // Check if pmid/article already exists in current case segregation evidences
+        let candidates = extraEvidenceData
             .filter(o => 'pmid' in o.source.metadata
-                    && o.source.metadata['pmid'] === pmid) : [];
+                    && o.source.metadata['pmid'] === pmid);
         let foundCandidate = null;
         if (candidates.length > 0) {
             candidates.forEach(candidate => {

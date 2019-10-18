@@ -145,7 +145,7 @@ let NewEvidenceModalMetadata = createReactClass({
                     }
                     node.push(<Input
                             type = "button-button"
-                            inputClassName = {(this.state.pmidPreviewDisabled ? "btn-default" : "btn-primary") + " btn-inline-spacer pull-right"}
+                            inputClassName = {(previewDisabled ? "btn-default" : "btn-primary") + " btn-inline-spacer pull-right"}
                             clickHandler = {this.searchPMID}
                             title = "Preview PubMed Article"
                             submitBusy = {this.state.pmidLookupBusy}
