@@ -244,10 +244,16 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     // Because myvariant.info doesn't always return ExAC allele frequency data
     parseAlleleFrequencyData: function(response) {
         let populationObj = this.state.populationObj;
+        const colocatedVariants = response && response[0] && response[0].colocated_variants && response[0].colocated_variants[0] ?
+            response[0].colocated_variants[0] : null;
         populationStatic.exac._order.map(key => {
-            populationObj.exac[key].af = typeof populationObj.exac[key].af !== 'undefined' ? (isNaN(populationObj.exac[key].af) ? null : populationObj.exac[key].af) : parseFloat(response[0].colocated_variants[0]['exac_' + key + '_maf']);
+            populationObj.exac[key].af = typeof populationObj.exac[key].af !== 'undefined' ?
+                (isNaN(populationObj.exac[key].af) ? null : populationObj.exac[key].af) :
+                (colocatedVariants ? parseFloat(colocatedVariants['exac_' + key + '_maf']) : NaN);
         });
-        populationObj.exac._tot.af = typeof populationObj.exac._tot.af !== 'undefined' ? (isNaN(populationObj.exac._tot.af) ? null : populationObj.exac._tot.af) : parseFloat(response[0].colocated_variants[0].exac_adj_maf);
+        populationObj.exac._tot.af = typeof populationObj.exac._tot.af !== 'undefined' ?
+            (isNaN(populationObj.exac._tot.af) ? null : populationObj.exac._tot.af) :
+            (colocatedVariants ? parseFloat(colocatedVariants.exac_adj_maf) : NaN);
 
         this.setState({populationObj: populationObj});
     },
@@ -405,12 +411,18 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
     parseTGenomesData: function(response) {
         // not all variants are SNPs. Do nothing if variant is not a SNP
         if (response.var_class && response.var_class == 'SNP') {
-            // FIXME: this GRCh vs gRCh needs to be reconciled in the data model and data import
-            // update off of this.props.data as it is more stable, and this.state.data does not contain relevant updates
-            let hgvs_GRCh37 = this.props.data.hgvsNames.GRCh37 ? this.props.data.hgvsNames.GRCh37 : this.props.data.hgvsNames.gRCh37;
-            let hgvs_GRCh38 = this.props.data.hgvsNames.GRCh38 ? this.props.data.hgvsNames.GRCh38 : this.props.data.hgvsNames.gRCh38;
+            let hgvs_GRCh37 = '';
+            let hgvs_GRCh38 = '';
             let populationObj = this.state.populationObj;
             let updated1000GData = false;
+            // FIXME: this GRCh vs gRCh needs to be reconciled in the data model and data import
+            // update off of this.props.data as it is more stable, and this.state.data does not contain relevant updates
+            if (this.props.data && this.props.data.hgvsNames) {
+                hgvs_GRCh37 = this.props.data.hgvsNames.GRCh37 ? this.props.data.hgvsNames.GRCh37 :
+                    (this.props.data.hgvsNames.gRCh37 ? this.props.data.hgvsNames.gRCh37 : '');
+                hgvs_GRCh38 = this.props.data.hgvsNames.GRCh38 ? this.props.data.hgvsNames.GRCh38 :
+                    (this.props.data.hgvsNames.gRCh38 ? this.props.data.hgvsNames.gRCh38 : '');
+            }
             // get extra 1000Genome information
             populationObj.tGenomes._extra.name = response.name;
             populationObj.tGenomes._extra.var_class = response.var_class;
@@ -590,7 +602,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
 
     // Method to render external ExAC/gnomAD linkout when no relevant population data is found
     renderExacGnomadLinkout: function(response, datasetName) {
-        let datasetCheck, datasetHomeURLKey, datasetLink, datasetRegionURLKey, linkText;
+        let datasetCheck, datasetLink, datasetRegionURLKey;
+        let linkText = 'Search ' + datasetName;
         // If no ExAC/gnomAD population data, construct external linkout for one of the following:
         // 1) clinvar/cadd data found & the variant type is substitution
         // 2) clinvar/cadd data found & the variant type is NOT substitution
@@ -598,30 +611,30 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         switch (datasetName) {
             case 'ExAC':
                 datasetCheck = this.state.hasExacData;
-                datasetHomeURLKey = 'EXACHome';
+                datasetLink = external_url_map['EXACHome'];
                 datasetRegionURLKey = 'ExACRegion';
             break;
             case 'gnomAD':
                 datasetCheck = this.state.hasGnomadData;
-                datasetHomeURLKey = 'gnomADHome';
+                datasetLink = external_url_map['gnomADHome'];
                 datasetRegionURLKey = 'gnomADRegion';
             break;
         }
         if (response) {
             let chrom = response.chrom;
-            let pos = response.hg19 ? response.hg19.start : (response.clinvar.hg19 ? response.clinvar.hg19.start : response.cadd.hg19.start);
-            let regionStart = response.hg19 ? parseInt(response.hg19.start) - 30 : (response.clinvar.hg19 ? parseInt(response.clinvar.hg19.start) - 30 : parseInt(response.cadd.hg19.start) - 30);
-            let regionEnd = response.hg19 ? parseInt(response.hg19.end) + 30 : (response.clinvar.hg19 ? parseInt(response.clinvar.hg19.end) + 30 : parseInt(response.cadd.hg19.end) + 30);
+            const regionStart = response.hg19 ? parseInt(response.hg19.start) - 30 :
+                (response.clinvar && response.clinvar.hg19 ? parseInt(response.clinvar.hg19.start) - 30 :
+                    (response.cadd && response.cadd.hg19 ? parseInt(response.cadd.hg19.start) - 30 : ''));
+            const regionEnd = response.hg19 ? parseInt(response.hg19.end) + 30 :
+                (response.clinvar && response.clinvar.hg19 ? parseInt(response.clinvar.hg19.end) + 30 :
+                    (response.cadd && response.cadd.hg19 ? parseInt(response.cadd.hg19.end) + 30 : ''));
+
             // Applies to 'Duplication', 'Deletion', 'Insertion', 'Indel' (deletion + insertion)
             // Or there is no ExAC/gnomAD data object in the returned myvariant.info JSON response
-            if (!this.state.ext_gnomadExac || !datasetCheck) {
+            if ((!this.state.ext_gnomadExac || !datasetCheck) && chrom && regionStart && regionEnd) {
                 datasetLink = external_url_map[datasetRegionURLKey] + chrom + '-' + regionStart + '-' + regionEnd;
                 linkText = 'View the coverage of this region (+/- 30 bp) in ' + datasetName;
             }
-        } else {
-            // 404 response from myvariant.info
-            datasetLink = external_url_map[datasetHomeURLKey];
-            linkText = 'Search ' + datasetName;
         }
         return (
             <span>
