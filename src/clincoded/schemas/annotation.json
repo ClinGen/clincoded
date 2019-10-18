@@ -99,28 +99,28 @@
             "properties": {
                 "nonscorable": {
                     "title": "Non-scorable",
-                    "description": "Non-scorable notes",
+                    "description": "Non-scorable Notes",
                     "type": "object",
                     "properties": {
                         "checked": {
-                            "title": "Checked",
-                            "description": "Boolean for whether or not nonscorable is checked",
+                            "title": "Non-scorable Checked",
+                            "description": "Boolean for whether or not non-scorable is checked",
                             "type": "boolean"
                         },
                         "text": {
                             "title": "Non-scorable Text",
-                            "description": "Explanation for nonscorable evidence",
+                            "description": "Explanation for non-scorable evidence",
                             "type": "string"
                         }
                     }
                 },
                 "other": {
                     "title": "Other",
-                    "description": "Other notes",
+                    "description": "Other Notes",
                     "type": "object",
                     "properties": {
                         "checked": {
-                            "title": "Checked",
+                            "title": "Other Checked",
                             "description": "Boolean for whether or not other is checked",
                             "type": "boolean"
                         },

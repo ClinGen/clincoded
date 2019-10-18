@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { property } from 'underscore';
 
 import { Form, Input } from '../libs/bootstrap/form';
 
@@ -41,13 +42,13 @@ const PubMedNotesBox = ({
                                 label="Non-scorable evidence"
                                 labelClassName="col-sm-10 no-padding"
                                 groupClassName="col-sm-4"
-                                checked={currPmidNotes.nonscorable.checked}
+                                checked={property(['nonscorable', 'checked'])(currPmidNotes)}
                                 defaultChecked="false"
                                 handleChange={(ref, e) => handleCheckboxChange(e, 'nonscorableCheckbox')}
                             />
                             <Input
                                 type="textarea"
-                                controlledValue={currPmidNotes.nonscorable.text}
+                                controlledValue={property(['nonscorable', 'text'])(currPmidNotes)}
                                 wrapperClassName="col-sm-8"
                                 handleChange={(ref, e) => handleTextChange(e, 'nonscorableText')}
                             />
@@ -58,13 +59,13 @@ const PubMedNotesBox = ({
                                 label="Other comments on PMID"
                                 labelClassName="col-sm-10 no-padding"
                                 groupClassName="col-sm-4"
-                                checked={currPmidNotes.other.checked}
+                                checked={property(['other', 'checked'])(currPmidNotes)}
                                 defaultChecked="false"
                                 handleChange={(ref, e) => handleCheckboxChange(e, 'otherCheckbox')}
                             />
                             <Input
                                 type="textarea"
-                                controlledValue={currPmidNotes.other.text}
+                                controlledValue={property(['other', 'text'])(currPmidNotes)}
                                 wrapperClassName="col-sm-8"
                                 handleChange={(ref, e) => handleTextChange(e, 'otherText')}
                             />
@@ -89,13 +90,13 @@ const PubMedNotesBox = ({
                             <div className="col-sm-4">
                                 <label className="col-sm-10 no-padding">Non-scorable evidence</label>
                                 {
-                                    currPmidNotes.nonscorable.checked
+                                    property(['nonscorable', 'checked'])(currPmidNotes)
                                         && <i className="icon icon-check" />
                                 }
                             </div>
                             <div className="col-sm-8">
                                 {
-                                    annotation.articleNotes && annotation.articleNotes.other && annotation.articleNotes.nonscorable.text
+                                    property(['articleNotes', 'nonscorable', 'text'])(annotation)
                                         ? <span>{ annotation.articleNotes.nonscorable.text }</span>
                                         : <i className="empty-text-placeholder">None</i>
                                 }
@@ -105,13 +106,13 @@ const PubMedNotesBox = ({
                             <div className="col-sm-4">
                                 <label htmlFor="other" className="col-sm-10 no-padding">Other comments on PMID</label>
                                 {
-                                    currPmidNotes.other.checked
+                                    property(['other', 'checked'])(currPmidNotes)
                                         && <i className="icon icon-check" />
                                 }
                             </div>
                             <div className="col-sm-8">
                                 {
-                                    annotation.articleNotes && annotation.articleNotes.other && annotation.articleNotes.other.text
+                                    property(['articleNotes', 'other', 'text'])(annotation)
                                         ? <span>{ annotation.articleNotes.other.text }</span>
                                         : <i className="empty-text-placeholder">None</i>
                                 }
