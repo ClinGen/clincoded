@@ -33,7 +33,7 @@ Feature: Variant Curation Tabs
         Then I should see "Curated Literature Evidence (Hotspot or functional domain)"
         When I press the tab "Case/Segregation "
         And I wait for 1 seconds
-        Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
+        Then I should see "Curated Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
         And I wait for 2 seconds
         Then I should see "BRCA1"
@@ -76,7 +76,7 @@ Feature: Variant Curation Tabs
         Then I should see "Curated Literature Evidence (Hotspot or functional domain)"
         When I press the tab "Case/Segregation "
         And I wait for 1 seconds
-        Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
+        Then I should see "Curated Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
         And I wait for 2 seconds
         Then I should see "CFTR"
@@ -120,7 +120,7 @@ Feature: Variant Curation Tabs
         Then I should see "Curated Literature Evidence (Hotspot or functional domain)"
         When I press the tab "Case/Segregation "
         And I wait for 1 seconds
-        Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
+        Then I should see "Curated Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
         And I wait for 2 seconds
         Then I should see "TYK2"
@@ -164,7 +164,7 @@ Feature: Variant Curation Tabs
         Then I should see "Curated Literature Evidence (Hotspot or functional domain)"
         When I press the tab "Case/Segregation "
         And I wait for 1 seconds
-        Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
+        Then I should see "Curated Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
         And I wait for 2 seconds
         Then I should see "SKI"
@@ -207,8 +207,7 @@ Feature: Variant Curation Tabs
         Then I should see "Structured Narrative of Functional Impact"
         When I press the tab "Case/Segregation "
         And I wait for 1 seconds
-        ################### TODO: CHANGE TEXT TO "Curated Evidence" AFTER CASE SEGREGATION IS MERGED ###################
-        Then I should see "Curated Literature Evidence (Observed in healthy adult(s))"
+        Then I should see "Curated Evidence (Observed in healthy adult(s))"
         When I press the tab "Gene-centric"
         And I wait for 2 seconds
         Then I should see "APOB"
