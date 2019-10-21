@@ -18,8 +18,6 @@ def extra_evidence_2_3(value, system):
 @upgrade_step('extra_evidence', '3', '4')
 def extra_evidence_3_4(value, system):
     # https://github.com/ClinGen/clincoded/issues/1755
-    # Import uuidpmid dictionary data file
-    from clincoded.upgrade.uuidpmid import uuidList
     # Add source property
     if 'category' in value:
         if value['category'] == 'case-segregation':
