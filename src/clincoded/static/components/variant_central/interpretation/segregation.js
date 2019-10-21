@@ -1,23 +1,29 @@
 'use strict';
+// Third-party libs
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
-import moment from 'moment';
-import { RestMixin } from '../../rest';
-import { Form, FormMixin, Input } from '../../../libs/bootstrap/form';
 import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
+
+// Internal libs
+import { RestMixin } from '../../rest';
 import { CompleteSection } from './shared/complete_section';
 import { scrollElementIntoView } from '../../../libs/helpers/scroll_into_view';
+import { extraEvidenceHasSource } from '../../../libs/extra_evidence_version';
 
 const vciFormHelper = require('./shared/form');
 const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
 const evaluation_section_mapping = require('./mapping/evaluation_section.json');
 const extraEvidence = require('./shared/extra_evidence');
+var curator = require('../../curator');
+var CuratorHistory = require('../../curator_history');
+import { ExtraEvidenceTable } from './segregation/addEvidence';
+import { MasterEvidenceTable } from './segregation/masterTable';
 
 // Display the curator data of the curation data
 var CurationInterpretationSegregation = module.exports.CurationInterpretationSegregation = createReactClass({
-    mixins: [RestMixin],
+    mixins: [RestMixin, CuratorHistory],
 
     propTypes: {
         data: PropTypes.object, // ClinVar data payload
@@ -34,7 +40,10 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
             data: this.props.data,
             clinvar_id: null,
             interpretation: this.props.interpretation,
-            selectedCriteria: this.props.selectedCriteria
+            selectedCriteria: this.props.selectedCriteria,
+            deleteBusy: false,
+            editBusy: false,
+            updateMsg: null
         };
     },
 
@@ -53,6 +62,171 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
         }
     },
 
+    /**
+     * Set the EditBusy state
+     * 
+     * @param {boolean} flag 
+     */
+    setEditBusyFunc: function(flag) {
+        this.setState({editBusy: flag});
+    },
+
+    /**
+     * Delete the given evidence from its interpretation.
+     * 
+     * @param {object} evidence     // Evidence to be deleted
+     */
+    deleteEvidenceFunc: function(evidence) {
+        this.setState({deleteBusy: true, editBusy: true});
+
+        let deleteTargetId = evidence['@id'];
+        let flatInterpretation = null;
+        let freshInterpretation = null;
+
+        let extra_evidence = {
+            variant: evidence.variant,
+            category: evidence.category,
+            subcategory: evidence.subcategory,
+            articles: evidence.articles && evidence.articles[0] ? [evidence.articles[0]['@id']] : [],
+            evidenceCriteria: evidence.evidenceCriteria,
+            evidenceDescription: evidence.evidenceDescription,
+            affiliation: evidence.affiliation,
+            source: evidence.source,
+            status: 'deleted'
+        };
+
+        return this.putRestData(evidence['@id'] + '?render=false', extra_evidence).then(result => {
+            return this.recordHistory('delete-hide', result['@graph'][0]).then(deleteHistory => {
+                return this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
+                    // get updated interpretation object, then flatten it
+                    freshInterpretation = interpretation;
+                    flatInterpretation = curator.flatten(freshInterpretation);
+
+                    // remove removed evidence from evidence list
+                    flatInterpretation.extra_evidence_list.splice(flatInterpretation.extra_evidence_list.indexOf(deleteTargetId), 1);
+
+                    // update the interpretation object
+                    return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
+                        return this.recordHistory('modify-hide', data['@graph'][0]).then(editHistory => {
+                            return Promise.resolve(data['@graph'][0]);
+                        });
+                    });
+                });
+            }).then(interpretation => {
+                // upon successful save, set everything to default state, and trigger updateInterptationObj callback
+                this.setState({deleteBusy: false, editBusy: false});
+                this.props.updateInterpretationObj();
+            });
+        }).catch(error => {
+            this.setState({deleteBusy: false, editBusy: false});
+            console.error(error);
+        });
+    },
+
+    /**
+     * If data has been completed for the evidence, save the data.  If not, just returns.
+     * 
+     * @param {bool} finished      If we have finished with data collection
+     * @param {object} evidence    The new/modified evidence source data
+     * @param {object} id          The evidence id if editing evidence. null if new evidence.
+     * @param {string} subcategory Subcategory this evidence belongs to
+     * @param {date} dateCreated   This evidence created date
+     */
+    evidenceCollectionDone: function(finished, evidence, id, subcategory, dateCreated) {
+        if (!finished) {
+            return;
+        } else {
+            this.setState({editBusy: true, updateMsg: null}); // Save button pressed; disable it and start spinner
+
+            let flatInterpretation = null;
+            let freshInterpretation = null;
+
+            this.getRestData('/interpretation/' + this.state.interpretation.uuid).then(interpretation => {
+                // get updated interpretation object, then flatten it
+                freshInterpretation = interpretation;
+                flatInterpretation = curator.flatten(freshInterpretation);
+
+                // create extra_evidence object to be inserted
+                let extra_evidence = {
+                    variant: this.state.interpretation.variant['@id'],
+                    category: 'case-segregation',
+                    subcategory: subcategory,
+                    articles: evidence.metadata._kind_key === 'PMID' ? [evidence.metadata.pmid] : [],
+                    evidenceCriteria: '',  // criteria has value which is not used for case segregation
+                    evidenceDescription: '',
+                    source: evidence
+                };
+
+                // Set the evidence created date to its original date if editing evidence
+                if (id !== null && dateCreated !== null) {
+                    extra_evidence.date_created = dateCreated;
+                }
+
+                // Add affiliation if the user is associated with an affiliation
+                // and if the data object has no affiliation
+                if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                    if (!extra_evidence.affiliation) {
+                        extra_evidence.affiliation = this.props.affiliation.affiliation_id;
+                    }
+                }
+
+                if (id === null) {
+                    // create new extra evidence
+                    return this.postRestData('/extra-evidence/', extra_evidence).then(result => {
+                        // post the new extra evidence object, then add its @id to the interpretation's extra_evidence_list array
+                        if (!flatInterpretation.extra_evidence_list) {
+                            flatInterpretation.extra_evidence_list = [];
+                        }
+                        flatInterpretation.extra_evidence_list.push(result['@graph'][0]['@id']);
+                        // update interpretation object
+                        return this.recordHistory('add-hide', result['@graph'][0]).then(addHistory => {
+                            return this.putRestData('/interpretation/' + this.state.interpretation.uuid, flatInterpretation).then(data => {
+                                return this.recordHistory('modify-hide', data['@graph'][0]).then(editHistory => {
+                                    return Promise.resolve(data['@graph'][0]);
+                                });
+                            });
+                        });
+                    });
+                } else {
+                    return this.putRestData(id, extra_evidence).then(result => {
+                        // post the new extra evidence object, then add its @id to the interpretation's extra_evidence_list array
+                        if (!flatInterpretation.extra_evidence_list) {
+                            flatInterpretation.extra_evidence_list = [];
+                        }
+                        flatInterpretation.extra_evidence_list.push(result['@graph'][0]['@id']);
+                        // update interpretation object
+                        return this.recordHistory('modify-hide', result['@graph'][0]);
+                    });
+                }
+            }).then(result => {
+                // upon successful save, set everything to default state, and trigger updateInterptationObj callback
+                this.setState({editBusy: false, descriptionInput: null});
+                this.props.updateInterpretationObj();
+            }).catch(error => {
+                this.setState({editBusy: false, updateMsg: <span className="text-danger">Something went wrong while trying to save this evidence!</span>});
+                console.error(error);
+            });
+        }
+    },
+
+    /**
+     * Check if the current login user can modify the given evidence.
+     *
+     * @param {object} evidence  // Evidence to be checked for
+     */
+    canCurrUserModifyEvidence(evidence) {
+        let created_affiliation = evidence.affiliation;
+        let curr_affiliation = this.props.affiliation;
+        let created_user = evidence.submitted_by ? evidence.submitted_by['@id'] : null;
+        let curr_user = this.props.session && this.props.session.user_properties ? this.props.session.user_properties['@id'] : null;
+
+        if ((created_affiliation && curr_affiliation && created_affiliation === curr_affiliation.affiliation_id) ||
+            (!created_affiliation && !curr_affiliation && created_user === curr_user && created_user != undefined)) {
+                return true;
+        }
+        return false;
+    },
+
     renderCriteriaEvalLink() {
         return (
             <span>
@@ -63,8 +237,231 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
         );
     },
 
+    renderMasterTable() {
+        return <MasterEvidenceTable
+                    evidence_arr = {this.getAllInterpretations()}
+                    affiliation = {this.props.affiliation}
+                    session = {this.props.session}
+                    viewOnly = {this.state.data && !this.state.interpretation}
+                    deleteEvidenceFunc = {this.deleteEvidenceFunc}
+                    evidenceCollectionDone = {this.evidenceCollectionDone}
+                    canCurrUserModifyEvidence={this.canCurrUserModifyEvidence}
+                >
+                </MasterEvidenceTable>
+    },
+
+    getAllInterpretations() {
+        let relevantEvidenceListRaw = [];
+        if (this.props.data && this.props.data.associatedInterpretations) {
+            this.props.data.associatedInterpretations.map(interpretation => {
+                if (interpretation.extra_evidence_list) {
+                    interpretation.extra_evidence_list.forEach(extra_evidence => {
+                        // temporary codes
+                        if (extra_evidence.category === 'case-segregation' &&
+                            extraEvidenceHasSource(extra_evidence)) {
+                            relevantEvidenceListRaw.push(extra_evidence);
+                        }
+                    });
+                }
+            });
+        }
+        let relevantEvidenceList = _(relevantEvidenceListRaw).sortBy(evidence => {
+            return evidence.date_created;
+        }).reverse();
+        return relevantEvidenceList;
+    },
+
     render() {
+        const variantUUID = this.state.data ? this.state.data['@id'] : null;
         const affiliation = this.props.affiliation, session = this.props.session;
+        let panel_data = [
+            {
+                title: 'Observed in healthy adult(s)',
+                key: 1,
+                bodyClassName: 'panel-wide-content',
+                panelClassName: 'tab-segegration-panel-observed-in-healthy',
+                criteria: ['BS2'],
+                curation: {
+                    content: criteriaGroup1,
+                    formDataUpdater: criteriaGroup1Update
+                },
+                extraEvidence: {
+                    subcategory: 'observed-in-healthy',
+                    tableName: <span>Curated Evidence (Observed in healthy adult(s))</span>,
+                    oldTableName: <span>Curated Literature Evidence (Observed in healthy adult(s)) - Retired Format</span>
+                }
+            },
+            {
+                title: 'Case-control',
+                key: 2,
+                bodyClassName: 'panel-wide-content',
+                panelClassName: 'tab-segegration-panel-case-control',
+                criteria: ['PS4'],
+                curation: {
+                    content: criteriaGroup2,
+                    formDataUpdater: criteriaGroup2Update
+                },
+                extraEvidence: {
+                    subcategory: 'case-control',
+                    tableName: <span>Curated Evidence (Case-control)</span>,
+                    oldTableName: <span>Curated Literature Evidence (Case-control) - Retired Format</span>
+                }
+            },
+            {
+                title: 'Segregation data',
+                key: 3,
+                bodyClassName: 'panel-wide-content',
+                panelClassName: 'tab-segegration-panel-segregation-data',
+                criteria: ['BS4', 'PP1'],
+                curation: {
+                    content: criteriaGroup3,
+                    formDataUpdater: criteriaGroup3Update
+                },
+                extraEvidence: {
+                    subcategory: 'segregation-data',
+                    tableName: <span>Curated Evidence (Segregation data)</span>,
+                    oldTableName: <span>Curated Literature Evidence (Segregation data) - Retired Format</span>
+                }
+            },
+            {
+                title: <h4><i>de novo</i> occurrence</h4>,
+                key: 4,
+                bodyClassName: 'panel-wide-content',
+                panelClassName: 'tab-segegration-panel-de-novo',
+                criteria: ['PM6', 'PS2'],
+                curation: {
+                    content: criteriaGroup4,
+                    formDataUpdater: criteriaGroup4Update
+                },
+                extraEvidence: {
+                    subcategory: 'de-novo',
+                    tableName: <span>Curated Evidence (<i>de novo</i> occurrence)</span>,
+                    oldTableName: <span>Curated Literature Evidence (<i>de novo</i> occurrence) - Retired Format</span>
+                }
+            },
+            {
+                title: <h4>Allele data (<i>cis/trans</i>)</h4>,
+                key: 5,
+                bodyClassName: 'panel-wide-content',
+                panelClassName: 'tab-segegration-panel-allele-data',
+                criteria: ['BP2', 'PM3'],
+                curation: {
+                    content: criteriaGroup5,
+                    formDataUpdater: criteriaGroup5Update
+                },
+                extraEvidence: {
+                    subcategory: 'allele-data',
+                    tableName: <span>Curated Evidence (Allele Data (<i>cis/trans</i>))</span>,
+                    oldTableName: <span>Curated Literature Evidence (Allele Data (<i>cis/trans</i>)) - Retired Format</span>
+                }
+            },
+            {
+                title: 'Alternate mechanism for disease',
+                key: 6,
+                bodyClassName: 'panel-wide-content',
+                panelClassName: 'tab-segegration-panel-alternate-mechanism',
+                criteria: ['BP5'],
+                curation: {
+                    content: criteriaGroup6,
+                    formDataUpdater: criteriaGroup6Update
+                },
+                extraEvidence: {
+                    subcategory: 'alternate-mechanism',
+                    tableName: <span>Curated Evidence (Alternate mechanism for disease)</span>,
+                    oldTableName: <span>Curated Literature Evidence (Alternate mechanism for disease) - Retired Format</span>
+                }
+            },
+            {
+                title: 'Specificity of phenotype',
+                key: 7,
+                bodyClassName: 'panel-wide-content',
+                panelClassName: 'tab-segegration-panel-specificity-of-phenotype',
+                criteria: ['PP4'],
+                curation: {
+                    content: criteriaGroup7,
+                    formDataUpdater: criteriaGroup7Update
+                },
+                extraEvidence: {
+                    subcategory: 'specificity-of-phenotype',
+                    tableName: <span>Curated Evidence (Specificity of phenotype)</span>,
+                    oldTableName: <span>Curated Literature Evidence (Specificity of phenotype) - Retired Format</span>
+                }
+            }
+        ];
+        const panels = panel_data.map(panel => {
+            let interpretationForm = null;
+            if (this.state.data && this.state.interpretation) {
+              interpretationForm = <div className="row">
+                  <div className="col-sm-12">
+                    <CurationInterpretationForm
+                        // Specific configutations
+                        renderedFormContent={panel.curation.content}
+                        criteria={panel.criteria}
+                        formDataUpdater={panel.curation.formDataUpdater}
+                        
+                        // Common configurations
+                        evidenceData={null}
+                        evidenceDataUpdated={true}
+                        variantUuid={variantUUID}
+                        interpretation={this.state.interpretation}
+                        updateInterpretationObj={this.props.updateInterpretationObj}
+                        affiliation={this.props.affiliation}
+                        session={this.props.session}
+                    />
+                  </div>
+                </div>
+            }
+            let extraEvidenceForm = <ExtraEvidenceTable 
+                // Specific configurations
+                subcategory={panel.extraEvidence.subcategory}
+                tableName={panel.extraEvidence.tableName}
+                criteriaList={panel.criteria}
+
+                // Common configurations
+                category="case-segregation"
+                session={this.props.session}
+                href_url={this.props.href_url}
+                variant={this.state.data}
+                interpretation={this.state.interpretation}
+                updateInterpretationObj={this.props.updateInterpretationObj}
+                viewOnly={this.state.data && !this.state.interpretation}
+                affiliation={this.props.affiliation}
+                deleteEvidenceFunc={this.deleteEvidenceFunc}
+                evidenceCollectionDone = {this.evidenceCollectionDone}
+                canCurrUserModifyEvidence={this.canCurrUserModifyEvidence}
+                isBusy={this.state.editBusy}
+                setBusy={this.setEditBusyFunc}
+            />;
+            let oldExtraEvidenceTable = <extraEvidence.ExtraEvidenceTable
+                category="case-segregation"
+                subcategory={panel.extraEvidence.subcategory}
+                session={this.props.session}
+                href_url={this.props.href_url}
+                tableName={panel.extraEvidence.oldTableName}
+                variant={this.state.data}
+                interpretation={this.state.interpretation}
+                updateInterpretationObj={this.props.updateInterpretationObj}
+                viewOnly={this.state.data && !this.state.interpretation}
+                affiliation={affiliation}
+                criteriaList={panel.criteria}
+                evidenceCollectionDone={this.evidenceCollectionDone}
+                canCurrUserModifyEvidence={this.canCurrUserModifyEvidence}
+                isBusy={this.state.editBusy}
+                setBusy={this.setEditBusyFunc}
+                />;
+            return <PanelGroup accordion key={panel.key}>
+                <Panel
+                    title={panel.title}
+                    panelBodyClassName={panel.bodyClassName}
+                    panelClassName={panel.panelClassName}
+                    open
+                    >
+                        {interpretationForm}
+                        {extraEvidenceForm}
+                        {oldExtraEvidenceTable}
+                </Panel>
+            </PanelGroup>
+        });
 
         return (
             <div className="variant-interpretation segregation">
@@ -73,138 +470,9 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                         Users should not publish data found in this interface without permission from the individual(s) who entered the data. For publication
                         of aggregate information, please contact ClinGen at <a href="mailto:clingen@clinicalgenome.org">clingen@clinicalgenome.org</a>.</p>
                     : null }
-                <PanelGroup accordion><Panel title="Observed in healthy adult(s)" panelBodyClassName="panel-wide-content"
-                    panelClassName="tab-segegration-panel-observed-in-healthy" open>
-                    {(this.state.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaGroup1} criteria={['BS2']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup1Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
-                            </div>
-                        </div>
-                        : null}
-                    <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="observed-in-healthy" session={this.props.session}
-                        href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Observed in healthy adult(s))</span>}
-                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['BS2']} />
-                </Panel></PanelGroup>
 
-                <PanelGroup accordion><Panel title="Case-control" panelBodyClassName="panel-wide-content"
-                    panelClassName="tab-segegration-panel-case-control" open>
-                    {(this.state.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaGroup2} criteria={['PS4']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup2Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
-                            </div>
-                        </div>
-                        : null}
-                    <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="case-control" session={this.props.session}
-                        href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Case-control)</span>}
-                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['PS4']} />
-                </Panel></PanelGroup>
-
-                <PanelGroup accordion><Panel title="Segregation data" panelBodyClassName="panel-wide-content"
-                    panelClassName="tab-segegration-panel-segregation-data" open>
-                    {(this.props.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaGroup3} criteria={['BS4', 'PP1']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup3Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
-                            </div>
-                        </div>
-                        : null}
-                    <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="segregation-data" session={this.props.session}
-                        href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Segregation data)</span>}
-                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['BS4', 'PP1']} />
-                </Panel></PanelGroup>
-
-                <PanelGroup accordion><Panel title={<h4><i>de novo</i> occurrence</h4>} panelBodyClassName="panel-wide-content"
-                    panelClassName="tab-segegration-panel-de-novo" open>
-                    {(this.state.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaGroup4} criteria={['PM6', 'PS2']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup4Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} criteriaEvalNote={this.renderCriteriaEvalLink} />
-                            </div>
-                        </div>
-                        : null}
-                    <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="de-novo" session={this.props.session}
-                        href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (<i>de novo</i> occurrence)</span>}
-                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['PM6', 'PS2']} />
-                </Panel></PanelGroup>
-
-                <PanelGroup accordion><Panel title={<h4>Allele data (<i>cis/trans</i>)</h4>} panelBodyClassName="panel-wide-content"
-                    panelClassName="tab-segegration-panel-allele-data" open>
-                    {(this.state.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaGroup5} criteria={['BP2', 'PM3']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup5Update} variantUuid={this.props.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
-                            </div>
-                        </div>
-                        : null}
-                    <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="allele-data" session={this.props.session}
-                        href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Allele Data (<i>cis/trans</i>))</span>}
-                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['BP2', 'PM3']} />
-                </Panel></PanelGroup>
-
-                <PanelGroup accordion><Panel title="Alternate mechanism for disease" panelBodyClassName="panel-wide-content"
-                    panelClassName="tab-segegration-panel-alternate-mechanism" open>
-                    {(this.state.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaGroup6} criteria={['BP5']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup6Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
-                            </div>
-                        </div>
-                        : null}
-                    <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="alternate-mechanism" session={this.props.session}
-                        href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Alternate mechanism for disease)</span>}
-                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['BP5']} />
-                </Panel></PanelGroup>
-
-                <PanelGroup accordion><Panel title="Specificity of phenotype" panelBodyClassName="panel-wide-content"
-                    panelClassName="tab-segegration-panel-specificity-of-phenotype" open>
-                    {(this.state.data && this.state.interpretation) ?
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <CurationInterpretationForm renderedFormContent={criteriaGroup7} criteria={['PP4']}
-                                    evidenceData={null} evidenceDataUpdated={true}
-                                    formDataUpdater={criteriaGroup7Update} variantUuid={this.state.data['@id']}
-                                    interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                                    affiliation={affiliation} session={session} />
-                            </div>
-                        </div>
-                        : null}
-                    <extraEvidence.ExtraEvidenceTable category="case-segregation" subcategory="specificity-of-phenotype" session={this.props.session}
-                        href_url={this.props.href_url} tableName={<span>Curated Literature Evidence (Specificity of phenotype)</span>}
-                        variant={this.state.data} interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
-                        viewOnly={this.state.data && !this.state.interpretation} affiliation={affiliation} criteriaList={['PP4']} />
-                </Panel></PanelGroup>
+                {this.renderMasterTable()}
+                {panels}
 
                 <PanelGroup accordion><Panel title="Reputable source" panelBodyClassName="panel-wide-content reputable-source"
                     panelClassName="tab-segegration-panel-reputable-source" open>
@@ -214,7 +482,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                                 <p className="alert alert-warning">ClinGen has determined that the following rules should not be applied in any context.</p>
                                 <CurationInterpretationForm renderedFormContent={criteriaGroup8} criteria={['BP6', 'PP5']}
                                     evidenceData={null} evidenceDataUpdated={true} criteriaCrossCheck={[['BP6', 'PP5']]}
-                                    formDataUpdater={criteriaGroup8Update} variantUuid={this.state.data['@id']}
+                                    formDataUpdater={criteriaGroup8Update} variantUuid={variantUUID}
                                     interpretation={this.state.interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
                                     disableEvalForm={true} affiliation={affiliation} session={session} />
                             </div>
