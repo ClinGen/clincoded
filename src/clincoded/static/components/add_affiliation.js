@@ -50,7 +50,7 @@ const AddAffiliation = createReactClass({
 
     getInitialState() {
         return {
-            selectedType: '', // selected object type - gdm or interpretation
+            selectedType: 'gdm', // selected object type - gdm or interpretation
             errorMsg: '', // Error message to display 
             submitBusy: false // REST operation in progress
         };
