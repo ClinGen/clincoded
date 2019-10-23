@@ -236,7 +236,9 @@ let EvidenceModalManager = createReactClass({
             this.props.evidenceCollectionDone(false, this.state.sourceData, this.getCurrentEvidenceId(), this.props.subcategory, null);
         }
         else {
-            this.props.setBusy(true);
+            if (this.props.setBusy) {
+                this.props.setBusy(true);
+            }
             // Remove empty fields and unnecessary fields - submitted_by, last_modified, _kind_title from source data
             let hasData = Object.keys(data).reduce((object, key) => { 
                 if (data[key] !== '' && !key.startsWith('_') ) {
