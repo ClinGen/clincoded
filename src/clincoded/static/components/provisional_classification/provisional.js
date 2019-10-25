@@ -64,8 +64,6 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
      */
     handlePreviewProvisional() {
         const provisionalComment = this.provisionalCommentInput.getValue();
-        console.log('props', this.props.affiliation.affiliation_id);
-        console.log('provisonal', this.props.provisional.affiliation);
         if (this.props.affiliation.affiliation_id !== this.props.provisional.affiliation) {
             this.child.openModal();
         }
@@ -80,7 +78,6 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
     handleAlertClick(confirm, e) {
         if (confirm) {
             window.location.href = '/dashboard/';
-            console.log('redirect');
         }
         this.child.closeModal();
         this.handleCancelProvisional();
