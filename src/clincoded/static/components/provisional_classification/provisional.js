@@ -235,7 +235,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         const provisional = this.props.provisional;
         const classification = this.props.classification;
         const affiliation = provisional.affiliation ? provisional.affiliation : (this.props.affiliation ? this.props.affiliation : null);
-        const currentUserAffiliation = this.props.affiliation ? this.props.affiliation.affiliation_fullname : (this.props.affiliation.affiliation_fullname ? this.props.affiliation.affiliation_fullname : null);
+        const currentUserAffiliation = this.props.affiliation ? this.props.affiliation.affiliation_fullname : null;
         const submitBusy = this.state.submitBusy;
 
         return (
