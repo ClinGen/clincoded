@@ -553,7 +553,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                 : null}
                             </div>
                             <div className="col-md-12">
-                                <button className="btn btn-primary btn-inline-spacer contributor-toggle-button pull-left" onClick={this.toggleAttributionForm}>{attributionButtonText}</button>
+                                <button className="btn btn-primary btn-inline-spacer contributor-toggle-button" onClick={this.toggleAttributionForm}>{attributionButtonText}</button>
                                 <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={formHelpText}>
                                     <i className="secondary-approvers-help icon icon-info-circle"></i>
                                 </span>
