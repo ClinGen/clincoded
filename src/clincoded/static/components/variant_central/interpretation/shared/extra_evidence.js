@@ -270,8 +270,8 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
 
         // Check if pmid/article already exists in current case segregation evidences
         let candidates = extraEvidenceData
-            .filter(o => 'pmid' in o.source.metadata
-                    && o.source.metadata['pmid'] === pmid);
+            .filter(o => 'pmid' in o.sourceInfo.metadata
+                    && o.sourceInfo.metadata['pmid'] === pmid);
         let foundCandidate = null;
         if (candidates.length > 0) {
             candidates.forEach(candidate => {
@@ -285,17 +285,17 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
             // deep copy the evidence data
             data = JSON.parse(JSON.stringify(foundCandidate));
             data.source.data['comments'] = (foundCandidate.source.data['comments'] && foundCandidate.source.data['comments'] != '') ?
-                foundCandidate.source.data['comments'] + '\n' + extra_evidence.evidenceDescription
+                foundCandidate.sourceInfo.data['comments'] + '\n' + extra_evidence.evidenceDescription
                 :
                 extra_evidence.evidenceDescription;
         } else {
             // If not found, allow user to add evidence in new format
             isNew = true;
-            data.source = {'metadata': {}, 'data': {}};
-            data.source.metadata['_kind_key'] = 'PMID';
-            data.source.metadata['_kind_title'] = 'Pubmed';
-            data.source.metadata['pmid'] = pmid;
-            data.source.data['comments'] = extra_evidence.evidenceDescription;
+            data.sourceInfo = {'metadata': {}, 'data': {}};
+            data.sourceInfo.metadata['_kind_key'] = 'PMID';
+            data.sourceInfo.metadata['_kind_title'] = 'Pubmed';
+            data.sourceInfo.metadata['pmid'] = pmid;
+            data.sourceInfo.data['comments'] = extra_evidence.evidenceDescription;
         }
         // Set the button
         return (
