@@ -51,14 +51,14 @@ export function getAllAffliations() {
             fullName: affiliation.affiliation_fullname
         });
     });
-   return affiliations;
+    return affiliations;
 }
 
 /**
  * Method to return affiliation subgroups from all affiliations
  */
 
- export function getAffiliationSubgroups() {
+export function getAffiliationSubgroups() {
     let subgroupList = [];
     AffiliationsList.forEach(affiliation => {
         if (affiliation.subgroups) {

@@ -65,7 +65,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             return {
                 value: affiliation.fullName,
                 label: `${affiliation.fullName} (${affiliation.id})`
-            }
+            };
         });
         this.setState({ affiliationsList: parsedAffiliations });
     },
