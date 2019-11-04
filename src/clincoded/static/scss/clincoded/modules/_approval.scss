@@ -375,6 +375,11 @@
     margin: 5px;
 }
 
+.contributor-toggle-button {
+    display: flex;
+    align-items: center;
+}
+
 .text-info.contextual-help {
     z-index: 0;
 }

@@ -54,40 +54,44 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
     componentDidMount() {
         this.getAffiliationApprovers();
         this.parseAffiliationsList();
-        const approverList = getAffiliationSubgroups();
-        this.parseApproversList(approverList);
+        this.parseApproversList();
     },
 
     // Method to get full affiliations list and reformat obj so it's compatible w/ react-select
     parseAffiliationsList() {
         const affiliationsList = getAllAffliations();
-        const parsedAffiliations = affiliationsList.map(affiliation => {
-            return {
-                value: affiliation.fullName,
-                label: `${affiliation.fullName} (${affiliation.id})`
-            };
-        });
-        this.setState({ affiliationsList: parsedAffiliations });
+        if (affiliationsList) {
+            const parsedAffiliations = affiliationsList.map(affiliation => {
+                return {
+                    value: affiliation.fullName,
+                    label: `${affiliation.fullName} (${affiliation.id})`
+                };
+            });
+            this.setState({ affiliationsList: parsedAffiliations });
+        }
     },
 
     // Method to get affiliation subgroups and pass to react-select
-    parseApproversList(approverList) {
+    parseApproversList() {
         const parsedApprovers = [];
-        approverList.forEach(approver => {
-           if (approver.gcep) {
-            parsedApprovers.push({
-                   value: approver.gcep.fullname,
-                   label: approver.gcep.fullname
-               });
-           } 
-           if (approver.vcep) {
-            parsedApprovers.push({
-                   value: approver.vcep.fullname,
-                   label: approver.vcep.fullname
-               });
-           }
-        });
-        this.setState({ approversList: parsedApprovers });
+        const approverList = getAffiliationSubgroups();
+        if (approverList) {
+            approverList.forEach(approver => {
+                if (approver.gcep) {
+                    parsedApprovers.push({
+                        value: approver.gcep.fullname,
+                        label: approver.gcep.fullname
+                    });
+                }
+                if (approver.vcep) {
+                    parsedApprovers.push({
+                        value: approver.vcep.fullname,
+                        label: approver.vcep.fullname
+                    });
+                }
+            });
+            this.setState({ approversList: parsedApprovers });
+        }
     },
 
     componentWillReceiveProps(nextProps) {
@@ -116,30 +120,30 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             let affiliationId = provisionalAffiliation ? provisionalAffiliation : userAffiliation;
             let approvers = getAffiliationApprover(affiliationId);
             if (approvers.length > 0) {
-                this.setState({affiliationApprovers: approvers.sort()}, () => {
+                this.setState({ affiliationApprovers: approvers.sort() }, () => {
                     if (provisional && provisional.classificationApprover) {
-                        this.setState({classificationApprover: provisional.classificationApprover}, () => {
+                        this.setState({ classificationApprover: provisional.classificationApprover }, () => {
                             this.approverInput.setValue(this.state.classificationApprover && this.state.affiliationApprovers ? this.state.classificationApprover : 'none');
                         });
                     }
                 });
             } else {
                 if (provisional && provisional.classificationApprover) {
-                    this.setState({classificationApprover: provisional.classificationApprover});
+                    this.setState({ classificationApprover: provisional.classificationApprover });
                 } else {
-                    this.setState({classificationApprover: getAffiliationName(affiliationId)});
+                    this.setState({ classificationApprover: getAffiliationName(affiliationId) });
                 }
             }
         }
     },
 
     handleReviewDateChange(approvalReviewDate) {
-        this.setState({approvalReviewDate});
+        this.setState({ approvalReviewDate });
     },
 
     toggleAttributionForm(e) {
         e.preventDefault();
-        this.setState({ showAttributionForm:!this.state.showAttributionForm });
+        this.setState({ showAttributionForm: !this.state.showAttributionForm });
     },
 
     handleContributorSelect(selectedContributor) {
@@ -177,7 +181,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                 sopVersion: sopVersion ? sopVersion : '',
                 classificationApprover: approver
             }, () => {
-                this.setState({isApprovalPreview: true});
+                this.setState({ isApprovalPreview: true });
                 formErr = false;
             });
         } else {
@@ -208,7 +212,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
      * Method to handle editing classification approval form
      */
     handleEditApproval() {
-        this.setState({isApprovalPreview: false});
+        this.setState({ isApprovalPreview: false });
     },
 
     /**
@@ -244,7 +248,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
 
         let provisionalSnapshots = this.props.snapshots && this.props.snapshots.length ? this.props.snapshots.filter(snapshot => snapshot.approvalStatus === 'Provisioned') : [];
         // Prevent users from incurring multiple submissions
-        this.setState({submitBusy: true});
+        this.setState({ submitBusy: true });
         if (this.props.gdm && Object.keys(this.props.gdm).length) {
             // Update existing provisional data object
             return this.putRestData('/provisional/' + this.props.provisional.uuid, newProvisional).then(data => {
@@ -263,7 +267,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             }).then(result => {
                 // get a fresh copy of the gdm object
                 this.getRestData('/gdm/' + this.props.gdm.uuid).then(newGdm => {
-                    let parentSnapshot = {gdm: newGdm};
+                    let parentSnapshot = { gdm: newGdm };
                     let newSnapshot = {
                         resourceId: result.uuid,
                         resourceType: 'classification',
@@ -313,7 +317,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             }).then(result => {
                 // get a fresh copy of the interpretation object
                 this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(newInterpretation => {
-                    let parentSnapshot = {interpretation: newInterpretation};
+                    let parentSnapshot = { interpretation: newInterpretation };
                     let newSnapshot = {
                         resourceId: result.uuid,
                         resourceType: 'interpretation',
@@ -369,8 +373,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const interpretation = this.props.interpretation;
         const submitBusy = this.state.submitBusy;
         const attributionButtonText = this.state.showAttributionForm ? 'Close Form' : 'Acknowledge Other Contributors';
-        const formHelpText = 'To acknowledge contributing and approving affiliation(s) for this gene-disease classification, please click here. Single or multiple affiliations or entities may be chosen.';
-        const contributorHelpText = 'In the event that more than one affiliation, or external curation group has contributed to the evidence and/or overall classification of this record, please select each from the dropdown menu.';
+        const formHelpText = 'Acknowledge contributing and approving affiliation(s) for this gene-disease classification. Single or multiple affiliations or entities may be chosen.';
+        const contributorHelpText = 'In the event that more than one affiliation or external curation group has contributed to the evidence and/or overall classification of this record, please select each from the dropdown menu.';
         const approverHelpText = 'In the event that more than one affiliation has contributed to the final approved classification, please select each from the dropdown menu.';
 
         return (
@@ -405,7 +409,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             <dt><span>SOP Version:</span></dt>
                                             <dd>{sopVersion}</dd>
                                         </dl>
-                                    </div>    
+                                    </div>
                                     <div>
                                         <dl className="inline-dl clearfix">
                                             <dt><span>Curation Contributor(s):</span></dt>
@@ -417,7 +421,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             <dt><span>Contributor Comments:</span></dt>
                                             <dd><span>{contributorComment}</span></dd>
                                         </dl>
-                                    </div>    
+                                    </div>
                                 </div>
                                 <div className="col-xs-12 col-sm-3">
                                     <div className="approval-date">
@@ -496,7 +500,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                                 </dl>
                                             }
                                         </div>
-                                    : null}
+                                        : null}
                                     <div className="approval-review-date form-group">
                                         <label className="col-sm-4 control-label">Final Approval Date:</label>
                                         <div className="col-sm-3 approval-date">
@@ -515,13 +519,13 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                 </div>
                                 <div className="sop-version">
                                     <Input type="select" ref={(input) => { this.sopVersionInput = input; }} label="SOP Version:"
-                                    labelClassName="sop-label col-sm-2 control-label" wrapperClassName="col-sm-1" groupClassName="form-group">
-                                        {sopVersions.map((version, i ) => {
+                                        labelClassName="sop-label col-sm-2 control-label" wrapperClassName="col-sm-1" groupClassName="form-group">
+                                        {sopVersions.map((version, i) => {
                                             return <option key={i} value={version}>{version}</option>;
                                         })}
                                     </Input>
                                 </div>
-                                {(curationContributorsList && curationContributorsList.length) && this.state.showAttributionForm ? 
+                                {(curationContributorsList && curationContributorsList.length) && this.state.showAttributionForm ?
                                     <div className="col-md-6">
                                         <div className="contributor-form">
                                             <label className="control-label">Curation Contributor(s):</label>
@@ -535,8 +539,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                                 label="Contributor Comments (optional):" rows="5" labelClassName="control-label" />
                                         </div>
                                     </div>
-                                : null}
-                                {this.state.showAttributionForm ? 
+                                    : null}
+                                {this.state.showAttributionForm ?
                                     <div className="col-md-6">
                                         <div className="curation-approvers approval-form">
                                             <label className="control-label">Curation Approver(s):</label>
@@ -550,10 +554,10 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                                 label="Approver Comments:" value={approvalComment} rows="5" labelClassName="control-label" />
                                         </div>
                                     </div>
-                                : null}
+                                    : null}
                             </div>
-                            <div className="col-md-12">
-                                <button className="btn btn-primary btn-inline-spacer contributor-toggle-button" onClick={this.toggleAttributionForm}>{attributionButtonText}</button>
+                            <div className="col-md-12 contributor-toggle-button">
+                                <button className="btn btn-primary btn-inline-spacer" onClick={this.toggleAttributionForm}>{attributionButtonText}</button>
                                 <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={formHelpText}>
                                     <i className="secondary-approvers-help icon icon-info-circle"></i>
                                 </span>
