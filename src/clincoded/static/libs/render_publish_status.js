@@ -6,7 +6,7 @@ import { sortListByDate } from './helpers/sort';
 /**
  * Method to render the publication status of a given GDM's classification
  * @param {array} snapshots - List of snapshots associated with classification
- * @param {boolean} stringOnly - Wether return status text or status labels/tags (default returns labels/tags)
+ * @param {boolean} stringOnly - Whether return status text or status labels/tags (default returns labels/tags)
  */
 export function renderPublishStatus(snapshots, stringOnly=false) {
     const sortedSnapshots = snapshots && snapshots.length ? sortListByDate(snapshots, 'date_created') : [];

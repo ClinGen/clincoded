@@ -10,7 +10,7 @@ import { sortListByDate } from './helpers/sort';
  * @param {object} context - The global context object
  * @param {string} affiliationId - The affiliation ID
  * @param {string} userId - The user's UUID
- * @param {boolean} stringOnly - Wether return status text or status labels/tags (default returns labels/tags)
+ * @param {boolean} stringOnly - Whether return status text or status labels/tags (default returns labels/tags)
  */
 export function renderApprovalStatus(snapshots, resourceType, context, affiliationId, userId, stringOnly=false) {
     let showApprovalLink = false;

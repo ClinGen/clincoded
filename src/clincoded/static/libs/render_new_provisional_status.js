@@ -10,7 +10,7 @@ import { sortListByDate } from './helpers/sort';
  * @param {object} gdm - The GDM object
  * @param {object} context - The global context object
  * @param {boolean} showLink - Whether to render link to view/approve provisional (gdm) or view provisional summary (interpretation)
- * @param {boolean} stringOnly - Wether return status text or status labels/tags (default returns labels/tags)
+ * @param {boolean} stringOnly - Whether return status text or status labels/tags (default returns labels/tags)
  */
 export function renderNewProvisionalStatus(snapshots, resourceType, gdm, context, showLink, stringOnly=false) {
     const sortedSnapshots = snapshots && snapshots.length ? sortListByDate(snapshots, 'date_created') : [];

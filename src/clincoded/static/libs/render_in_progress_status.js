@@ -6,7 +6,7 @@ import { getClassificationSavedDate } from './get_saved_date';
 /**
  * Method to render 'IN PROGRESS' status tag/label for a given classification
  * @param {object} classification - The saved GDM classification
- * @param {boolean} stringOnly - Wether return status text or status labels/tags (default returns labels/tags)
+ * @param {boolean} stringOnly - Whether return status text or status labels/tags (default returns labels/tags)
  */
 export function renderInProgressStatus(classification, stringOnly=false) {
     if (classification && classification.classificationStatus && classification.classificationStatus === 'In progress') {
