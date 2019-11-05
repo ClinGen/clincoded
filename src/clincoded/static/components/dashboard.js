@@ -101,7 +101,7 @@ var Dashboard = createReactClass({
                     );
                 });
                 // Remove item that's already included in selected list
-                const newList = filteredList.filter(item=> !filteredGdms.includes(item));
+                const newList = filteredList.filter(item => !filteredGdms.includes(item));
                 // Sort list by gene disease & model
                 const sortedList = _(newList).sortBy(item => {
                     return (this.cleanGdmGeneDiseaseName(item.gdmGeneDisease, item.gdmModel));
@@ -128,7 +128,7 @@ var Dashboard = createReactClass({
         const statusList = [];
         selectedStatus.forEach(status => {
             statusList.push(status.value);
-        })
+        });
         this.setState({gdmSearchStatus: statusList}, () => {
             this.gdmSetSearchResults();
         });
@@ -192,7 +192,7 @@ var Dashboard = createReactClass({
         const statusList = [];
         selectedStatus.forEach(status => {
             statusList.push(status.value);
-        })
+        });
         this.setState({interpretationSearchStatus: statusList}, () => {
             this.interpretationSetSearchResults();
         });
@@ -489,7 +489,7 @@ var Dashboard = createReactClass({
                 {value: "Provisional", label: "Provisional"},
                 {value: "New Provisional", label: "New Provisional"},
                 {value: "Published", label: "Published"},
-               ];
+            ];
             return (
                 <div className="filter-by">
                     <div className="filter-term">
@@ -579,7 +579,7 @@ var Dashboard = createReactClass({
                 {value: "Provisional", label: "Provisional"},
                 {value: "New Provisional", label: "New Provisional"},
                 {value: "Published", label: "Published"},
-               ];
+            ];
             return (
                 <div className="filter-by">
                     <div className="filter-term">
