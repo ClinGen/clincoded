@@ -17,7 +17,7 @@ export function renderApproverNames(curationApprovers) {
       if (approverId.startsWith('5')) {
           approverNames.push(getAffiliationNameBySubgroupID('vcep', approverId));
       } else if (approverId.startsWith('4')) {
-          approverNames.push(getAffiliationNameBySubgroupID('gcep', approverId))
+          approverNames.push(getAffiliationNameBySubgroupID('gcep', approverId));
       }
   });
   return approverNames;
