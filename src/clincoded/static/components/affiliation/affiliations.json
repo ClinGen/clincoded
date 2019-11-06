@@ -754,5 +754,9 @@
                 "fullname": "Limb Girdle Muscular Dystrophy GCEP"
             }
         }
+    },
+    {
+        "affiliation_id": "10062",
+        "affiliation_fullname": "InSiGHT_Dev"
     }
 ]
