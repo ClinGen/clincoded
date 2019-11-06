@@ -5,6 +5,7 @@ import moment from 'moment';
 import { Input } from '../../libs/bootstrap/form';
 import { getAffiliationName, getAffiliationNameBySubgroupID } from '../../libs/get_affiliation_name';
 import { renderSelectedModeInheritance } from '../../libs/render_mode_inheritance';
+import { renderApproverNames, renderContributorNames } from '../../libs/render_approver_names';
 import { sortListByDate } from '../../libs/helpers/sort';
 import { isScoringForCurrentSOP } from '../../libs/sop';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
@@ -372,13 +373,13 @@ class CurationSnapshots extends Component {
                                     {snapshot.resource && snapshot.resource.curationApprovers ?
                                         <dl className="inline-dl clearfix">
                                             <dt><span>Curation approvers:</span></dt>
-                                            <dd><span>{snapshot.resource.curationApprovers.sort().join(', ')}</span></dd>
+                                            <dd><span>{renderApproverNames(snapshot.resource.curationApprovers).sort().join(', ')}</span></dd>
                                         </dl>
                                         : null}
                                     {snapshot.resource && snapshot.resource.curationContributors ?
                                         <dl className="inline-dl clearfix">
                                             <dt><span>Curation contributors:</span></dt>
-                                            <dd><span>{snapshot.resource.curationContributors.sort().join(', ')}</span></dd>
+                                            <dd><span>{renderContributorNames(snapshot.resource.curationContributors).sort().join(', ')}</span></dd>
                                         </dl>
                                         : null}
                                     <dl className="inline-dl clearfix snapshot-final-approval-date">

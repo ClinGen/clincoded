@@ -235,7 +235,6 @@ var ProvisionalCuration = createReactClass({
             if (newProvisional.curationContributors) delete newProvisional.curationContributors;
             if (newProvisional.curationApprovers) delete newProvisional.curationApprovers;
             if (newProvisional.approvalDate) delete newProvisional.approvalDate;
-            if (newProvisional.contributorDate) delete newProvisional.contributorDate;
             if (newProvisional.approvalReviewDate) delete newProvisional.approvalReviewDate;
             if (newProvisional.approvalComment) delete newProvisional.approvalComment;
             if (newProvisional.contributorComment) delete newProvisional.contributorComment;

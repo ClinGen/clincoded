@@ -5,6 +5,7 @@ import moment from 'moment';
 import { external_url_map } from '../globals';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
 import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
+import { renderApproverNames, renderContributorNames } from '../../libs/render_approver_names';
 import { getClassificationSavedDate } from '../../libs/get_saved_date';
 
 class GeneDiseaseEvidenceSummaryHeader extends Component {
@@ -47,13 +48,13 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                             {curationApprovers && curationApprovers.length ? 
                                 <div>
                                     <dt>Curation approvers:</dt>
-                                    <dd>{curationApprovers.join(', ')}</dd>
+                                    <dd>{renderApproverNames(curationApprovers).join(', ')}</dd>
                                 </div>
                             : null}
                             {curationContributors && curationContributors.length ? 
                                 <div>
                                     <dt>Curation contributors:</dt>
-                                    <dd>{curationContributors.join(', ')}</dd>
+                                    <dd>{renderContributorNames(curationContributors).join(', ')}</dd>
                                 </div>
                             : null}
                             <dt>Calculated classification:</dt>

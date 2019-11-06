@@ -7,6 +7,7 @@ import { RestMixin } from '../rest';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
 import { getAffiliationName, getAllAffliations, getAffiliationSubgroups } from '../../libs/get_affiliation_name';
 import { getAffiliationApprover } from '../../libs/get_affiliation_approver';
+import { renderApproverNames, renderContributorNames } from '../../libs/render_approver_names';
 import Select from 'react-select';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
@@ -63,7 +64,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         if (affiliationsList) {
             const parsedAffiliations = affiliationsList.map(affiliation => {
                 return {
-                    value: affiliation.fullName,
+                    value: affiliation.id,
                     label: `${affiliation.fullName} (${affiliation.id})`
                 };
             });
@@ -79,13 +80,13 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             approverList.forEach(approver => {
                 if (approver.gcep) {
                     parsedApprovers.push({
-                        value: approver.gcep.fullname,
+                        value: approver.gcep.id,
                         label: approver.gcep.fullname
                     });
                 }
                 if (approver.vcep) {
                     parsedApprovers.push({
-                        value: approver.vcep.fullname,
+                        value: approver.vcep.id,
                         label: approver.vcep.fullname
                     });
                 }
@@ -141,11 +142,12 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         this.setState({ approvalReviewDate });
     },
 
-    toggleAttributionForm(e) {
+    openAttributionForm(e) {
         e.preventDefault();
-        this.setState({ showAttributionForm: !this.state.showAttributionForm });
+        this.setState({ showAttributionForm: true });
     },
 
+    // Only saves affiliation IDs from react-select
     handleContributorSelect(selectedContributor) {
         const contributors = [];
         selectedContributor.forEach(contributor => {
@@ -154,6 +156,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         this.setState({ curationContributors: contributors });
     },
 
+    // Only saves affiliation subgroup IDs from react-select
     handleApproverSelect(selectedApprover) {
         const approvers = [];
         selectedApprover.forEach(approver => {
@@ -361,8 +364,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const approvalComment = this.state.approvalComment && this.state.approvalComment.length ? this.state.approvalComment : '';
         const curationContributorsList = this.state.affiliationsList ? this.state.affiliationsList : null;
         const approversList = this.state.approversList ? this.state.approversList : null;
-        const curationContributors = this.state.curationContributors ? this.state.curationContributors.join(', ') : null;
-        const curationApprovers = this.state.curationApprovers ? this.state.curationApprovers.join(', ') : null;
+        const curationContributors = this.state.curationContributors ? this.state.curationContributors : null;
+        const curationApprovers = this.state.curationApprovers ? this.state.curationApprovers : null;
         const session = this.props.session;
         const sopVersion = this.state.sopVersion;
         const provisional = this.props.provisional;
@@ -372,7 +375,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const affiliationApprovers = this.state.affiliationApprovers;
         const interpretation = this.props.interpretation;
         const submitBusy = this.state.submitBusy;
-        const attributionButtonText = this.state.showAttributionForm ? 'Close Form' : 'Acknowledge Other Contributors';
+        const attributionButtonText = 'Acknowledge Other Contributors';
         const formHelpText = 'Acknowledge contributing and approving affiliation(s) for this gene-disease classification. Single or multiple affiliations or entities may be chosen.';
         const contributorHelpText = 'In the event that more than one affiliation or external curation group has contributed to the evidence and/or overall classification of this record, please select each from the dropdown menu.';
         const approverHelpText = 'In the event that more than one affiliation has contributed to the final approved classification, please select each from the dropdown menu.';
@@ -413,7 +416,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     <div>
                                         <dl className="inline-dl clearfix">
                                             <dt><span>Curation Contributor(s):</span></dt>
-                                            <dd>{curationContributors ? curationContributors : null}</dd>
+                                            <dd>{curationContributors ? renderContributorNames(curationContributors).join(', ') : null}</dd>
                                         </dl>
                                     </div>
                                     <div>
@@ -439,7 +442,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     <div className="curation-approvers">
                                         <dl className="inline-dl clearfix">
                                             <dt><span>Curation Approver(s):</span></dt>
-                                            <dd>{curationApprovers ? curationApprovers : null}</dd>
+                                            <dd>{curationApprovers ? renderApproverNames(curationApprovers).join(', ') : null}</dd>
                                         </dl>
                                     </div>
                                     <div className="approval-comments">
@@ -536,7 +539,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                         </div>
                                         <div className="contributor-form">
                                             <Input type="textarea" ref={(input) => { this.contributorCommentInput = input; }}
-                                                label="Contributor Comments (optional):" rows="5" labelClassName="control-label" />
+                                                label="Contributor Comments (optional):" value={contributorComment} rows="5" labelClassName="control-label" />
                                         </div>
                                     </div>
                                     : null}
@@ -556,12 +559,14 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     </div>
                                     : null}
                             </div>
-                            <div className="col-md-12 contributor-toggle-button">
-                                <button className="btn btn-primary btn-inline-spacer" onClick={this.toggleAttributionForm}>{attributionButtonText}</button>
-                                <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={formHelpText}>
-                                    <i className="secondary-approvers-help icon icon-info-circle"></i>
-                                </span>
-                            </div>
+                            {!this.state.showAttributionForm ?
+                                <div className="col-md-12 contributor-toggle-button">
+                                    <button className="btn btn-primary btn-inline-spacer" onClick={this.openAttributionForm}>{attributionButtonText}</button>
+                                    <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={formHelpText}>
+                                        <i className="secondary-approvers-help icon icon-info-circle"></i>
+                                    </span>
+                                </div>
+                                : null}
                         </div>
                     }
                     <div className="col-md-12 approval-form-buttons-wrapper">
