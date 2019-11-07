@@ -37,6 +37,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             approversList: [],
             curationContributors: this.props.provisional && this.props.provisional.curationContributors ? this.props.curationContributors : [],
             curationApprovers: this.props.provisional && this.props.provisional.curationApprovers ? this.props.curationApprovers : [],
+            retainSelectedApprover: this.props.provisional && this.props.provisional.retainSelectedApprover ? this.props.retainSelectedApprover : [],
+            retainSelectedContributor: this.props.provisional && this.props.provisional.retainSelectedContributor ? this.props.retainSelectedContributor : [],
             contributorComment: this.props.provisional && this.props.provisional.contributorComment ? this.props.contributorComment : '',
             approvalReviewDate: this.props.provisional && this.props.provisional.approvalReviewDate ? this.props.provisional.approvalReviewDate : undefined,
             approvalDate: this.props.provisional && this.props.provisional.approvalDate ? this.props.provisional.approvalDate : undefined,
@@ -150,19 +152,23 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
     // Only saves affiliation IDs from react-select
     handleContributorSelect(selectedContributor) {
         const contributors = [];
+        const retainSelectedContributor = [];
         selectedContributor.forEach(contributor => {
             contributors.push(contributor.value);
+            retainSelectedContributor.push(contributor);
         });
-        this.setState({ curationContributors: contributors });
+        this.setState({ curationContributors: contributors, retainSelectedContributor });
     },
 
     // Only saves affiliation subgroup IDs from react-select
     handleApproverSelect(selectedApprover) {
         const approvers = [];
+        const retainSelectedApprover = [];
         selectedApprover.forEach(approver => {
             approvers.push(approver.value);
+            retainSelectedApprover.push(approver);
         });
-        this.setState({ curationApprovers: approvers });
+        this.setState({ curationApprovers: approvers, retainSelectedApprover });
     },
 
     /**
@@ -535,7 +541,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={contributorHelpText}>
                                                 <i className="icon icon-info-circle secondary-approvers-help"></i>
                                             </span>
-                                            <Select isMulti options={curationContributorsList} placeholder="Select Affiliation(s)" onChange={this.handleContributorSelect} />
+                                            <Select isMulti options={curationContributorsList} placeholder="Select Affiliation(s)" defaultValue={this.state.retainSelectedContributor} onChange={this.handleContributorSelect} />
                                         </div>
                                         <div className="contributor-form">
                                             <Input type="textarea" ref={(input) => { this.contributorCommentInput = input; }}
@@ -550,7 +556,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={approverHelpText}>
                                                 <i className="icon icon-info-circle secondary-approvers-help"></i>
                                             </span>
-                                            <Select isMulti options={approversList} placeholder="Select Curation Approver(s)" onChange={this.handleApproverSelect} />
+                                            <Select isMulti options={approversList} placeholder="Select Curation Approver(s)" defaultValue={this.state.retainSelectedApprover} onChange={this.handleApproverSelect} />
                                         </div>
                                         <div className="approval-form">
                                             <Input type="textarea" ref={(input) => { this.approvalCommentInput = input; }}
