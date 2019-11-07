@@ -1,5 +1,5 @@
-'use strict'
-import {getAffiliationName, getAffiliationNameBySubgroupID} from './get_affiliation_name.js'
+'use strict';
+import {getAffiliationName, getAffiliationNameBySubgroupID} from './get_affiliation_name.js';
 
 // Takes in a list of affiliation IDs and renders names for display
 export function renderContributorNames(curationContributors) {
