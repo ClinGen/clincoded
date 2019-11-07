@@ -35,11 +35,11 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         return {
             affiliationsList: [],
             approversList: [],
-            curationContributors: this.props.provisional && this.props.provisional.curationContributors ? this.props.curationContributors : [],
-            curationApprovers: this.props.provisional && this.props.provisional.curationApprovers ? this.props.curationApprovers : [],
-            retainSelectedApprover: this.props.provisional && this.props.provisional.retainSelectedApprover ? this.props.retainSelectedApprover : [],
-            retainSelectedContributor: this.props.provisional && this.props.provisional.retainSelectedContributor ? this.props.retainSelectedContributor : [],
-            contributorComment: this.props.provisional && this.props.provisional.contributorComment ? this.props.contributorComment : '',
+            curationContributors: this.props.provisional && this.props.provisional.curationContributors ? this.props.provisional.curationContributors : [],
+            curationApprovers: this.props.provisional && this.props.provisional.curationApprovers ? this.props.provisional.curationApprovers : [],
+            retainSelectedApprover: this.props.provisional && this.props.provisional.retainSelectedApprover ? this.props.provisional.retainSelectedApprover : [],
+            retainSelectedContributor: this.props.provisional && this.props.provisional.retainSelectedContributor ? this.props.provisional.retainSelectedContributor : [],
+            contributorComment: this.props.provisional && this.props.provisional.contributorComment ? this.props.provisional.contributorComment : '',
             approvalReviewDate: this.props.provisional && this.props.provisional.approvalReviewDate ? this.props.provisional.approvalReviewDate : undefined,
             approvalDate: this.props.provisional && this.props.provisional.approvalDate ? this.props.provisional.approvalDate : undefined,
             approvalComment: this.props.provisional && this.props.provisional.approvalComment ? this.props.provisional.approvalComment : undefined,
@@ -545,7 +545,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                         </div>
                                         <div className="contributor-form">
                                             <Input type="textarea" ref={(input) => { this.contributorCommentInput = input; }}
-                                                label="Contributor Comments (optional):" value={contributorComment} rows="5" labelClassName="control-label" />
+                                                label="Contributor Comments" value={contributorComment} rows="5" labelClassName="control-label" />
                                         </div>
                                     </div>
                                     : null}
