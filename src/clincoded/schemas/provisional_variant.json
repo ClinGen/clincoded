@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "4"
+            "default": "5"
         },
         "autoClassification": {
             "title": "Classification",
@@ -80,6 +80,34 @@
         "approvalComment": {
             "title": "Review Comments",
             "description": "Review comments for the classification",
+            "type": "string"
+        },
+        "curationContributors": {
+            "title": "Curation Contributor(s)",
+            "description": "Curator(s) who contributed to the classification",
+            "type": "array",
+            "items": {
+                "title": "Contributor(s)",
+                "type": "string"
+            }
+        },
+        "curationApprovers": {
+            "title": "Curation Approver(s)",
+            "description": "Curator(s) who approved the classification",
+            "type": "array",
+            "items": {
+                "title": "Approver(s)",
+                "type": "string"
+            }
+        },
+        "sopVersion": {
+            "title": "SOP Version",
+            "description": "SOP Version chosen by user in approval form",
+            "type": "string"
+        },
+        "contributorComment": {
+            "title": "Review Comments for the contributor(s)",
+            "description": "Review comments for the classification contributor(s)",
             "type": "string"
         },
         "provisionalSubmitter": {
