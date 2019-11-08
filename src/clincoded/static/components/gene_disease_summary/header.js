@@ -5,9 +5,9 @@ import moment from 'moment';
 import { external_url_map } from '../globals';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
 import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
-import { renderApproverNames, renderContributorNames } from '../../libs/render_approver_names';
+import { getApproverNames, getContributorNames } from '../../libs/get_approver_names';
 import { getClassificationSavedDate } from '../../libs/get_saved_date';
-import { sopVersionByScoring } from '../../libs/sop';
+import { sopVersionByScoring, sopVersionByDate } from '../../libs/sop';
 
 class GeneDiseaseEvidenceSummaryHeader extends Component {
     constructor(props) {
@@ -25,7 +25,7 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
         const publishDate = provisional.publishDate ? provisional.publishDate : snapshotPublishDate;
         const curationApprovers = provisional.curationApprovers ? provisional.curationApprovers.sort() : null;
         const curationContributors = provisional.curationContributors ? provisional.curationContributors.sort() : null;
-        const sopVersion = provisional.sopVersion ? provisional.sopVersion : sopVersionByScoring(provisional.classificationPoints);
+        const sopVersion = provisional.sopVersion ? provisional.sopVersion : sopVersionByDate(provisional);
 
         return (
             <div className="evidence-summary panel-header">
@@ -49,13 +49,13 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                             {curationApprovers && curationApprovers.length ? 
                                 <div>
                                     <dt>Curation approvers:</dt>
-                                    <dd>{renderApproverNames(curationApprovers).join(', ')}</dd>
+                                    <dd>{getApproverNames(curationApprovers).join(', ')}</dd>
                                 </div>
                             : null}
                             {curationContributors && curationContributors.length ? 
                                 <div>
                                     <dt>Curation contributors:</dt>
-                                    <dd>{renderContributorNames(curationContributors).join(', ')}</dd>
+                                    <dd>{getContributorNames(curationContributors).join(', ')}</dd>
                                 </div>
                             : null}
                             <dt>Calculated classification:</dt>

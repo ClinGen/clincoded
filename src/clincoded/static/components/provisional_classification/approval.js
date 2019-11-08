@@ -7,7 +7,7 @@ import { RestMixin } from '../rest';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
 import { getAffiliationName, getAllAffliations, getAffiliationSubgroups } from '../../libs/get_affiliation_name';
 import { getAffiliationApprover } from '../../libs/get_affiliation_approver';
-import { renderApproverNames, renderContributorNames } from '../../libs/render_approver_names';
+import { getApproverNames, getContributorNames } from '../../libs/get_approver_names';
 import Select from 'react-select';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
@@ -152,23 +152,19 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
     // Only saves affiliation IDs from react-select
     handleContributorSelect(selectedContributor) {
         const contributors = [];
-        const retainSelectedContributor = [];
         selectedContributor.forEach(contributor => {
             contributors.push(contributor.value);
-            retainSelectedContributor.push(contributor);
         });
-        this.setState({ curationContributors: contributors, retainSelectedContributor });
+        this.setState({ curationContributors: contributors, retainSelectedContributor: selectedContributor });
     },
 
     // Only saves affiliation subgroup IDs from react-select
     handleApproverSelect(selectedApprover) {
         const approvers = [];
-        const retainSelectedApprover = [];
         selectedApprover.forEach(approver => {
             approvers.push(approver.value);
-            retainSelectedApprover.push(approver);
         });
-        this.setState({ curationApprovers: approvers, retainSelectedApprover });
+        this.setState({ curationApprovers: approvers, retainSelectedApprover: selectedApprover });
     },
 
     /**
@@ -422,7 +418,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     <div>
                                         <dl className="inline-dl clearfix">
                                             <dt><span>Curation Contributor(s):</span></dt>
-                                            <dd>{curationContributors ? renderContributorNames(curationContributors).join(', ') : null}</dd>
+                                            <dd>{curationContributors ? getContributorNames(curationContributors).join(', ') : null}</dd>
                                         </dl>
                                     </div>
                                     <div>
@@ -432,7 +428,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                         </dl>
                                     </div>
                                 </div>
-                                <div className="col-xs-12 col-sm-3">
+                                <div className="col-xs-12 col-sm-5">
                                     <div className="approval-date">
                                         <dl className="inline-dl clearfix preview-approval-date">
                                             <dt><span>Date saved as Approved:</span></dt>
@@ -448,7 +444,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     <div className="curation-approvers">
                                         <dl className="inline-dl clearfix">
                                             <dt><span>Curation Approver(s):</span></dt>
-                                            <dd>{curationApprovers ? renderApproverNames(curationApprovers).join(', ') : null}</dd>
+                                            <dd>{curationApprovers ? getApproverNames(curationApprovers).join(', ') : null}</dd>
                                         </dl>
                                     </div>
                                     <div className="approval-comments">

@@ -5,9 +5,9 @@ import moment from 'moment';
 import { Input } from '../../libs/bootstrap/form';
 import { getAffiliationName, getAffiliationNameBySubgroupID } from '../../libs/get_affiliation_name';
 import { renderSelectedModeInheritance } from '../../libs/render_mode_inheritance';
-import { renderApproverNames, renderContributorNames } from '../../libs/render_approver_names';
+import { getApproverNames, getContributorNames } from '../../libs/get_approver_names';
 import { sortListByDate } from '../../libs/helpers/sort';
-import { sopVersionByScoring, isScoringForCurrentSOP } from '../../libs/sop';
+import { sopVersionByScoring, isScoringForCurrentSOP, sopVersionByDate } from '../../libs/sop';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
 import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
@@ -373,13 +373,13 @@ class CurationSnapshots extends Component {
                                     {snapshot.resource && snapshot.resource.curationApprovers ?
                                         <dl className="inline-dl clearfix">
                                             <dt><span>Curation approvers:</span></dt>
-                                            <dd><span>{renderApproverNames(snapshot.resource.curationApprovers).sort().join(', ')}</span></dd>
+                                            <dd><span>{getApproverNames(snapshot.resource.curationApprovers).sort().join(', ')}</span></dd>
                                         </dl>
                                         : null}
                                     {snapshot.resource && snapshot.resource.curationContributors ?
                                         <dl className="inline-dl clearfix">
                                             <dt><span>Curation contributors:</span></dt>
-                                            <dd><span>{renderContributorNames(snapshot.resource.curationContributors).sort().join(', ')}</span></dd>
+                                            <dd><span>{getContributorNames(snapshot.resource.curationContributors).sort().join(', ')}</span></dd>
                                         </dl>
                                         : null}
                                     <dl className="inline-dl clearfix snapshot-final-approval-date">
@@ -393,7 +393,7 @@ class CurationSnapshots extends Component {
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-sop-version">
                                         <dt><span>SOP Version:</span></dt>
-                                        <dd><span>{snapshot.resource.sopVersion ? snapshot.resource.sopVersion : sopVersionByScoring(snapshot.resource.classificationPoints)}</span></dd>
+                                        <dd><span>{snapshot.resource.sopVersion ? snapshot.resource.sopVersion : sopVersionByDate(snapshot.resource)}</span></dd>
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-approval-classification">
                                         <dt><span>{type === 'interpretation' ? 'Saved Pathogenicity:' : 'Saved Classification:'}</span></dt>
