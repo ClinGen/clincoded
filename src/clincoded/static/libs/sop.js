@@ -23,3 +23,14 @@ export function isScoringForCurrentSOP(classificationPoints) {
         return false;
     }
 }
+
+/**
+ * Method to determine the ClinGen SOP version from the provisional object
+ * @param {object} provisional - Object containing classification info
+*/
+export function sopVersionByDate(provisional) {
+    const currentSOPDate = new Date('12 November 2019').toISOString();
+    if (provisional && provisional.provisionalDate < currentSOPDate) {
+        return sopVersionByScoring(provisional.classificationPoints);
+    }
+}
