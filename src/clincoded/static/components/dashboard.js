@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
+import Select from 'react-select';
 import { curator_page } from './globals';
 import { RestMixin } from './rest';
 import { parseAndLogError } from './mixins';
@@ -16,6 +17,7 @@ import { renderProvisionalStatus } from '../libs/render_provisional_status';
 import { renderApprovalStatus } from '../libs/render_approval_status';
 import { renderNewProvisionalStatus } from '../libs/render_new_provisional_status';
 import { renderPublishStatus } from '../libs/render_publish_status';
+import { exportCSV } from '../libs/export_csv';
 
 var Dashboard = createReactClass({
     mixins: [RestMixin, CuratorHistory],
@@ -41,7 +43,13 @@ var Dashboard = createReactClass({
             affiliatedGdms: [],
             affiliatedGdmsLoading: true,
             affiliatedInterpretations: [],
-            affiliatedInterpretationsLoading: true
+            affiliatedInterpretationsLoading: true,
+            gdmSearchTerm: '', // User input to filter GDMs
+            gdmSearchStatus: [], // User selected status to filter GDMs
+            filteredGdms: [],  // List of parsed and filtered/unfiltered GDMs
+            interpretationSearchTerm: '', // User input to filter interpretations
+            interpretationSearchStatus: [], // User selected status to filter interpretations
+            filteredInterpretations: [] // List of parsed and filtered/unfiltered interpretations
         };
     },
 
@@ -63,21 +71,186 @@ var Dashboard = createReactClass({
         });
     },
 
+    // Reset filtered GDM list according to selected filters
+    gdmSetSearchResults() {
+        const affiliation = this.props.affiliation;
+        // Filter GDMs
+        let gdms = [];
+        if (affiliation && Object.keys(affiliation).length) {
+            gdms = this.state.affiliatedGdms; // Get the complete list of affiliated GDMs
+        } else {
+            gdms = this.state.gdmList; // Get the complete list of GDMs
+        }
+        const searchTerm = this.state.gdmSearchTerm;
+        let searchStatus = this.state.gdmSearchStatus;
+        let filteredGdms = [];
+        if ((searchTerm && searchTerm.length > 0) || (searchStatus && searchStatus.length > 0)) {
+            // If no status is selected, set to search for 'All'
+            searchStatus = searchStatus.length === 0 ? ['All'] : searchStatus;
+            searchStatus.map(status => {
+                // If status is 'All', empty the status filter
+                if (status === 'All') {
+                    status = '';
+                }
+                // Get items for each status
+                const filteredList = gdms.filter(function(item) {
+                    return (
+                        ((item.gdmGeneDisease && item.gdmGeneDisease.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
+                        (item.gdmModel && item.gdmModel.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1)) &&
+                        (item.status && item.status.toLowerCase().indexOf(status.toLowerCase()) > -1)
+                    );
+                });
+                // Remove item that's already included in selected list
+                const newList = filteredList.filter(item => !filteredGdms.includes(item));
+                // Sort list by gene disease & model
+                const sortedList = _(newList).sortBy(item => {
+                    return (this.cleanGdmGeneDiseaseName(item.gdmGeneDisease, item.gdmModel));
+                });
+                // Add new items to selected list
+                filteredGdms.push(...sortedList);
+            });
+            this.setState({filteredGdms: filteredGdms});
+        } else {
+            // No filter is selected so just return complete list
+            this.setState({filteredGdms: gdms});
+        }
+    },
+
+    // Method to handle user input to filter/unfilter GDMs
+    gdmHandleSearchTermChange(e) {
+        this.setState({gdmSearchTerm: e.target.value}, () => {
+            this.gdmSetSearchResults();
+        });
+    },
+
+    // Method to handle user status change to filter/unfilter GDMs
+    gdmHandleStatusChange(selectedStatus) {
+        const statusList = [];
+        selectedStatus.forEach(status => {
+            statusList.push(status.value);
+        });
+        this.setState({gdmSearchStatus: statusList}, () => {
+            this.gdmSetSearchResults();
+        });
+    },
+
+    // Reset filtered interpretation list according to selected filters
+    interpretationSetSearchResults() {
+        const affiliation = this.props.affiliation;
+        // Filter Interpretations
+        let interpretations = [];
+        if (affiliation && Object.keys(affiliation).length) {
+            interpretations = this.state.affiliatedInterpretations; // Get the complete list of affiliated interpretations
+        } else {
+            interpretations = this.state.vciInterpList; // Get the complete list of interpretations
+        }
+        const searchTerm = this.state.interpretationSearchTerm;
+        let searchStatus = this.state.interpretationSearchStatus;
+        let filteredInterpretations = [];
+        if ((searchTerm && searchTerm.length > 0) || (searchStatus && searchStatus.length > 0)) {
+            // If no status is selected, set to search for 'All'
+            searchStatus = searchStatus.length === 0 ? ['All'] : searchStatus;
+            searchStatus.map(status => {
+                // If status is 'All', empty the status filter
+                if (status === 'All') {
+                    status = '';
+                }
+                // Get items for each status
+                const filteredList = interpretations.filter(function(item) {
+                    return (
+                        ((item.variantTitle && item.variantTitle.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
+                         (item.diseaseTerm && item.diseaseTerm.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1) ||
+                         (item.modeInheritance && item.modeInheritance.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1)) &&
+                        (item.status && item.status.toLowerCase().indexOf(status.toLowerCase()) > -1)
+                    );
+                });
+                // Remove item that's already included in selected list
+                const newList = filteredList.filter(item=> !filteredInterpretations.includes(item));
+                // Sort list by variant
+                const sortedList = _(newList).sortBy(item => {
+                    return item.variantTitle;
+                });
+                // Add new items to selected list
+                filteredInterpretations.push(...sortedList);
+            });
+            this.setState({filteredInterpretations: filteredInterpretations});
+        } else {
+            // No filter is selected so just return complete list
+            this.setState({filteredInterpretations: interpretations});
+        }
+    },
+
+    // Method to handle user input to filter/unfilter interpretations
+    interpretationHandleSearchTermChange(e) {
+        this.setState({interpretationSearchTerm: e.target.value}, () => {
+            this.interpretationSetSearchResults();
+        });
+    },
+
+    // Method to handle user status change to filter/unfilter interpretations
+    interpretationHandleStatusChange(selectedStatus) {
+        const statusList = [];
+        selectedStatus.forEach(status => {
+            statusList.push(status.value);
+        });
+        this.setState({interpretationSearchStatus: statusList}, () => {
+            this.interpretationSetSearchResults();
+        });
+    },
+
+    // Method to handle export selected GDMs or interpretations to csv file
+    handleExport(contentType, filename) {
+        if (contentType === 'interpretation') {
+            let interpretations = [];
+            if (this.state.filteredInterpretations.length > 0) {
+                this.state.filteredInterpretations.map(item => {
+                    interpretations.push({
+                        Variant: item.variantTitle,
+                        'Disease/Mode of Inheritance': '"' + (item.diseaseTerm ? item.diseaseTerm : "--") + "/" + (item.modeInheritance ? item.modeInheritance : "--") + '"',
+                        Status: item.status,
+                        'Creation Date': moment(item.date_created).format("YYYY MMM DD")
+                    });
+                });
+
+                exportCSV(interpretations, {filename: filename});
+            }
+        } else if (contentType === 'gdm') {
+            let gdms = [];
+            if (this.state.filteredGdms.length > 0) {
+                this.state.filteredGdms.map(gdm => {
+                    gdms.push({
+                        'Gene-Disease Record': '"' + this.cleanGdmGeneDiseaseName(gdm.gdmGeneDisease, gdm.gdmModel) + '"',
+                        Status: gdm.status,
+                        'Creation Date': moment(gdm.date_created).format("YYYY MMM DD")
+                    });
+                });
+
+                exportCSV(gdms, {filename: filename});
+            }
+        } else {
+            return false;
+        }
+    },
+
     /**
-     * Method to render status labels/tags for each row of GDMs and Interpretations
+     * Method to render status labels/tags/string for each row of GDMs and Interpretations
      * Called during the rendering of each GDM or Interpretation
+     * and setting the status for eacg GDM or Interpretation
+     *
      * @param {object} gdm - The GDM object
      * @param {object} interpretation - The Interpretation object
      * @param {object} affiliation - The affiliation object
      * @param {object} session - The session object
+     * @param {boolean} stringOnly - Only return status text, not the status labels/tags (default returns labels/tags)
      */
-    renderClassificationStatusTag(gdm, intepretation, affiliation, session) {
+
+    renderClassificationStatusTag(gdm, intepretation, affiliation, session, stringOnly=false) {
         const context = this.props.context;
         let classification = null, snapshots = [], resourceType = '';
         if (gdm && Object.keys(gdm).length) {
             // The rendering is for a GDM
             resourceType = 'classification';
-            let provisionalClassification = GetProvisionalClassification(gdm, affiliation, session);
+            const provisionalClassification = GetProvisionalClassification(gdm, affiliation, session);
             if (provisionalClassification && provisionalClassification.provisionalExist && provisionalClassification.provisional) {
                 classification = provisionalClassification.provisional;
                 snapshots = classification.associatedClassificationSnapshots && classification.associatedClassificationSnapshots.length ? classification.associatedClassificationSnapshots : [];
@@ -91,20 +264,34 @@ var Dashboard = createReactClass({
             }
         }
         if (snapshots && snapshots.length) {
-            return (
-                <span className="classification-status-wrapper">
-                    {renderProvisionalStatus(snapshots, resourceType, gdm, context, false)}
-                    {renderApprovalStatus(snapshots, resourceType, context)}
-                    {renderNewProvisionalStatus(snapshots, resourceType, gdm, context, false)}
-                    {renderPublishStatus(snapshots)}
-                </span>
-            );
+            if (stringOnly) {
+                let statusList = [], status = [];
+                statusList.push(renderProvisionalStatus(snapshots, resourceType, gdm, context, false, stringOnly));
+                statusList.push(renderApprovalStatus(snapshots, resourceType, context, null, null, stringOnly));
+                statusList.push(renderNewProvisionalStatus(snapshots, resourceType, gdm, context, false, stringOnly));
+                statusList.push(renderPublishStatus(snapshots, stringOnly));
+                status = statusList.filter(item => (item != null));
+                return (status.join(' '));
+            } else {
+                return (
+                    <span className="classification-status-wrapper">
+                        {renderProvisionalStatus(snapshots, resourceType, gdm, context, false, stringOnly)}
+                        {renderApprovalStatus(snapshots, resourceType, context, null, null, stringOnly)}
+                        {renderNewProvisionalStatus(snapshots, resourceType, gdm, context, false, stringOnly)}
+                        {renderPublishStatus(snapshots, stringOnly)}
+                    </span>
+                );
+            }
         } else {
-            return (
-                <span className="classification-status-wrapper">
-                    {renderInProgressStatus(classification)}
-                </span>
-            );
+            if (stringOnly) {
+                return renderInProgressStatus(classification, stringOnly);
+            } else {
+                return (
+                    <span className="classification-status-wrapper">
+                        {renderInProgressStatus(classification, stringOnly)}
+                    </span>
+                );
+            }
         }
     },
 
@@ -127,11 +314,12 @@ var Dashboard = createReactClass({
                                 gdm: gdmResult,
                                 gdmGeneDisease: this.cleanGdmGeneDiseaseName(gdmResult.gene.symbol, gdmResult.disease.term),
                                 gdmModel: this.cleanHpoName(gdmResult.modeInheritance),
+                                status: this.renderClassificationStatusTag(gdmResult, null, this.props.affiliation, this.props.session, true),
                                 date_created: gdmResult.date_created
                             });
                         }
                     });
-                    this.setState({gdmList: gdmList, gdmListLoading: false});
+                    this.setState({gdmList: gdmList, gdmListLoading: false, filteredGdms: gdmList});
                 });
             } else {
                 this.setState({gdmListLoading: false});
@@ -147,13 +335,15 @@ var Dashboard = createReactClass({
                                 interpretation: vciInterpResult,
                                 variantUuid: vciInterpResult.variant.uuid,
                                 variant: vciInterpResult.variant,
+                                variantTitle: renderVariantTitle(vciInterpResult.variant, true),
                                 diseaseTerm: vciInterpResult.disease ? vciInterpResult.disease.term : null,
                                 modeInheritance: vciInterpResult.modeInheritance ? this.cleanHpoName(vciInterpResult.modeInheritance) : null,
+                                status: this.renderClassificationStatusTag(null, vciInterpResult, this.props.affiliation, this.props.session, true),
                                 date_created: vciInterpResult.date_created
                             });
                         }
                     });
-                    this.setState({vciInterpList: vciInterpList, vciInterpListLoading: false});
+                    this.setState({vciInterpList: vciInterpList, vciInterpListLoading: false, filteredInterpretations: vciInterpList});
                 });
             } else {
                 this.setState({vciInterpListLoading: false});
@@ -183,13 +373,14 @@ var Dashboard = createReactClass({
                             gdm: affiliatedGdm,
                             gdmGeneDisease: this.cleanGdmGeneDiseaseName(affiliatedGdm.gene.symbol, affiliatedGdm.disease.term),
                             gdmModel: this.cleanHpoName(affiliatedGdm.modeInheritance),
+                            status: this.renderClassificationStatusTag(affiliatedGdm, null, this.props.affiliation, this.props.session, true),
                             date_created: affiliatedGdm.date_created
                         });
                     });
-                    this.setState({affiliatedGdms: affiliatedGdms, affiliatedGdmsLoading: false});
+                    this.setState({affiliatedGdms: affiliatedGdms, affiliatedGdmsLoading: false, filteredGdms: affiliatedGdms});
                 });
             } else {
-                this.setState({affiliatedGdms: affiliatedGdms, affiliatedGdmsLoading: false});
+                this.setState({affiliatedGdms: affiliatedGdms, affiliatedGdmsLoading: false, filteredGdms: affiliatedGdms});
             }
             // Handle interpretations result
             interpretationURLs = data[1]['@graph'].map(result => { return result['@id']; });
@@ -201,29 +392,31 @@ var Dashboard = createReactClass({
                             interpretation: interpretation,
                             variantUuid: interpretation.variant.uuid,
                             variant: interpretation.variant,
+                            variantTitle: renderVariantTitle(interpretation.variant, true),
                             diseaseTerm: interpretation.disease ? interpretation.disease.term : null,
                             modeInheritance: interpretation.modeInheritance ? this.cleanHpoName(interpretation.modeInheritance) : null,
                             modified_by: interpretation.modified_by ? interpretation.modified_by.title : interpretation.submitted_by.title,
+                            status: this.renderClassificationStatusTag(null, interpretation, this.props.affiliation, this.props.session, true),
                             date_created: interpretation.date_created
                         });
                     });
-                    this.setState({affiliatedInterpretations: affiliatedInterpretations, affiliatedInterpretationsLoading: false});
+                    this.setState({affiliatedInterpretations: affiliatedInterpretations, affiliatedInterpretationsLoading: false, filteredInterpretations: affiliatedInterpretations});
                 });
             } else {
-                this.setState({affiliatedInterpretations: affiliatedInterpretations, affiliatedInterpretationsLoading: false});
+                this.setState({affiliatedInterpretations: affiliatedInterpretations, affiliatedInterpretationsLoading: false, filteredInterpretations: affiliatedInterpretations});
             }
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
     componentDidMount() {
-        let user = this.props.session.user_properties;
-        let affiliation = this.props.affiliation;
+        const user = this.props.session.user_properties;
+        const affiliation = this.props.affiliation;
         if (!affiliation && user) {
             this.setUserData(user);
             this.getData(user);
             this.getHistories(user, 10, null, affiliation).then(histories => {
                 if (histories) {
-                    let filteredHistories = histories.filter(item => !item.primary.affiliation);
+                    const filteredHistories = histories.filter(item => !item.primary.affiliation);
                     this.setState({histories: filteredHistories, historiesLoading: false});
                 }
             });
@@ -240,16 +433,16 @@ var Dashboard = createReactClass({
     },
 
     componentWillReceiveProps(nextProps) {
-        let user = nextProps && nextProps.session.user_properties;
-        let affiliation = nextProps && nextProps.affiliation;
+        const user = nextProps && nextProps.session.user_properties;
+        const affiliation = nextProps && nextProps.affiliation;
         // This 'if' condition is true immediately upon user signing-in
         // Fetch data associated with the curator only, especially when the curator is not associated with any affiliations
-        if (user && nextProps.href.indexOf('dashboard') > -1 && !_.isEqual(user, this.props.session.user_properties)) {
+        if (!affiliation && user && nextProps.href.indexOf('dashboard') > -1 && !_.isEqual(user, this.props.session.user_properties)) {
             this.setUserData(user);
             this.getData(user);
             this.getHistories(user, 10, null, affiliation).then(histories => {
                 if (histories) {
-                    let filteredHistories = histories.filter(item => !item.primary.affiliation);
+                    const filteredHistories = histories.filter(item => !item.primary.affiliation);
                     this.setState({histories: filteredHistories, historiesLoading: false});
                 } else {
                     this.setState({histories: [], historiesLoading: false});
@@ -274,7 +467,7 @@ var Dashboard = createReactClass({
             this.getData(user);
             this.getHistories(user, 10, null, affiliation).then(histories => {
                 if (histories) {
-                    let filteredHistories = histories.filter(item => !item.primary.affiliation);
+                    const filteredHistories = histories.filter(item => !item.primary.affiliation);
                     this.setState({histories: filteredHistories, historiesLoading: false});
                 } else {
                     this.setState({histories: [], historiesLoading: false});
@@ -284,64 +477,62 @@ var Dashboard = createReactClass({
     },
 
     /**
-     * Method to render individual evidence table
-     * @param {array} records - Individual curation evidence
+     * Method to render GDMs status filter
+     * @param {integer} listLength - number of available GDMs
      */
-    renderIndividualRecords(records) {
-        const self = this;
-        return (
-            <div className="panel panel-primary">
-                <div className="panel-heading">
-                    <h3 className="panel-title">My Gene-Disease Records</h3>
+    renderGdmsStatusFilter(listLength) {
+        if (listLength > 0) {
+            const statusList = [
+                {value: "None", label: "None"},
+                {value: "In Progress", label: "In Progress"},
+                {value: "Approved", label: "Approved"},
+                {value: "Provisional", label: "Provisional"},
+                {value: "New Provisional", label: "New Provisional"},
+                {value: "Published", label: "Published"},
+            ];
+            return (
+                <div className="filter-by">
+                    <div className="filter-term">
+                        <input type="text" name="gdmFilterTerm" id="gdmFilterTerm" placeholder="Filter by Gene, Disease or Mode of Inheritance"
+                            value={this.state.gdmSearchTerm} onChange={this.gdmHandleSearchTermChange} className="form-control filter-term-input"/>
+                    </div>
+                    <div className="filter-status">
+                        <Select isMulti className="multi-select" placeholder="Filter by Status" options={statusList} onChange={this.gdmHandleStatusChange} />
+                    </div>
                 </div>
-                <div className="panel-content-wrapper">
-                    {this.state.gdmListLoading ? showActivityIndicator('Loading... ') : null}
-                    {records.length > 0 ?
-                        <table className="table individual-record-list">
-                            <thead>
-                                <tr>
-                                    <th className="item-name">Gene-Disease Record</th>
-                                    <th className="item-status">Status</th>
-                                    <th className="item-timestamp">Creation Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {records.map(item => {
-                                    return (
-                                        <tr key={item.uuid}>
-                                            <td className="item-name">
-                                                <a key={item.uuid} className="individual-record-link" href={"/curation-central/?gdm=" + item.uuid}>
-                                                    <span className="gdm-record-label"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span>
-                                                </a>
-                                            </td>
-                                            <td className="item-status">{self.renderClassificationStatusTag(item.gdm, null, this.props.affiliation, this.props.session)}</td>
-                                            <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                        :
-                        <div className="panel-body"><p>You have not created any Gene-Disease-Mode of Inheritance entries.</p></div>
-                    }
-                </div>
-            </div>
-        );
+            );
+        } else {
+            return null;
+        }
     },
 
     /**
-     * Method to render affiliated evidence table
-     * @param {array} records - Affiliated curation evidence
+     * Method to render gene-disease records (GDMs) table
+     * @param {array} records - gene-disease records (GDMs)
+     * @param {boolean} affiliated - GDMs are affiliated with an affiliation
      */
-    renderAffiliatedGdms(records) {
-        const self = this;
+    renderGdms(records, affiliated) {
+        const tableTitle = affiliated ? "My Affiliation's Gene-Disease Records *" : "My Gene-Disease Records";
+        const isLoading = affiliated ? this.state.affiliatedGdmsLoading : this.state.gdmListLoading;
+        const gdmsCount = affiliated ? this.state.affiliatedGdms.length : this.state.gdmList.length;
+        const buttonTitle = (this.state.gdmSearchTerm || this.state.gdmSearchStatus.length > 0) ? 'Download filtered table as .csv' : 'Download .csv';
+        const emptyListMsg = (this.state.gdmSearchTerm || this.state.gdmSearchStatus.length > 0) ? 'No matching Gene-Disease record found.' : 'Your affiliation has not created any Gene-Disease-Mode of Inheritance entries.';
+        const disableButton = records.length > 0 ? false : true;
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
-                    <h3 className="panel-title">My Affiliation's Gene-Disease Records *</h3>
+                    <h3 className="panel-title">{tableTitle}
+                        <span className="number-of-entries"> number of entries: {records.length}</span>
+                        <span className="download-button pull-right">
+                            <button onClick={this.handleExport.bind(null, 'gdm', 'gdms-export.csv')} className="btn btn-default btn-sm" disabled={disableButton}>
+                                {buttonTitle} <i className="icon icon-download"></i>
+                            </button>
+                        </span>
+                    </h3>
                 </div>
+                {this.renderGdmsStatusFilter(gdmsCount)}
                 <div className="panel-content-wrapper">
-                    {this.state.affiliatedGdmsLoading ? showActivityIndicator('Loading... ') : null}
+                    {isLoading ? showActivityIndicator('Loading... ') : null}
                     {records.length > 0 ?
                         <table className="table affiliated-evidence-list">
                             <thead>
@@ -360,7 +551,7 @@ var Dashboard = createReactClass({
                                                     <span className="gdm-record-label"><strong>{item.gdmGeneDisease}</strong>–<i>{item.gdmModel}</i></span>
                                                 </a>
                                             </td>
-                                            <td className="item-status">{self.renderClassificationStatusTag(item.gdm, null, this.props.affiliation, this.props.session)}</td>
+                                            <td className="item-status">{this.renderClassificationStatusTag(item.gdm, null, this.props.affiliation, this.props.session)}</td>
                                             <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
                                     );
@@ -368,7 +559,7 @@ var Dashboard = createReactClass({
                             </tbody>
                         </table>
                         :
-                        <div className="panel-body"><p>Your affiliation has not created any Gene-Disease-Mode of Inheritance entries.</p></div>
+                        <div className="panel-body"><p>{emptyListMsg}</p></div>
                     }
                 </div>
             </div>
@@ -376,68 +567,62 @@ var Dashboard = createReactClass({
     },
 
     /**
-     * Method to render individual variant interpretations table
-     * @param {array} records - Individual variant interpretations
+     * Method to render variant interpretations filters
+     * @param {integer} listLength - number of available variant interpretations
      */
-    renderIndividualInterpretations(records) {
-        const self = this;
-        return (
-            <div className="panel panel-primary">
-                <div className="panel-heading">
-                    <h3 className="panel-title">My Variant Interpretations</h3>
+    renderInterpretationsStatusFilter(listLength) {
+        if (listLength > 0) {
+            const statusList = [
+                {value: "None", label: "None"},
+                {value: "In Progress", label: "In Progress"},
+                {value: "Approved", label: "Approved"},
+                {value: "Provisional", label: "Provisional"},
+                {value: "New Provisional", label: "New Provisional"},
+                {value: "Published", label: "Published"},
+            ];
+            return (
+                <div className="filter-by">
+                    <div className="filter-term">
+                        <input type="text" name="interpretationFilterTerm" id="interpretationFilterTerm" placeholder="Filter by Variant, Disease or Mode of Inheritance"
+                            value={this.state.interpretationSearchTerm} onChange={this.interpretationHandleSearchTermChange} className="form-control filter-term-input"/>
+                    </div>
+                    <div className="filter-status">
+                        <Select isMulti className="multi-select" placeholder="Filter by Status" options={statusList} onChange={this.interpretationHandleStatusChange} />
+                    </div>
                 </div>
-                <div className="panel-content-wrapper">
-                    {this.state.vciInterpListLoading ? showActivityIndicator('Loading... ') : null}
-                    {records.length > 0 ?
-                        <table className="table individual-interpretation-list">
-                            <thead>
-                                <tr>
-                                    <th className="item-variant">Variant</th>
-                                    <th className="item-attribute">Disease/Mode of Inheritance</th>
-                                    <th className="item-status">Status</th>
-                                    <th className="item-timestamp">Creation Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {records.map(item => {
-                                    return (
-                                        <tr key={item.uuid}>
-                                            <td className="item-variant">
-                                                <a key={item.uuid}
-                                                    className="individual-record-link"
-                                                    href={"/variant-central/?edit=true&variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
-                                                    <span className="variant-title"><strong>{renderVariantTitle(item.variant)}</strong></span>
-                                                </a>
-                                            </td>
-                                            <td className="item-attribute">{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
-                                            <td className="item-status">{self.renderClassificationStatusTag(null, item.interpretation, this.props.affiliation, this.props.session)}</td>
-                                            <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                        :
-                        <div className="panel-body"><p>You have not created any variant interpretations.</p></div>
-                    }
-                </div>
-            </div>
-        );
+            );
+        } else {
+            return null;
+        }
     },
 
     /**
-     * Method to render affiliated variant interpretations table
-     * @param {array} records - Affiliated variant interpretations
+     * Method to render variant interpretations table
+     * @param {array} records - variant interpretations
+     * @param {boolean} affiliated - interpretaions are affiliated with an affiliation
      */
-    renderAffiliatedInterpretations(records) {
-        const self = this;
+    renderInterpretations(records, affiliated) {
+        const tableTitle = affiliated ? "My Affiliation's Variant Interpretations *" : "My Variant Interpretations";
+        const isLoading = affiliated ? this.state.affiliatedInterpretationsLoading : this.state.vciInterpListLoading;
+        const interpretationsCount = affiliated ? this.state.affiliatedInterpretations.length : this.state.vciInterpList.length;
+        const buttonTitle = (this.state.interpretationSearchTerm || this.state.interpretationSearchStatus.length > 0) ? 'Download filtered table as .csv' : 'Download .csv';
+        const emptyListMsg = (this.state.interpretationSearchTerm || this.state.interpretationSearchStatus.length > 0) ? 'No matching variant interpretation found.' : 'Your affiliation has not created any You have not created any variant interpretations.';
+        const disableButton = records.length > 0 ? false : true;
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
-                    <h3 className="panel-title">My Affiliation's Variant Interpretations *</h3>
+                    <h3 className="panel-title">{tableTitle}
+                        <span className="number-of-entries"> number of entries: {records.length}</span>
+                        <span className="download-button pull-right">
+                            <button onClick={this.handleExport.bind(null, 'interpretation', 'interpretations-export.csv')} className="btn btn-default btn-sm" disabled={disableButton}>
+                                {buttonTitle} <i className="icon icon-download"></i>
+                            </button>
+                        </span>
+                    </h3>
                 </div>
+                {this.renderInterpretationsStatusFilter(interpretationsCount)}
                 <div className="panel-content-wrapper">
-                    {this.state.affiliatedInterpretationsLoading ? showActivityIndicator('Loading... ') : null}
+                    {isLoading ? showActivityIndicator('Loading... ') : null}
                     {records.length > 0 ?
                         <table className="table affiliated-interpretation-list">
                             <thead>
@@ -456,11 +641,11 @@ var Dashboard = createReactClass({
                                                 <a key={item.uuid}
                                                     className="affiliated-record-link"
                                                     href={"/variant-central/?edit=true&variant=" + item.variantUuid + "&interpretation=" + item.uuid}>
-                                                    <span className="variant-title"><strong>{renderVariantTitle(item.variant)}</strong></span>
+                                                    <span className="variant-title"><strong>{item.variantTitle}</strong></span>
                                                 </a>
                                             </td>
                                             <td className="item-attribute">{item.diseaseTerm ? item.diseaseTerm : "--"}/{item.modeInheritance ? item.modeInheritance : "--"}</td>
-                                            <td className="item-status">{self.renderClassificationStatusTag(null, item.interpretation, this.props.affiliation, this.props.session)}</td>
+                                            <td className="item-status">{this.renderClassificationStatusTag(null, item.interpretation, this.props.affiliation, this.props.session)}</td>
                                             <td className="item-timestamp">{moment(item.date_created).format("YYYY MMM DD, h:mm a")}</td>
                                         </tr>
                                     );
@@ -468,17 +653,19 @@ var Dashboard = createReactClass({
                             </tbody>
                         </table>
                         :
-                        <div className="panel-body"><p>Your affiliation has not created any variant interpretations.</p></div>
+                        <div className="panel-body"><p>{emptyListMsg}</p></div>
                     }
                 </div>
             </div>
         );
     },
 
+
+
     render() {
-        let affiliation = this.props.affiliation;
+        const affiliation = this.props.affiliation;
         // FIXME: Temporarily suppress history items for adding PMIDs or variants as they are affiliation-agnostic
-        let filteredHistories = this.state.histories.filter(history => !history.primary['@id'].match(/articles|variants/ig));
+        const filteredHistories = this.state.histories.filter(history => !history.primary['@id'].match(/articles|variants/ig));
 
         return (
             <div className="container">
@@ -538,11 +725,11 @@ var Dashboard = createReactClass({
                     {/*/ Right pane /*/}
                     <div className="col-md-8">
                         {affiliation && Object.keys(affiliation).length ?
-                            this.renderAffiliatedInterpretations(this.state.affiliatedInterpretations)
-                            : this.renderIndividualInterpretations(this.state.vciInterpList)}
+                            this.renderInterpretations(this.state.filteredInterpretations, true)
+                            : this.renderInterpretations(this.state.filteredInterpretations, false)}
                         {affiliation && Object.keys(affiliation).length ?
-                            this.renderAffiliatedGdms(this.state.affiliatedGdms)
-                            : this.renderIndividualRecords(this.state.gdmList)}
+                            this.renderGdms(this.state.filteredGdms, true)
+                            : this.renderGdms(this.state.filteredGdms, false)}
                         {affiliation && Object.keys(affiliation).length ?
                             <div className="alert alert-info">
                                 <strong>* Variant interpretations and Gene-Disease records created by this Affiliation.</strong> To create a new
