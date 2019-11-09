@@ -7,7 +7,7 @@ import { getAffiliationName, getAffiliationNameBySubgroupID } from '../../libs/g
 import { renderSelectedModeInheritance } from '../../libs/render_mode_inheritance';
 import { getApproverNames, getContributorNames } from '../../libs/get_approver_names';
 import { sortListByDate } from '../../libs/helpers/sort';
-import { sopVersionByScoring, isScoringForCurrentSOP, sopVersionByDate } from '../../libs/sop';
+import { sopVersionByScoring, isScoringForCurrentSOP, determineSOPVersion } from '../../libs/sop';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
 import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
@@ -393,7 +393,7 @@ class CurationSnapshots extends Component {
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-sop-version">
                                         <dt><span>SOP Version:</span></dt>
-                                        <dd><span>{snapshot.resource.sopVersion ? snapshot.resource.sopVersion : sopVersionByDate(snapshot.resource)}</span></dd>
+                                        <dd><span>{snapshot.resource.sopVersion ? snapshot.resource.sopVersion : determineSOPVersion(snapshot.resource)}</span></dd>
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-approval-classification">
                                         <dt><span>{type === 'interpretation' ? 'Saved Pathogenicity:' : 'Saved Classification:'}</span></dt>
