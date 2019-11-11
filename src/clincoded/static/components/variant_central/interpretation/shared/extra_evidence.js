@@ -284,7 +284,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
         if (foundCandidate != null) {
             // deep copy the evidence data
             data = JSON.parse(JSON.stringify(foundCandidate));
-            data.source.data['comments'] = (foundCandidate.source.data['comments'] && foundCandidate.source.data['comments'] != '') ?
+            data.sourceInfo.data['comments'] = (foundCandidate.sourceInfo.data['comments'] && foundCandidate.sourceInfo.data['comments'] != '') ?
                 foundCandidate.sourceInfo.data['comments'] + '\n' + extra_evidence.evidenceDescription
                 :
                 extra_evidence.evidenceDescription;
