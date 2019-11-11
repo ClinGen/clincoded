@@ -29,7 +29,23 @@ export function isScoringForCurrentSOP(classificationPoints) {
  * @param {object} provisional - Object containing classification info
 */
 export function determineSOPVersion(provisional) {
-    if (provisional && !provisional.sopVersion) {
-        return sopVersionByScoring(provisional.classificationPoints);
+    const sopCurrentVersion = '7';
+    if (provisional) {
+        if (provisional.hasOwnProperty('sopVersion')) {
+            if (provisional.sopVersion) {
+                return provisional.sopVersion;
+            } else {
+                // Until "current" classification is approved (where SOP is selected), assume curation is taking place under current SOP
+                return sopCurrentVersion;
+            }
+        } else {
+            // For classifications saved before users could select an SOP version, use existing determination logic
+            return sopVersionByScoring(provisional.classificationPoints);
+        }
+    } else {
+        // Until classification is saved (via the approval process), assume curation is taking place under current SOP
+        return sopCurrentVersion;
     }
 }
+
+export const sopVersions = ['7', '6', '5', '4', '3', '2', '1'];

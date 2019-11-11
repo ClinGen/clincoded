@@ -8,6 +8,7 @@ import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
 import { getAffiliationName, getAllAffliations, getAffiliationSubgroups } from '../../libs/get_affiliation_name';
 import { getAffiliationApprover } from '../../libs/get_affiliation_approver';
 import { getApproverNames, getContributorNames } from '../../libs/get_approver_names';
+import { sopVersions } from '../../libs/sop';
 import Select from 'react-select';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
@@ -375,7 +376,6 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const provisional = this.props.provisional;
         const classification = this.props.classification;
         const affiliation = provisional.affiliation ? provisional.affiliation : (this.props.affiliation ? this.props.affiliation : null);
-        const sopVersions = ['7', '6', '5', '4', '3', '2', '1'];
         const affiliationApprovers = this.state.affiliationApprovers;
         const interpretation = this.props.interpretation;
         const submitBusy = this.state.submitBusy;
