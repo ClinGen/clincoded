@@ -7,7 +7,7 @@ import { getAffiliationName, getAffiliationNameBySubgroupID } from '../../libs/g
 import { renderSelectedModeInheritance } from '../../libs/render_mode_inheritance';
 import { getApproverNames, getContributorNames } from '../../libs/get_approver_names';
 import { sortListByDate } from '../../libs/helpers/sort';
-import { sopVersionByScoring, isScoringForCurrentSOP, determineSOPVersion } from '../../libs/sop';
+import { isScoringForCurrentSOP, determineSOPVersion } from '../../libs/sop';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
 import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';

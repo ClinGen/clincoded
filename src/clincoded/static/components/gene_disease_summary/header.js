@@ -7,7 +7,7 @@ import { getAffiliationName } from '../../libs/get_affiliation_name';
 import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
 import { getApproverNames, getContributorNames } from '../../libs/get_approver_names';
 import { getClassificationSavedDate } from '../../libs/get_saved_date';
-import { sopVersionByScoring, determineSOPVersion } from '../../libs/sop';
+import { determineSOPVersion } from '../../libs/sop';
 
 class GeneDiseaseEvidenceSummaryHeader extends Component {
     constructor(props) {
