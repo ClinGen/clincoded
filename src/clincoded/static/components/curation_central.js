@@ -209,6 +209,9 @@ var CurationCentral = createReactClass({
     handleDeletePmid: function(e, currAnnotation) {
         e.preventDefault(); e.stopPropagation();
         const { currGdm } = this.state;
+        const annotationToDelete = curator.flatten(currAnnotation);
+        annotationToDelete.status = 'deleted';
+        this.putRestData('/evidence/' + currAnnotation.uuid, annotationToDelete);
         this.getRestData('/gdm/' + currGdm.uuid, null, true).then(freshGdm => {
             const gdmObj = curator.flatten(freshGdm);
             if (gdmObj.annotations) {
