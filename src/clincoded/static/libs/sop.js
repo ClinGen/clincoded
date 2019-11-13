@@ -1,5 +1,4 @@
 'use strict';
-import _ from 'underscore';
 
 /**
  * Method to determine the ClinGen SOP version of the provided evidence scoring (from a classification)
