@@ -25,7 +25,7 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
         const publishDate = provisional.publishDate ? provisional.publishDate : snapshotPublishDate;
         const curationApprovers = provisional.curationApprovers ? provisional.curationApprovers.sort() : null;
         const curationContributors = provisional.curationContributors ? provisional.curationContributors.sort() : null;
-        const sopVersion = provisional.sopVersion ? provisional.sopVersion : determineSOPVersion(provisional);
+        const sopVersion = determineSOPVersion(provisional);
 
         return (
             <div className="evidence-summary panel-header">

@@ -393,7 +393,7 @@ class CurationSnapshots extends Component {
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-sop-version">
                                         <dt><span>SOP Version:</span></dt>
-                                        <dd><span>{snapshot.resource.sopVersion ? snapshot.resource.sopVersion : determineSOPVersion(snapshot.resource)}</span></dd>
+                                        <dd><span>{determineSOPVersion(snapshot.resource)}</span></dd>
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-approval-classification">
                                         <dt><span>{type === 'interpretation' ? 'Saved Pathogenicity:' : 'Saved Classification:'}</span></dt>

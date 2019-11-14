@@ -1,4 +1,5 @@
 'use strict';
+import _ from 'underscore';
 
 /**
  * Method to determine the ClinGen SOP version of the provided evidence scoring (from a classification)
@@ -29,10 +30,17 @@ export function isScoringForCurrentSOP(classificationPoints) {
  * @param {object} provisional - Object containing classification info
 */
 export function determineSOPVersion(provisional) {
-    if (provisional.hasOwnProperty('sopVersion')) {
-        if (provisional.sopVersion) {
-            return provisional.sopVersion;
+    const sopCurrentVersion = '7';
+    if (!_.isEmpty(provisional)) {
+        if (provisional.hasOwnProperty('sopVersion')) {
+            if (provisional.sopVersion) {
+                return provisional.sopVersion;
+            } else {
+                // Until "current" classification is approved (where SOP is selected), assume curation is taking place under current SOP
+                return sopCurrentVersion;
+            }
         } else {
+            // For classifications saved before users could select an SOP version, use existing determination logic
             return sopVersionByScoring(provisional.classificationPoints);
         }
     }
