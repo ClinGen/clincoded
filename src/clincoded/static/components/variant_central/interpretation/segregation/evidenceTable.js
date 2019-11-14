@@ -96,7 +96,7 @@ let EvidenceTable = createReactClass({
      */
     getSourceColumnContent(row) {
         let nodeContent = null;
-        let metadata = row.source.metadata;
+        let metadata = row.sourceInfo.metadata;
 
         if (metadata['_kind_key'] === 'PMID') {
             if (row.articles.length > 0) {
@@ -162,8 +162,8 @@ let EvidenceTable = createReactClass({
             <EvidenceModalManager
                 data = {row}
                 allData = {this.props.allData}
-                criteriaList = {row.source['relevant_criteria']}
-                evidenceType = {row.source.metadata['_kind_key']}
+                criteriaList = {row.sourceInfo['relevant_criteria']}
+                evidenceType = {row.sourceInfo.metadata['_kind_key']}
                 subcategory = {this.props.subcategory}
                 evidenceCollectionDone = {this.props.evidenceCollectionDone}
                 isNew = {false}
@@ -283,8 +283,8 @@ let EvidenceTable = createReactClass({
 
         tableData.forEach(row => {
             if (this.showRow(row)) {
-                let sourceData = row.source.data;
-                let metadata = row.source.metadata;
+                let sourceData = row.sourceInfo.data;
+                let metadata = row.sourceInfo.metadata;
                 sourceData['_kind_title'] = metadata['_kind_title']
                 sourceData['relevant_criteria'] = this.props.criteriaList.join(', ');
                 sourceData['_last_modified'] = moment(row['last_modified']).format('YYYY MMM DD, h:mm a');
@@ -449,7 +449,7 @@ let EvidenceTable = createReactClass({
     showRow(row) {
         let cols = this.getSubcategoryPanelColumns();
         const show = cols.some(col => {
-            if (row.source && row.source.data && row.source.data[col] && row.source.data[col] != '') {
+            if (row.sourceInfo && row.sourceInfo.data && row.sourceInfo.data[col] && row.sourceInfo.data[col] != '') {
                 return true;
             }
         });
