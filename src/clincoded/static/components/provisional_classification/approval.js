@@ -7,6 +7,7 @@ import { RestMixin } from '../rest';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
 import { getAffiliationApprover } from '../../libs/get_affiliation_approver';
+import ModalComponent from '../../libs/bootstrap/modal';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
 import * as CuratorHistory from '../curator_history';
@@ -90,6 +91,14 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         this.setState({approvalReviewDate});
     },
 
+    handleAlertClick(confirm, e) {
+        if (confirm) {
+            window.location.href = '/dashboard/';
+        }
+        this.child.closeModal();
+        this.handleCancelProvisional();
+    },
+
     /**
      * Method to handle previewing classificaiton approval form
      */
@@ -112,6 +121,11 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             formErr = true;
             this.setFormErrors(this.approverInput, 'Select an approver');
             return false;
+        }
+
+        // Trigger alert modal if affiliations do not match 
+        if (this.props.affiliation.affiliation_id !== this.props.provisional.affiliation) {
+            this.child.openModal();
         }
     },
 
@@ -272,6 +286,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const provisional = this.props.provisional;
         const classification = this.props.classification;
         const affiliation = provisional.affiliation ? provisional.affiliation : (this.props.affiliation ? this.props.affiliation : null);
+        const currentUserAffiliation = this.props.affiliation ? this.props.affiliation.affiliation_fullname : null;
         const affiliationApprovers = this.state.affiliationApprovers;
         const interpretation = this.props.interpretation;
         const submitBusy = this.state.submitBusy;
@@ -432,6 +447,18 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         }
                     </div>
                 </Form>
+                <ModalComponent modalTitle="Warning" modalClass="modal-default" modalWrapperClass="conflicting-affiliations"
+                    bootstrapBtnClass="btn btn-primary" actuatorClass="input-group-affiliation" actuatorTitle="" onRef={ref => (this.child = ref)}>
+                    <div className="modal-body">
+                        <p className="alert alert-warning">You are currently curating an Interpretation under the wrong affiliation. You are logged in as <strong>{currentUserAffiliation}</strong> and 
+                            curating an interpretation for <strong>{getAffiliationName(affiliation)}</strong>. Either close this tab in your browser or redirect to the Dashboard below.
+                        </p>
+                    </div>
+                    <div className="modal-footer">
+                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleAlertClick.bind(null, false)} title="Cancel" />
+                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleAlertClick.bind(null, true)} title="Go to Dashboard" />
+                    </div>
+                </ModalComponent>
             </div>
         );
     }
