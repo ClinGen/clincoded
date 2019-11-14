@@ -64,7 +64,10 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
      */
     handlePreviewProvisional() {
         const provisionalComment = this.provisionalCommentInput.getValue();
-        if (this.props.affiliation.affiliation_id !== this.props.provisional.affiliation) {
+        const affiliation = this.props.provisional.affiliation ? this.props.provisional.affiliation : null;
+        const currentUserAffiliation = this.props.affiliation ? this.props.affiliation.affiliation_id : null;
+    
+        if (currentUserAffiliation && currentUserAffiliation !== affiliation) {
             this.child.openModal();
         }
         this.setState({
@@ -368,7 +371,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                     bootstrapBtnClass="btn btn-primary" actuatorClass="input-group-affiliation" actuatorTitle="" onRef={ref => (this.child = ref)}>
                     <div className="modal-body">
                         <p className="alert alert-warning">You are currently curating an Interpretation under the wrong affiliation. You are logged in as <strong>{currentUserAffiliation}</strong> and 
-                            curating an interpretation for <strong>{getAffiliationName(affiliation)}</strong>. Either close this tab in your browser or redirect to the Dashboard below.
+                            curating an interpretation for <strong>{affiliation ? getAffiliationName(affiliation) : null}</strong>. Either close this tab in your browser or redirect to the Dashboard below.
                         </p>
                     </div>
                     <div className="modal-footer">

@@ -103,9 +103,14 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
      * Method to handle previewing classificaiton approval form
      */
     handlePreviewApproval() {
-        const affiliation = this.props.affiliation;
+        const affiliation = this.props.affiliation ? this.props.affiliation : null;
         let approver = this.approverInput ? this.approverInput.getValue() : (affiliation ? getAffiliationName(affiliation.affiliation_id) : this.props.session.user_properties.title);
         let formErr = false;
+
+        // Trigger alert modal if affiliations do not match 
+        if (affiliation && affiliation.affiliation_id !== this.props.provisional.affiliation) {
+            this.child.openModal();
+        }
 
         if (approver && approver !== 'none') {
             const approvalComment = this.approvalCommentInput.getValue();
@@ -121,11 +126,6 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             formErr = true;
             this.setFormErrors(this.approverInput, 'Select an approver');
             return false;
-        }
-
-        // Trigger alert modal if affiliations do not match 
-        if (this.props.affiliation.affiliation_id !== this.props.provisional.affiliation) {
-            this.child.openModal();
         }
     },
 
@@ -451,7 +451,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                     bootstrapBtnClass="btn btn-primary" actuatorClass="input-group-affiliation" actuatorTitle="" onRef={ref => (this.child = ref)}>
                     <div className="modal-body">
                         <p className="alert alert-warning">You are currently curating an Interpretation under the wrong affiliation. You are logged in as <strong>{currentUserAffiliation}</strong> and 
-                            curating an interpretation for <strong>{getAffiliationName(affiliation)}</strong>. Either close this tab in your browser or redirect to the Dashboard below.
+                            curating an interpretation for <strong>{affiliation ? getAffiliationName(affiliation) : null}</strong>. Either close this tab in your browser or redirect to the Dashboard below.
                         </p>
                     </div>
                     <div className="modal-footer">
