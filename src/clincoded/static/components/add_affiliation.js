@@ -109,12 +109,8 @@ const AddAffiliation = createReactClass({
             }).then(objectList => {
                 if (objectList && objectList.length) {
                     let tempArray = [];
-                    // Return a new array with only the objects that don't already have affiliations
-                    let filteredList = objectList.filter(object => {
-                        return !object.affiliation || (object.affiliation && !object.affiliation.length);
-                    });
-                    // Batch update the objects with affiliations
-                    return this.putRestDatas(filteredList, affiliationId).then(response => {
+                    // Batch update the objects 
+                    return this.putRestDatas(objectList, affiliationId).then(response => {
                         for (let item of response) {
                             tempArray.push(item['@graph'][0]);
                         }
