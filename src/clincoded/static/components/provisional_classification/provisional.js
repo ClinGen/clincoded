@@ -371,7 +371,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                     bootstrapBtnClass="btn btn-primary" actuatorClass="input-group-affiliation" actuatorTitle="" onRef={ref => (this.child = ref)}>
                     <div className="modal-body">
                         <p className="alert alert-warning">You are currently curating an Interpretation under the wrong affiliation. You are logged in as <strong>{currentUserAffiliation}</strong> and 
-                            curating an interpretation for <strong>{affiliation ? getAffiliationName(affiliation) : null}</strong>. Either close this tab in your browser or redirect to the Dashboard below.
+                            curating an interpretation for <strong>{provisional.affiliation ? getAffiliationName(provisional.affiliation) : 'No Affiliation'}</strong>. Either close this tab in your browser or redirect to the Dashboard below.
                         </p>
                     </div>
                     <div className="modal-footer">
