@@ -67,7 +67,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         const affiliation = this.props.provisional.affiliation ? this.props.provisional.affiliation : null;
         const currentUserAffiliation = this.props.affiliation ? this.props.affiliation.affiliation_id : null;
     
-        if (currentUserAffiliation && currentUserAffiliation !== affiliation) {
+        if (currentUserAffiliation !== affiliation) {
             this.child.openModal();
         }
         this.setState({
@@ -238,7 +238,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         const provisional = this.props.provisional;
         const classification = this.props.classification;
         const affiliation = provisional.affiliation ? provisional.affiliation : (this.props.affiliation ? this.props.affiliation : null);
-        const currentUserAffiliation = this.props.affiliation ? this.props.affiliation.affiliation_fullname : null;
+        const currentUserAffiliation = this.props.affiliation ? this.props.affiliation.affiliation_fullname : 'No Affiliation';
         const submitBusy = this.state.submitBusy;
 
         return (
@@ -368,7 +368,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                     </div>
                 </Form>
                 <ModalComponent modalTitle="Warning" modalClass="modal-default" modalWrapperClass="conflicting-affiliations"
-                    bootstrapBtnClass="btn btn-primary" actuatorClass="input-group-affiliation" actuatorTitle="" onRef={ref => (this.child = ref)}>
+                    bootstrapBtnClass="btn btn-primary" actuatorClass="input-group-affiliation" onRef={ref => (this.child = ref)}>
                     <div className="modal-body">
                         <p className="alert alert-warning">You are currently curating an Interpretation under the wrong affiliation. You are logged in as <strong>{currentUserAffiliation}</strong> and 
                             curating an interpretation for <strong>{provisional.affiliation ? getAffiliationName(provisional.affiliation) : 'No Affiliation'}</strong>. Either close this tab in your browser or redirect to the Dashboard below.
