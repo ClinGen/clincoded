@@ -22,8 +22,7 @@ about 1GB to succeed, while elasticsearch will need at least 2GB for the JVM.
 Mac OSX
 --------
 If you do not have homebrew installed, you can get it at `brew.sh
-<https://brew.sh/>`_  You may also want to have it globally available; if you run
-bash, you can append ``export PATH=/usr/local/opt/postgresql@9.4/bin:$PATH`` to your ``~/.bash_profile`` file.
+<https://brew.sh/>`_.
 
 #. Verify that homebrew is working properly::
 
@@ -43,10 +42,21 @@ bash, you can append ``export PATH=/usr/local/opt/postgresql@9.4/bin:$PATH`` to 
     Note: For Mac < 10.9, the system python doesn't work. You should install Python 3.4.x; the
     preferred method is to use pyEnv, covered further down the list
 
+#. Install Git (use ``git --version`` to check if it's already installed)
+   ::
+
+    $ brew install git
+
+#. Install Java JDK 1.8
+   ::
+
+    $ brew tap AdoptOpenJDK/openjdk
+    $ brew cask install adoptopenjdk8
+
 #. Install postgres
    ::
 
-    $ brew install postgres@9.4
+    $ brew install postgresql@9.4
 
 #. Install elasticsearch
 
@@ -60,6 +70,31 @@ bash, you can append ``export PATH=/usr/local/opt/postgresql@9.4/bin:$PATH`` to 
         $ ln -s [install location]/bin/elasticsearch.in.sh /usr/local/bin/elasticsearch.in.sh
 
 
+#. Install Node v6 (v6 is the current LTS version https://github.com/nodejs/LTS#lts-schedule ):
+
+  * check node version::
+
+      $ node --version
+
+  * install via homebrew (homebrew will indicate if you need to unlink a prior version of node)::
+
+      $ brew install node@6
+
+  * or install via nvm::
+
+      $ npm install -g nvm
+      $ nvm install 6
+      $ nvm use 6
+
+  * it may be necessary to update the PATH environment variable (including a profile update, such as to ``~/.bash_profile``)::
+
+      $ export PATH=/usr/local/opt/node@6/bin:$PATH
+
+  * ensure you are using npm 3 (check version: ``npm --version``), if necessary update npm to npm 3::
+
+      $ npm install npm -g
+
+
 #. Install pyEnv and python 3.4
 
    ::
@@ -69,6 +104,13 @@ bash, you can append ``export PATH=/usr/local/opt/postgresql@9.4/bin:$PATH`` to 
 
 
    If pyEnv fails on installation, this may help: https://github.com/pyenv/pyenv/wiki/Common-build-problems
+
+   To enable shims (which the global command requires), add the following to the shell (i.e. at the end of ``~/.bash_profile``)
+   ::
+
+        if command -v pyenv 1>/dev/null 2>&1; then
+          eval "$(pyenv init -)"
+        fi
 
    To make the newly-installed version of python the system default
 
@@ -82,26 +124,16 @@ bash, you can append ``export PATH=/usr/local/opt/postgresql@9.4/bin:$PATH`` to 
 
         $ python —version
 
-#. Install Node v6 (v6 is the current LTS version https://github.com/nodejs/LTS#lts-schedule ):
+#. Install six
+   ::
 
-  * check node version::
+    $ pip install six==1.9.0
 
-    $ node --version
+#. Install Sass/Compass
+   ::
 
-  * install via homebrew (homebrew will indicate if you need to unlink a prior version of node)::
-
-    $ brew install node@6
-
-  * or install via nvm::
-
-    $ npm install -g nvm
-    $ nvm install 6
-    $ nvm use 6
-
-Insure you are using npm 3 (check version: `npm --version`), if necessary update npm to npm 3::
-
-    $ npm install npm -g
-
+    $ gem install sass
+    $ gem install compass
 
 If you need to update dependencies::
 
@@ -113,19 +145,10 @@ You can also use the Makefile to set up for a clean buildout::
 
     $ make clean
 
-Then proceed to the section on installing python, node, and ruby depdendencies.
+Build the application
+=====================
 
-Linux
------
-
-See cloud-config.yml in this repository.  Use apt-get or yum or other package manager to install everything under packages.   The rest of the install instructions assume you have python3.4 in your path.
-
-Install python, node and ruby dependencies
-==========================================
-
-Note: These will all be installed locally for the application and should never conflict with other system packages
-
-Step 1b: Run buildout::
+Run buildout::
 
     $ python3.4 bootstrap.py -v 2.9.5 --setuptools-version 15.2
     $ bin/buildout -c buildout-dev.cfg
@@ -229,14 +252,6 @@ Notes on SASS/Compass
 =====================
 
 `SASS <http://sass-lang.com/>`_ and `Compass <http://compass-style.org/>`_ are being used. Before running to app, you need to builld the css files by starting 'compass watch' or doing a 'compass compile' (see below).
-
-Installing
-----------
-
-Both can be installed via Ruby gems::
-
-    $ gem install sass
-    $ gem install compass
 
 Compiling "on the fly"
 ----------------------
