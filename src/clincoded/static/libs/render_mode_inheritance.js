@@ -1,6 +1,6 @@
 'use strict';
 import React from 'react';
-import { external_url_map } from './globals';
+import { external_url_map } from "../components/globals";
 
 /**
  * Method to display either mode of inheritance with adjective,
