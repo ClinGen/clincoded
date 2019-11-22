@@ -19,6 +19,7 @@ class VariantInterpretationSummaryHeader extends Component {
         const variant = interpretation && interpretation.variant, disease = interpretation && interpretation.disease;
         let clinVarId = variant && variant.clinvarVariantId ? variant.clinvarVariantId : null;
         let carId = variant && variant.carId ? variant.carId : null;
+        const lastSavedDate = classification.last_modified ? getClassificationSavedDate(classification) : null;
         const publishStatus = classification ? classification.publishClassification : false;
         const publishDate = classification ? classification.publishDate : null;
 
@@ -62,7 +63,7 @@ class VariantInterpretationSummaryHeader extends Component {
                             {classification ?
                                 <div>
                                     <dt>Date interpretation saved:</dt>
-                                    <dd className="classificationSaved">{moment(getClassificationSavedDate(classification)).format("YYYY MMM DD, h:mm a")}</dd>
+                                    <dd className="classificationSaved">{moment(lastSavedDate).format("YYYY MMM DD, h:mm a")}</dd>
                                 </div>
                                 : null}
                             {publishStatus && publishDate ?
