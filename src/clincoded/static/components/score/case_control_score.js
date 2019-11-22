@@ -199,7 +199,7 @@ var ScoreCaseControl = module.exports.ScoreCaseControl = createReactClass({
                 </div>
                 {this.props.scoreSubmit ?
                     <div className="curation-submit clearfix">
-                        <Input type="button" inputClassName="btn-primary pull-right" clickHandler={this.props.scoreSubmit}
+                        <Input type="submit" inputClassName="btn-primary pull-right" submitHandler={this.props.scoreSubmit}
                         title="Save" submitBusy={this.props.submitBusy} />
                     </div>
                 : null}

@@ -5,6 +5,7 @@ import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
 import url from 'url';
+import { toast } from 'react-toastify';
 import { curator_page, content_views, history_views, queryKeyValue, external_url_map, country_codes } from './globals';
 import { RestMixin } from './rest';
 import { Form, FormMixin, Input } from '../libs/bootstrap/form';
@@ -1765,6 +1766,12 @@ const IndividualViewer = createReactClass({
         window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
     },
 
+    handleScoreSubmitError: function(err) {
+        this.setState({ submitBusy: false });
+        toast.error('Something went wrong! Help us improve your experience by sending an error report.');
+        console.log('Individual score submit error: ', err);
+    },
+
     scoreSubmit: function(e) {
         let individual = this.props.context;
         /*****************************************************/
@@ -1794,10 +1801,11 @@ const IndividualViewer = createReactClass({
                 // Update and create score object when the score object has the scoreStatus key/value pair
                 if (this.state.userScoreObj.uuid) {
                     return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
-                        this.setState({submitBusy: false});
                         return Promise.resolve(modifiedScoreObj['@graph'][0]['@id']);
                     }).then(data => {
                         this.handlePageRedirect();
+                    }).catch(err => {
+                        this.handleScoreSubmitError(err);
                     });
                 } else {
                     return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
@@ -1818,12 +1826,13 @@ const IndividualViewer = createReactClass({
                             newIndividual.scores.push(newScoreObjectUuid);
 
                             return this.putRestData('/individual/' + individual.uuid, newIndividual).then(updatedIndividualObj => {
-                                this.setState({submitBusy: false});
                                 return Promise.resolve(updatedIndividualObj['@graph'][0]);
                             });
                         });
                     }).then(data => {
                         this.handlePageRedirect();
+                    }).catch(err => {
+                        this.handleScoreSubmitError(err);
                     });
                 }
             } else if (!newUserScoreObj.scoreStatus) {
@@ -1855,12 +1864,13 @@ const IndividualViewer = createReactClass({
                                 });
                             }
                             return this.putRestData('/individual/' + individual.uuid, newIndividual).then(updatedIndividualObj => {
-                                this.setState({submitBusy: false});
                                 return Promise.resolve(updatedIndividualObj['@graph'][0]);
                             });
                         });
                     }).then(data => {
                         this.handlePageRedirect();
+                    }).catch(err => {
+                        this.handleScoreSubmitError(err);
                     });
                 }
             }
@@ -2167,7 +2177,7 @@ const IndividualViewer = createReactClass({
                                         <ScoreIndividual evidence={individual} modeInheritance={tempGdm? tempGdm.modeInheritance : null} evidenceType="Individual"
                                             session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit}
                                             scoreError={this.state.scoreError} scoreErrorMsg={this.state.scoreErrorMsg} affiliation={affiliation}
-                                            variantInfo={variants} gdm={this.state.gdm} pmid={tempPmid ? tempPmid : null} />
+                                            variantInfo={variants} gdm={this.state.gdm} pmid={tempPmid ? tempPmid : null} submitBusy={this.state.submitBusy} />
                                         : null}
                                     {!isEvidenceScored && ((affiliation && !affiliatedIndividual) || (!affiliation && !userIndividual)) ?
                                         <div className="row">

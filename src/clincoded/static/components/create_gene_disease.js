@@ -33,7 +33,8 @@ var CreateGeneDisease = createReactClass({
             diseaseUuid: null,
             diseaseError: null,
             adjectives: [],
-            adjectiveDisabled: true
+            adjectiveDisabled: true,
+            submitBusy: false,
         };
     },
 
@@ -113,6 +114,7 @@ var CreateGeneDisease = createReactClass({
             this.saveFormValue('moiAdjective', moiAdjectiveValue);
         }
         if (this.validateForm()) {
+            this.setState({ submitBusy: true });
             // Get the free-text values for the Orphanet ID and the Gene ID to check against the DB
             /**
              * FIXME: Need to delete orphanet reference
@@ -128,7 +130,10 @@ var CreateGeneDisease = createReactClass({
             this.getRestDatas([
                 '/genes/' + geneId
             ], [
-                function() { this.setFormErrors('hgncgene', 'HGNC gene symbol not found'); }.bind(this)
+                function() {
+                    this.setState({ submitBusy: false });
+                    this.setFormErrors('hgncgene', 'HGNC gene symbol not found');
+                }.bind(this)
             ]).then(response => {
                 return this.getRestData('/search?type=disease&diseaseId=' + diseaseObj.diseaseId).then(diseaseSearch => {
                     let diseaseUuid;
@@ -189,13 +194,14 @@ var CreateGeneDisease = createReactClass({
                         });
                     } else {
                         // Found matching GDM. See of the user wants to curate it.
-                        this.setState({gdm: gdmSearch['@graph'][0]});
+                        this.setState({ gdm: gdmSearch['@graph'][0], submitBusy: false });
                         this.child.openModal();
                     }
                 });
             }).catch(e => {
                 // Some unexpected error happened
                 parseAndLogError.bind(undefined, 'fetchedRequest');
+                this.setState({ submitBusy: false });
             });
         }
     },
@@ -230,6 +236,7 @@ var CreateGeneDisease = createReactClass({
         let adjectiveDisabled = this.state.adjectiveDisabled;
         const moiKeys = Object.keys(modesOfInheritance);
         let gdm = this.state.gdm;
+        const { submitBusy } = this.state;
 
         return (
             <div className="container">
@@ -267,7 +274,7 @@ var CreateGeneDisease = createReactClass({
                                 </Input>
                                 <div><p className="alert alert-warning">The above options (gene, disease, mode of inheritance, or adjective) can be altered for a Gene:Disease record up until a PMID has been added to the record. This includes
                                     adding an adjective to a Gene:Disease:Mode of inheritance record that has already been created or editing an adjective associated with a record.</p></div>
-                                <Input type="submit" inputClassName="btn-default pull-right" id="submit" />
+                                <Input type="submit" inputClassName="btn-default pull-right" submitBusy={submitBusy} id="submit" />
                             </div>
                         </Form>
                         {gdm && gdm.gene && gdm.disease && gdm.modeInheritance ?

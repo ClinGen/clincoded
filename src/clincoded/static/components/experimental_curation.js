@@ -5,6 +5,7 @@ import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
 import url from 'url';
+import { toast } from 'react-toastify';
 import { curator_page, content_views, history_views, queryKeyValue, dbxref_prefix_map, external_url_map, country_codes } from './globals';
 import { RestMixin } from './rest';
 import { Form, FormMixin, Input } from '../libs/bootstrap/form';
@@ -2572,6 +2573,12 @@ const ExperimentalViewer = createReactClass({
         window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
     },
 
+    handleScoreSubmitError: function(err) {
+        this.setState({ submitBusy: false });
+        toast.error('Something went wrong! Help us improve your experience by sending an error report.');
+        console.log('Experimental score submit error: ', err);
+    },
+
     // Handle the score submit button
     scoreSubmit: function(e) {
         let experimental = this.props.context;
@@ -2593,10 +2600,11 @@ const ExperimentalViewer = createReactClass({
                 // Update and create score object when the score object has the scoreStatus key/value pair
                 if (this.state.userScoreObj.uuid) {
                     return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
-                        this.setState({submitBusy: false});
                         return Promise.resolve(modifiedScoreObj['@graph'][0]['@id']);
                     }).then(data => {
                         this.handlePageRedirect();
+                    }).catch(err => {
+                        this.handleScoreSubmitError(err);
                     });
                 } else {
                     return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
@@ -2617,12 +2625,13 @@ const ExperimentalViewer = createReactClass({
                             newExperimental.scores.push(newScoreObjectUuid);
 
                             return this.putRestData('/experimental/' + experimental.uuid, newExperimental).then(updatedExperimentalObj => {
-                                this.setState({submitBusy: false});
                                 return Promise.resolve(updatedExperimentalObj['@graph'][0]);
                             });
                         });
                     }).then(data => {
                         this.handlePageRedirect();
+                    }).catch(err => {
+                        this.handleScoreSubmitError(err);
                     });
                 }
             } else if (!newUserScoreObj.scoreStatus) {
@@ -2654,12 +2663,13 @@ const ExperimentalViewer = createReactClass({
                                 });
                             }
                             return this.putRestData('/experimental/' + experimental.uuid, newExperimental).then(updatedExperimentalObj => {
-                                this.setState({submitBusy: false});
                                 return Promise.resolve(updatedExperimentalObj['@graph'][0]);
                             });
                         });
                     }).then(data => {
                         this.handlePageRedirect();
+                    }).catch(err => {
+                        this.handleScoreSubmitError(err);
                     });
                 }
             }
@@ -3268,7 +3278,7 @@ const ExperimentalViewer = createReactClass({
                             {isEvidenceScored || (!isEvidenceScored && affiliation && affiliatedExperimental) || (!isEvidenceScored && !affiliation && userExperimental) ?
                                 <ScoreExperimental evidence={experimental} experimentalType={experimental.evidenceType} experimentalEvidenceType={experimentalEvidenceType}
                                     evidenceType="Experimental" session={this.props.session} handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit}
-                                    formError={this.state.formError} affiliation={affiliation} />
+                                    formError={this.state.formError} affiliation={affiliation} submitBusy={this.state.submitBusy} />
                                 : null}
                             {!isEvidenceScored && ((affiliation && !affiliatedExperimental) || (!affiliation && !userExperimental)) ?
                                 <div className="row">
