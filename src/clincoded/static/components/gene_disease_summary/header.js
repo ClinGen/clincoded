@@ -48,8 +48,8 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                             </dd>
                             {curationApprovers && curationApprovers.length ? 
                                 <div>
-                                    <dt>Curation approvers:</dt>
-                                    <dd>{getApproverNames(curationApprovers).join(', ')}</dd>
+                                    <dt>Curation approver:</dt>
+                                    <dd>{getApproverNames(curationApprovers)}</dd>
                                 </div>
                             : null}
                             {curationContributors && curationContributors.length ? 

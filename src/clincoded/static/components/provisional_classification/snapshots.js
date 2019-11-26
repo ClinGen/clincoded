@@ -372,8 +372,8 @@ class CurationSnapshots extends Component {
                                         : null}
                                     {snapshot.resource && snapshot.resource.curationApprovers ?
                                         <dl className="inline-dl clearfix">
-                                            <dt><span>Curation approvers:</span></dt>
-                                            <dd><span>{getApproverNames(snapshot.resource.curationApprovers).sort().join(', ')}</span></dd>
+                                            <dt><span>Curation approver:</span></dt>
+                                            <dd><span>{getApproverNames(snapshot.resource.curationApprovers)}</span></dd>
                                         </dl>
                                         : null}
                                     {snapshot.resource && snapshot.resource.curationContributors ?

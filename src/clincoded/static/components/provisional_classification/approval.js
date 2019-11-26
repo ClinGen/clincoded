@@ -443,8 +443,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     </div>
                                     <div className="curation-approvers">
                                         <dl className="inline-dl clearfix">
-                                            <dt><span>Curation Approver(s):</span></dt>
-                                            <dd>{curationApprovers ? getApproverNames(curationApprovers).join(', ') : null}</dd>
+                                            <dt><span>Curation Approver:</span></dt>
+                                            <dd>{curationApprovers ? getApproverNames(curationApprovers) : null}</dd>
                                         </dl>
                                     </div>
                                     <div className="approval-comments">
