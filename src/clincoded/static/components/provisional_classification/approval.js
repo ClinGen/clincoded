@@ -161,11 +161,9 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
 
     // Only saves affiliation subgroup IDs from react-select
     handleApproverSelect(selectedApprover) {
-        const approvers = [];
-        selectedApprover.forEach(approver => {
-            approvers.push(approver.value);
-        });
-        this.setState({ curationApprovers: approvers, retainSelectedApprover: selectedApprover });
+        const approver = [];
+        approver.push(selectedApprover.value);
+        this.setState({ curationApprovers: approver, retainSelectedApprover: selectedApprover });
     },
 
     /**
@@ -526,14 +524,14 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                 </div>
                                 <div className="sop-version">
                                     <Input type="select" ref={(input) => { this.sopVersionInput = input; }} label="SOP Version:"
-                                        labelClassName="sop-label col-sm-2 control-label" wrapperClassName="col-sm-1" groupClassName="form-group">
+                                        value={sopVersion} labelClassName="sop-label col-sm-2 control-label" wrapperClassName="col-sm-1" groupClassName="form-group">
                                         {sopVersions.map((version, i) => {
                                             return <option key={i} value={version}>{version}</option>;
                                         })}
                                     </Input>
                                 </div>
                                 {(curationContributorsList && curationContributorsList.length) && this.state.showAttributionForm ?
-                                    <div className="col-md-6">
+                                    <div className="col-md-6 contributor-form">
                                         <div className="contributor-form">
                                             <label className="control-label">Curation Contributor(s):</label>
                                             <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={contributorHelpText}>
@@ -548,13 +546,13 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     </div>
                                     : null}
                                 {this.state.showAttributionForm ?
-                                    <div className="col-md-6">
+                                    <div className="col-md-6 approval-form">
                                         <div className="curation-approvers approval-form">
                                             <label className="control-label">Curation Approver(s):</label>
                                             <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={approverHelpText}>
                                                 <i className="icon icon-info-circle secondary-approvers-help"></i>
                                             </span>
-                                            <Select isMulti options={approversList} placeholder="Select Curation Approver(s)" defaultValue={this.state.retainSelectedApprover} onChange={this.handleApproverSelect} />
+                                            <Select options={approversList} placeholder="Select Curation Approver(s)" defaultValue={this.state.retainSelectedApprover} onChange={this.handleApproverSelect} />
                                         </div>
                                         <div className="approval-form">
                                             <Input type="textarea" ref={(input) => { this.approvalCommentInput = input; }}
