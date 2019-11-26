@@ -2291,7 +2291,7 @@ function flattenEvaluation(evaluation) {
 }
 
 var extraEvidenceSimpleProps = [
-    "category", "subcategory", "evidenceCriteria", "evidenceDescription", "experimentalType", "affiliation", "source", "date_created"
+    "category", "subcategory", "evidenceCriteria", "evidenceDescription", "experimentalType", "affiliation", "sourceInfo", "date_created"
 ];
 
 function flattenExtraEvidence(extra_evidence) {
