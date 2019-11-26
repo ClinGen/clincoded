@@ -552,7 +552,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={approverHelpText}>
                                                 <i className="icon icon-info-circle secondary-approvers-help"></i>
                                             </span>
-                                            <Select options={approversList} placeholder="Select Curation Approver(s)" defaultValue={this.state.retainSelectedApprover} onChange={this.handleApproverSelect} />
+                                            <Select options={approversList} placeholder="Select Curation Approver" defaultValue={this.state.retainSelectedApprover} onChange={this.handleApproverSelect} />
                                         </div>
                                         <div className="approval-form">
                                             <Input type="textarea" ref={(input) => { this.approvalCommentInput = input; }}
