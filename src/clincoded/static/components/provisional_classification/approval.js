@@ -380,7 +380,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const attributionButtonText = 'Acknowledge Other Contributors';
         const formHelpText = 'Acknowledge contributing and approving affiliation(s) for this gene-disease classification. Single or multiple affiliations or entities may be chosen.';
         const contributorHelpText = 'In the event that more than one affiliation or external curation group has contributed to the evidence and/or overall classification of this record, please select each from the dropdown menu.';
-        const approverHelpText = 'In the event that more than one affiliation has contributed to the final approved classification, please select each from the dropdown menu.';
+        const approverHelpText = 'In the event that another affiliation approved the final approved classification, please select that affiliation from the dropdown menu.';
 
         return (
             <div className="final-approval-panel-content">
