@@ -359,7 +359,7 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         let acTotal = 0;
         let anTotal = 0;
         let homTotal = 0;
-        const source = _.property(['ld', 'PopulationAlleleFrequencySource', 0, 'entContent', 0])(response);
+        const source = _.property(['ld', 'PopulationAlleleFrequencySource', 0, 'entContent'])(response);
         if (source) {
             if (source['gnomad-exomes']) {
                 // Parse the exome filters 
