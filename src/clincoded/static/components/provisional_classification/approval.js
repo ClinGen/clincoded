@@ -36,8 +36,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         return {
             affiliationsList: [],
             approversList: [],
-            curationContributors: this.props.provisional && this.props.provisional.curationContributors ? this.props.provisional.curationContributors : [],
-            curationApprovers: this.props.provisional && this.props.provisional.curationApprovers ? this.props.provisional.curationApprovers : [],
+            classificationContributors: this.props.provisional && this.props.provisional.classificationContributors ? this.props.provisional.classificationContributors : [],
+            additionalApprover: this.props.provisional && this.props.provisional.additionalApprover ? this.props.provisional.additionalApprover : [],
             retainSelectedApprover: this.props.provisional && this.props.provisional.retainSelectedApprover ? this.props.provisional.retainSelectedApprover : [],
             retainSelectedContributor: this.props.provisional && this.props.provisional.retainSelectedContributor ? this.props.provisional.retainSelectedContributor : [],
             contributorComment: this.props.provisional && this.props.provisional.contributorComment ? this.props.provisional.contributorComment : '',
@@ -107,8 +107,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                     approvalComment: nextProps.provisional.approvalComment,
                     approvalSubmitter: nextProps.provisional.approvalSubmitter,
                     classificationApprover: nextProps.provisional.classificationApprover,
-                    curationContributors: nextProps.provisional.curationContributors,
-                    curationApprovers: nextProps.provisional.curationApprovers,
+                    classificationContributors: nextProps.provisional.classificationContributors,
+                    additionalApprover: nextProps.provisional.additionalApprover,
                     contributorComment: nextProps.provisional.contributorComment,
                     sopVersion: nextProps.provisional.sopVersion
                 });
@@ -156,14 +156,14 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         selectedContributor.forEach(contributor => {
             contributors.push(contributor.value);
         });
-        this.setState({ curationContributors: contributors, retainSelectedContributor: selectedContributor });
+        this.setState({ classificationContributors: contributors, retainSelectedContributor: selectedContributor });
     },
 
     // Only saves affiliation subgroup IDs from react-select
     handleApproverSelect(selectedApprover) {
         const approver = [];
         approver.push(selectedApprover.value);
-        this.setState({ curationApprovers: approver, retainSelectedApprover: selectedApprover });
+        this.setState({ additionalApprover: approver, retainSelectedApprover: selectedApprover });
     },
 
     /**
@@ -206,8 +206,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             classificationApprover: this.props.provisional && this.props.provisional.classificationApprover ? this.props.provisional.classificationApprover : undefined,
             retainSelectedApprover: this.props.provisional && this.props.provisional.retainSelectedApprover ? this.props.provisional.retainSelectedApprover : null,
             retainSelectedContributor: this.props.provisional && this.props.provisional.retainSelectedContributor ? this.props.provisional.retainSelectedContributor : null,
-            curationContributors: this.props.provisional && this.props.provisional.curationContributors ? this.props.provisional.curationContributors : null,
-            curationApprovers: this.props.provisional && this.props.provisional.curationApprovers ? this.props.provisional.curationApprovers : null,
+            classificationContributors: this.props.provisional && this.props.provisional.classificationContributors ? this.props.provisional.classificationContributors : null,
+            additionalApprover: this.props.provisional && this.props.provisional.additionalApprover ? this.props.provisional.additionalApprover : null,
             contributorComment: this.props.provisional && this.props.provisional.contributorComment ? this.props.provisional.contributorComment : null,
             sopVersion: this.props.provisional && this.props.provisional.sopVersion ? this.props.provisional.sopVersion : null,
             isApprovalPreview: false
@@ -232,8 +232,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         newProvisional.approvedClassification = true;
         newProvisional.approvalSubmitter = this.state.approvalSubmitter;
         newProvisional.classificationApprover = this.state.classificationApprover;
-        newProvisional.curationApprovers = this.state.curationApprovers;
-        newProvisional.curationContributors = this.state.curationContributors;
+        newProvisional.additionalApprover = this.state.additionalApprover;
+        newProvisional.classificationContributors = this.state.classificationContributors;
         newProvisional.approvalDate = moment().toISOString();
         newProvisional.approvalReviewDate = this.state.approvalReviewDate;
         newProvisional.sopVersion = this.state.sopVersion;
@@ -365,10 +365,10 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const approvalReviewDate = this.state.approvalReviewDate ? moment(this.state.approvalReviewDate).format('MM/DD/YYYY') : '';
         const approvalDate = this.state.approvalDate ? moment(this.state.approvalDate).format('YYYY MM DD, h:mm a') : moment().format('YYYY MM DD, h:mm a');
         const approvalComment = this.state.approvalComment && this.state.approvalComment.length ? this.state.approvalComment : '';
-        const curationContributorsList = this.state.affiliationsList ? this.state.affiliationsList : null;
+        const classificationContributorsList = this.state.affiliationsList ? this.state.affiliationsList : null;
         const approversList = this.state.approversList ? this.state.approversList : null;
-        const curationContributors = this.state.curationContributors ? this.state.curationContributors : null;
-        const curationApprovers = this.state.curationApprovers ? this.state.curationApprovers : null;
+        const classificationContributors = this.state.classificationContributors ? this.state.classificationContributors : null;
+        const additionalApprover = this.state.additionalApprover ? this.state.additionalApprover : null;
         const session = this.props.session;
         const sopVersion = this.state.sopVersion;
         const provisional = this.props.provisional;
@@ -417,8 +417,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     </div>
                                     <div>
                                         <dl className="inline-dl clearfix">
-                                            <dt><span>Curation Contributor(s):</span></dt>
-                                            <dd>{curationContributors ? getContributorNames(curationContributors).join(', ') : null}</dd>
+                                            <dt><span>Classification Contributor(s):</span></dt>
+                                            <dd>{classificationContributors ? getContributorNames(classificationContributors).join(', ') : null}</dd>
                                         </dl>
                                     </div>
                                     <div>
@@ -441,10 +441,10 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             <dd><span>{approvalReviewDate ? formatDate(parseDate(approvalReviewDate), "YYYY MMM DD") : null}</span></dd>
                                         </dl>
                                     </div>
-                                    <div className="curation-approvers">
+                                    <div className="additional-approver">
                                         <dl className="inline-dl clearfix">
-                                            <dt><span>Curation Approver:</span></dt>
-                                            <dd>{curationApprovers ? getApproverNames(curationApprovers) : null}</dd>
+                                            <dt><span>Classification Approver:</span></dt>
+                                            <dd>{additionalApprover ? getApproverNames(additionalApprover) : null}</dd>
                                         </dl>
                                     </div>
                                     <div className="approval-comments">
@@ -530,14 +530,14 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                         })}
                                     </Input>
                                 </div>
-                                {(curationContributorsList && curationContributorsList.length) && this.state.showAttributionForm ?
+                                {(classificationContributorsList && classificationContributorsList.length) && this.state.showAttributionForm ?
                                     <div className="col-md-6 contributor-form">
                                         <div className="contributor-form">
-                                            <label className="control-label">Curation Contributor(s):</label>
+                                            <label className="control-label">Classification Contributor(s):</label>
                                             <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={contributorHelpText}>
                                                 <i className="icon icon-info-circle secondary-approvers-help"></i>
                                             </span>
-                                            <Select isMulti options={curationContributorsList} placeholder="Select Affiliation(s)" defaultValue={this.state.retainSelectedContributor} onChange={this.handleContributorSelect} />
+                                            <Select isMulti options={classificationContributorsList} placeholder="Select Affiliation(s)" defaultValue={this.state.retainSelectedContributor} onChange={this.handleContributorSelect} />
                                         </div>
                                         <div className="contributor-form">
                                             <Input type="textarea" ref={(input) => { this.contributorCommentInput = input; }}
@@ -548,11 +548,11 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                 {this.state.showAttributionForm ?
                                     <div className="col-md-6 approval-form">
                                         <div className="curation-approvers approval-form">
-                                            <label className="control-label">Curation Approver(s):</label>
+                                            <label className="control-label">Classification Approver(s):</label>
                                             <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={approverHelpText}>
                                                 <i className="icon icon-info-circle secondary-approvers-help"></i>
                                             </span>
-                                            <Select options={approversList} placeholder="Select Curation Approver" defaultValue={this.state.retainSelectedApprover} onChange={this.handleApproverSelect} />
+                                            <Select options={approversList} placeholder="Select Classification Approver" defaultValue={this.state.retainSelectedApprover} onChange={this.handleApproverSelect} />
                                         </div>
                                         <div className="approval-form">
                                             <Input type="textarea" ref={(input) => { this.approvalCommentInput = input; }}

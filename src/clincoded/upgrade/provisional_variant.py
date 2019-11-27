@@ -25,4 +25,3 @@ def provisional_variant_4_5(value, system):
     # https://github.com/ClinGen/clincoded/issues/1796
     # Add secondary approver properties and update
     return
-

@@ -8,7 +8,6 @@ import { renderSelectedModeInheritance } from '../../libs/render_mode_inheritanc
 import { getApproverNames, getContributorNames } from '../../libs/get_approver_names';
 import { sortListByDate } from '../../libs/helpers/sort';
 import { isScoringForCurrentSOP, determineSOPVersion } from '../../libs/sop';
-import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
 import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
 import AlertMessage from '../../libs/bootstrap/alert';
@@ -370,16 +369,16 @@ class CurationSnapshots extends Component {
                                             <dd>{snapshot.resource.classificationApprover}</dd>
                                         </dl>
                                         : null}
-                                    {snapshot.resource && snapshot.resource.curationApprovers ?
+                                    {snapshot.resource && snapshot.resource.additionalApprover ?
                                         <dl className="inline-dl clearfix">
-                                            <dt><span>Curation approver:</span></dt>
-                                            <dd><span>{getApproverNames(snapshot.resource.curationApprovers)}</span></dd>
+                                            <dt><span>Classification Approver:</span></dt>
+                                            <dd><span>{getApproverNames(snapshot.resource.additionalApprover)}</span></dd>
                                         </dl>
                                         : null}
-                                    {snapshot.resource && snapshot.resource.curationContributors ?
+                                    {snapshot.resource && snapshot.resource.classificationContributors ?
                                         <dl className="inline-dl clearfix">
-                                            <dt><span>Curation contributors:</span></dt>
-                                            <dd><span>{getContributorNames(snapshot.resource.curationContributors).sort().join(', ')}</span></dd>
+                                            <dt><span>Classification Contributors:</span></dt>
+                                            <dd><span>{getContributorNames(snapshot.resource.classificationContributors).sort().join(', ')}</span></dd>
                                         </dl>
                                         : null}
                                     <dl className="inline-dl clearfix snapshot-final-approval-date">

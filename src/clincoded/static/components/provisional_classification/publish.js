@@ -382,8 +382,8 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         const publishComment = this.state.publishComment && this.state.publishComment.length ? this.state.publishComment : '';
         const session = this.props.session;
         const provisional = this.state.selectedProvisional;
-        const curationApprovers = provisional ? provisional.curationApprovers : null;
-        const curationContributors = provisional ? provisional.curationContributors : null;
+        const additionalApprover = provisional ? provisional.additionalApprover : null;
+        const classificationContributors = provisional ? provisional.classificationContributors : null;
         const classification = this.props.classification;
         const affiliation = provisional.affiliation ? provisional.affiliation : (this.props.affiliation ? this.props.affiliation : null);
         const interpretation = this.props.interpretation;
@@ -413,12 +413,12 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                             <dd>{affiliation ? getAffiliationName(affiliation, affiliationSubgroup) : null}</dd>
                                         </dl>
                                         <dl className="inline-dl clearfix">
-                                            <dt><span>Curation Approver:</span></dt>
-                                            <dd>{curationApprovers ? getApproverNames(curationApprovers) : null}</dd>
+                                            <dt><span>Classification Approver:</span></dt>
+                                            <dd>{additionalApprover ? getApproverNames(additionalApprover) : null}</dd>
                                         </dl>
                                         <dl className="inline-dl clearfix">
-                                            <dt><span>Curation Contributors:</span></dt>
-                                            <dd>{curationContributors ? getContributorNames(curationContributors).join(', ') : null}</dd>
+                                            <dt><span>Classification Contributor(s):</span></dt>
+                                            <dd>{classificationContributors ? getContributorNames(classificationContributors).join(', ') : null}</dd>
                                         </dl>
                                     </div>
                                     <div className="publish-submitter">

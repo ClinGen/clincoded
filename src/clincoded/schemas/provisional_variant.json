@@ -82,8 +82,8 @@
             "description": "Review comments for the classification",
             "type": "string"
         },
-        "curationContributors": {
-            "title": "Curation Contributor(s)",
+        "classificationContributors": {
+            "title": "Classification Contributor(s)",
             "description": "Curator(s) who contributed to the classification",
             "type": "array",
             "items": {
@@ -91,9 +91,9 @@
                 "type": "string"
             }
         },
-        "curationApprovers": {
-            "title": "Curation Approver(s)",
-            "description": "Curator(s) who approved the classification",
+        "additionalApprover": {
+            "title": "Additional Classification Approver",
+            "description": "Additional (secondary) curator(s) who approved the classification",
             "type": "array",
             "items": {
                 "title": "Approver(s)",

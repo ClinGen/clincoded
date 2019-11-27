@@ -23,8 +23,8 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
         const modeInheritanceAdjective = gdm && gdm.modeInheritanceAdjective ? gdm.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
         const publishStatus = provisional.publishClassification || snapshotPublishDate ? true : false;
         const publishDate = provisional.publishDate ? provisional.publishDate : snapshotPublishDate;
-        const curationApprovers = provisional.curationApprovers ? provisional.curationApprovers.sort() : null;
-        const curationContributors = provisional.curationContributors ? provisional.curationContributors.sort() : null;
+        const additionalApprover = provisional.additionalApprover ? provisional.additionalApprover.sort() : null;
+        const classificationContributors = provisional.classificationContributors ? provisional.classificationContributors.sort() : null;
         const sopVersion = determineSOPVersion(provisional);
 
         return (
@@ -46,16 +46,16 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                                     (provisional && provisional.submitted_by ? provisional.submitted_by.title : null)
                                 }
                             </dd>
-                            {curationApprovers && curationApprovers.length ? 
+                            {additionalApprover && additionalApprover.length ? 
                                 <div>
-                                    <dt>Curation approver:</dt>
-                                    <dd>{getApproverNames(curationApprovers)}</dd>
+                                    <dt>Classification Approver:</dt>
+                                    <dd>{getApproverNames(additionalApprover)}</dd>
                                 </div>
                             : null}
-                            {curationContributors && curationContributors.length ? 
+                            {classificationContributors && classificationContributors.length ? 
                                 <div>
-                                    <dt>Curation contributors:</dt>
-                                    <dd>{getContributorNames(curationContributors).join(', ')}</dd>
+                                    <dt>Classification Contributor(s):</dt>
+                                    <dd>{getContributorNames(classificationContributors).join(', ')}</dd>
                                 </div>
                             : null}
                             <dt>Calculated classification:</dt>

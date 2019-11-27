@@ -595,8 +595,8 @@
             "description": "Curator who approved the classification",
             "type": "string"
         },
-        "curationContributors": {
-            "title": "Curation Contributor(s)",
+        "classificationContributors": {
+            "title": "Classification Contributor(s)",
             "description": "Curator(s) who contributed to the classification",
             "type": "array",
             "items": {
@@ -604,9 +604,9 @@
                 "type": "string"
             }
         },
-        "curationApprovers": {
-            "title": "Curation Approver(s)",
-            "description": "Curator(s) who approved the classification",
+        "additionalApprover": {
+            "title": "Classification Approver(s)",
+            "description": "Additional (secondary) curator(s) who approved the classification",
             "type": "array",
             "items": {
                 "title": "Approver(s)",
@@ -761,7 +761,7 @@
             "title": "Approved By",
             "type": "string"
         },
-        "curationContributors": {
+        "classificationContributors": {
             "title": "Curation Contributor(s)",
             "description": "Curator(s) who contributed to the classification",
             "type": "array",
@@ -770,7 +770,7 @@
                 "type": "string"
             }
         },
-        "curationApprovers": {
+        "additionalApprover": {
             "title": "Curation Approver(s)",
             "description": "Curator(s) who approved the classification",
             "type": "array",
