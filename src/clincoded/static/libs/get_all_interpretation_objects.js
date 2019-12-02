@@ -12,21 +12,17 @@ export function getAllInterpretationObjects(interpretation) {
         totalObjects.push(filteredObject(evaluation));
         // loop through population
         let populations = evaluation.population && evaluation.population.length ? evaluation.population : [];
-        if (populations.length) {
-            populations.forEach(population => {
-                // Get population
-                totalObjects.push(filteredObject(population));
-            });
-        }
+        populations.forEach(population => {
+            // Get population
+            totalObjects.push(filteredObject(population));
+        });
 
         // loop through computational
         let computationals = evaluation.computational && evaluation.computational.length ? evaluation.computational : [];
-        if (computationals.length) {
-            computationals.forEach(computational => {
-                // Get computational
-                totalObjects.push(filteredObject(computational));
-            });
-        }
+        computationals.forEach(computational => {
+            // Get computational
+            totalObjects.push(filteredObject(computational));
+        });
     });
 
     // loop through extra_evidence_list 

@@ -184,6 +184,9 @@ const AddAffiliation = createReactClass({
                 });
             });
         }
+        else {
+            this.setState({submitBusy: false});
+        }
     },
 
     render() {
