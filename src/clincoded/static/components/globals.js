@@ -202,6 +202,7 @@ module.exports.external_url_map = {
     'MondoApi': 'https://www.ebi.ac.uk/ols/api/ontologies/mondo/terms?iri=http://purl.obolibrary.org/obo/',
     'HPOApi': 'https://www.ebi.ac.uk/ols/api/ontologies/hp/terms?iri=http://purl.obolibrary.org/obo/',
     'dbSNP': 'https://www.ncbi.nlm.nih.gov/snp/',
+    'LDHVariant': 'https://ldh.genome.network/ldh/Variant/id/',
     'CAR': 'http://reg.genome.network/site/cg-registry',
     'CARallele': '//reg.genome.network/allele/',
     'CAR-test': 'http://reg.test.genome.network/site/registry',

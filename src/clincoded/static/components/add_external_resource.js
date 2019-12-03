@@ -730,18 +730,22 @@ function carValidateForm() {
 function carQueryResource() {
     // for pinging and parsing data from CAR
     this.saveFormValue('resourceId', this.state.inputValue);
+    console.log('car query triggered');
     var error_msg;
     if (carValidateForm.call(this)) {
         var url = this.props.protocol + external_url_map['CARallele'];
         var data;
         var id = this.state.inputValue;
         this.getRestData(url + id).then(json => {
+            console.log('\n\n\nCAR dataset', json);
             data = parseCAR(json);
+            console.log('\n\nparsedCar data = ', data);
             if (data.clinvarVariantId) {
                 // if the CAR result has a ClinVar variant ID, query ClinVar with it, and use its data
                 url = external_url_map['ClinVarEutilsVCV'];
                 this.getRestDataXml(url + data.clinvarVariantId).then(xml => {
                     var data_cv = parseClinvar(xml);
+                    console.log('ClinVar parsed data =', data_cv);
                     if (data_cv.clinvarVariantId) {
                         // found the result we want
                         data_cv.carId = id;
@@ -757,10 +761,12 @@ function carQueryResource() {
                 });
             } else if (data.carId) {
                 // if the CAR result has no ClinVar variant ID, just use the CAR data set
+                console.log('car result has no ClinVar variant id');
                 let hgvs_notation = getHgvsNotation(data, 'GRCh38', true);
                 let request_params = '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&ExAC=1&MaxEntScan=1&GeneSplicer=1&Conservation=1&numbers=1&domains=1&canonical=1&merged=1';
                 if (hgvs_notation) {
                     this.getRestData(this.props.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params).then(response => {
+                        console.log('fetch conanical transcript from Ensenbl data set', response);
                         let ensemblTranscripts = response.length && response[0].transcript_consequences ? response[0].transcript_consequences : [];
                         if (ensemblTranscripts && ensemblTranscripts.length) {
                             let canonicalTranscript = getCanonicalTranscript(ensemblTranscripts);
@@ -807,6 +813,18 @@ function carQueryResource() {
                 // in case the above two fail (theoretically a 404 json response, but an error is thrown instead (see below))
                 this.setFormErrors('resourceId', 'CA ID not found');
                 this.setState({queryResourceBusy: false, resourceFetched: false});
+            }
+
+            // only query MANE if we have CAR since MANE only has id of transcript and requires CAR to retrieve transcript data
+            console.log('ready to query MANE, but what is data now?', data);
+            if (data.carId) {
+                this.getRestData(`${this.props.protocol + external_url_map['CARallele']}${this.state.inputValue}`).then(json => console.log('test CAR ajax first', json))
+                    .catch(error => console.warn('oh no, CAR error!', error));
+
+                const url = external_url_map['LDHVariant'];
+                // 'https://cors-anywhere.herokuapp.com/' + 
+                this.getRestData(url + data.carId).then(json => console.log('\n\n\nnow test LDH', json))
+                    .catch(error => console.warn('oh no, LDH error!', error));
             }
         }).catch(e => {
             // error handling for CAR query
@@ -864,6 +882,7 @@ function carSubmitResource(func) {
             internal_uri = '/search/?type=variant&carId=' + this.state.tempResource.carId;
         }
         this.getRestData(internal_uri).then(check => {
+            Console.log('getRestData, check = ', check);
             if (check.total) {
                 // variation already exists in our db
                 this.getRestData(check['@graph'][0]['@id']).then(result => {
