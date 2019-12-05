@@ -41,7 +41,7 @@ require('./provisional_curation');
 require('./add_curator');
 require('./select_variant');
 require('./add_disease');
-require('./add_affiliation');
+require('./transfer_curation');
 require('./gene_disease_summary');
 require('./provisional_classification');
 require('./variant_interpretation_summary');
