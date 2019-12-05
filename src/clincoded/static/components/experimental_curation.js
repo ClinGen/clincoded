@@ -745,7 +745,7 @@ var ExperimentalCuration = createReactClass({
                 'limit1': "Enter only one GO ID",
                 'limit': "Enter only " + limit + " GO IDs"
             },
-            'hpoIDs': {
+            's': {
                 'invalid1': "Use HPO ID (e.g. HP:0000001)",
                 'invalid': "Use HPO IDs (e.g. HP:0000001) separated by commas",
                 'limit1': "Enter only one HPO ID",
@@ -803,7 +803,7 @@ var ExperimentalCuration = createReactClass({
         // Start with default validation; indicate errors on form if not, then bail
         if (this.validateDefault()) {
             var groupGenes;
-            var goSlimIDs, geneSymbols, hpoIDs, hpoMpIDs, uberonIDs, clIDs, efoClIDs;
+            var goSlimIDs, geneSymbols, s, hpoMpIDs, uberonIDs, clIDs, efoClIDs;
             var formError = false;
 
             if (this.state.experimentalType == 'Biochemical Function') {
@@ -815,9 +815,9 @@ var ExperimentalCuration = createReactClass({
                 // check geneSymbols
                 geneSymbols = curator.capture.genes(this.getFormValue('geneWithSameFunctionSameDisease.genes'));
                 formError = this.validateFormTerms(formError, 'geneSymbols', geneSymbols, 'geneWithSameFunctionSameDisease.genes');
-                // check hpoIDs
-                hpoIDs = curator.capture.hpoids(this.getFormValue('geneFunctionConsistentWithPhenotype.phenotypeHPO'));
-                formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'geneFunctionConsistentWithPhenotype.phenotypeHPO');
+                // check s
+                s = curator.capture.s(this.getFormValue('geneFunctionConsistentWithPhenotype.phenotypeHPO'));
+                formError = this.validateFormTerms(formError, 's', s, 'geneFunctionConsistentWithPhenotype.phenotypeHPO');
             }
             else if (this.state.experimentalType == 'Protein Interactions') {
                 // check geneSymbols
@@ -856,10 +856,10 @@ var ExperimentalCuration = createReactClass({
                     efoClIDs = curator.capture.efoclids(this.getFormValue('cellCulture'));
                     formError = this.validateFormTerms(formError, 'efoClIDs', efoClIDs, 'cellCulture', 1);
                 }
-                // check hpoIDs
+                // check s
                 if (this.getFormValue('model.phenotypeHPO') !== '') {
-                    hpoIDs = curator.capture.hpoids(this.getFormValue('model.phenotypeHPO'));
-                    formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'model.phenotypeHPO');
+                    s = curator.capture.s(this.getFormValue('model.phenotypeHPO'));
+                    formError = this.validateFormTerms(formError, 's', s, 'model.phenotypeHPO');
                 }
                 // check hpoMpIDs part 2
                 if (this.getFormValue('model.phenotypeHPOObserved') !== '') {
@@ -877,10 +877,10 @@ var ExperimentalCuration = createReactClass({
                     efoClIDs = curator.capture.efoclids(this.getFormValue('rescue.cellCulture'));
                     formError = this.validateFormTerms(formError, 'efoClIDs', efoClIDs, 'rescue.cellCulture', 1);
                 }
-                // check hpoIDs
+                // check s
                 if (this.getFormValue('rescue.phenotypeHPO') !== '') {
-                    hpoIDs = curator.capture.hpoids(this.getFormValue('rescue.phenotypeHPO'));
-                    formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'rescue.phenotypeHPO');
+                    s = curator.capture.s(this.getFormValue('rescue.phenotypeHPO'));
+                    formError = this.validateFormTerms(formError, 's', s, 'rescue.phenotypeHPO');
                 }
             }
 
@@ -942,7 +942,7 @@ var ExperimentalCuration = createReactClass({
                         }
                     } else if (this.state.experimentalSubtype.charAt(0) == 'B') {
                         newExperimental.biochemicalFunction['geneFunctionConsistentWithPhenotype'] = {};
-                        var BFphenotypeHPO = hpoIDs;
+                        var BFphenotypeHPO = s;
                         if (BFphenotypeHPO) {
                             newExperimental.biochemicalFunction.geneFunctionConsistentWithPhenotype.phenotypeHPO = BFphenotypeHPO;
                         }
@@ -1772,7 +1772,7 @@ function TypeBiochemicalFunctionB() {
     return (
         <div>
             {curator.renderPhenotype(null, 'Experimental')}
-            <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.phenotypeHPO" label={<LabelHPOIDs />} rows="1"
+            <Input type="textarea" ref="geneFunctionConsistentWithPhenotype.phenotypeHPO" label={<Labels />} rows="1"
                 error={this.getFormError('geneFunctionConsistentWithPhenotype.phenotypeHPO')} clearError={this.clrFormErrors.bind(null, 'geneFunctionConsistentWithPhenotype.phenotypeHPO')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" placeholder="e.g. HP:0010704"
                 value={BF_phenotypeHPO} handleChange={this.handleChange} inputDisabled={this.cv.othersAssessed} required={!this.state.biochemicalFunctionFT}
@@ -1797,7 +1797,7 @@ function TypeBiochemicalFunctionB() {
 /**
  * HTML labels for Biochemical Functions panel B
  */
-const LabelHPOIDs = () => {
+const Labels = () => {
     return (
         <span>Phenotype(s) consistent with function <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID)</span>:</span>
     );

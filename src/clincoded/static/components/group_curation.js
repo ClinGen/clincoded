@@ -138,27 +138,26 @@ var GroupCuration = createReactClass({
      */
     fetchHpoName() {
         let hpoIds = this.refs['hpoid'].getValue();
-        if (hpoIds.match(/ *\([^)]*\) */g)) {
-            hpoIds = hpoIds.replace(/ *\([^)]*\) */g, "");
-        }
-        const hpoidList = hpoIds.split(', ');
-        const hpoWithTerms = [];
-        hpoidList.forEach(id => {
-            let url = external_url_map['HPOApi'] + id.replace(':', '_');
-            // Make the OLS REST API call
-            this.getRestData(url).then(response => {
-                let termLabel = response['_embedded']['terms'][0]['label'];
-                let hpoWithTerm = termLabel ? `${id} (${termLabel})` : id + ' (note: term not found)';
-                hpoWithTerms.push(hpoWithTerm);
-                this.refs['hpoid'].setValue(hpoWithTerms.join(', '));
-            }).catch(err => {
-                // Unsuccessful retrieval
-                console.warn('Error in fetching HPO data =: %o', err);
-                let hpoWithTerm = id + ' (note: term not found)';
-                hpoWithTerms.push(hpoWithTerm);
-                this.refs['hpoid'].setValue(hpoWithTerms.join(', '));
+        if (hpoIds.length && !hpoIds.match(/ *\([^)]*\) */g)) {
+            const hpoidList = hpoIds.split(', ');
+            const hpoWithTerms = [];
+            hpoidList.forEach(id => {
+                const url = external_url_map['HPOApi'] + id;
+                // Make the OLS REST API call
+                this.getRestData(url).then(response => {
+                    const termLabel = response['details']['name'];
+                    const hpoWithTerm = `${id} (${termLabel})`;
+                    hpoWithTerms.push(hpoWithTerm);
+                    this.refs['hpoid'].setValue(hpoWithTerms.join(', '));
+                }).catch(err => {
+                    // Unsuccessful retrieval
+                    console.warn('Error in fetching HPO data =: %o', err);
+                    const hpoWithTerm = id + ' (note: term not found)';
+                    hpoWithTerms.push(hpoWithTerm);
+                    this.refs['hpoid'].setValue(hpoWithTerms.join(', '));
+                });
             });
-        });
+        }
     },
 
     /**
@@ -166,27 +165,26 @@ var GroupCuration = createReactClass({
      */
     fetchHpoInElimName() {
         let hpoIds = this.refs['nothpoid'].getValue();
-        if (hpoIds.match(/ *\([^)]*\) */g)) {
-            hpoIds = hpoIds.replace(/ *\([^)]*\) */g, "");
-        }
-        const hpoidList = hpoIds.split(', ');
-        const hpoInElimWithTerms = [];
-        hpoidList.forEach(id => {
-            let url = external_url_map['HPOApi'] + id.replace(':', '_');
-            // Make the OLS REST API call
-            this.getRestData(url).then(response => {
-                let termLabel = response['_embedded']['terms'][0]['label'];
-                let hpoWithTerm = termLabel ? `${id} (${termLabel})` : id + ' (note: term not found)';
-                hpoInElimWithTerms.push(hpoWithTerm);
-                this.refs['nothpoid'].setValue(hpoInElimWithTerms.join(', '));
-            }).catch(err => {
-                // Unsuccessful retrieval
-                console.warn('Error in fetching HPO data =: %o', err);
-                let hpoWithTerm = id + ' (note: term not found)';
-                hpoInElimWithTerms.push(hpoWithTerm);
-                this.refs['nothpoid'].setValue(hpoInElimWithTerms.join(', '));
+        if (hpoIds.length && !hpoIds.match(/ *\([^)]*\) */g)) {
+            const hpoidList = hpoIds.split(', ');
+            const hpoInElimWithTerms = [];
+            hpoidList.forEach(id => {
+                const url = external_url_map['HPOApi'] + id;
+                // Make the OLS REST API call
+                this.getRestData(url).then(response => {
+                    const termLabel = response['details']['name'];
+                    const hpoWithTerm = `${id} (${termLabel})`;
+                    hpoInElimWithTerms.push(hpoWithTerm);
+                    this.refs['nothpoid'].setValue(hpoInElimWithTerms.join(', '));
+                }).catch(err => {
+                    // Unsuccessful retrieval
+                    console.warn('Error in fetching HPO data =: %o', err);
+                    const hpoWithTerm = id + ' (note: term not found)';
+                    hpoInElimWithTerms.push(hpoWithTerm);
+                    this.refs['nothpoid'].setValue(hpoInElimWithTerms.join(', '));
+                });
             });
-        });
+        }
     },
 
     submitForm: function(e) {
@@ -690,7 +688,7 @@ var GroupCommonDiseases = function() {
             <Input type="textarea" ref="hpoid" label={<LabelHpoId />} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('hpoid')} clearError={this.clrMultiFormErrors.bind(null, ['hpoid', 'phenoterms'])} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="button" ref="gethpoidterm" inputClassName="btn-copy btn-last btn-sm" title="Get HPO Terms" wrapperClassName="col-sm-7 col-sm-offset-5 orphane" clickHandler={this.fetchHpoName} />    
+            <Input type="button" ref="gethpoidterm" inputClassName="btn-copy btn-last btn-sm get-hpo" title="Get HPO Terms" wrapperClassName="col-sm-7 col-sm-offset-5 orphane" clickHandler={this.fetchHpoName} />    
             <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="2" value={group && group.termsInDiagnosis ? group.termsInDiagnosis : ''}
                 error={this.getFormError('phenoterms')} clearError={this.clrMultiFormErrors.bind(null, ['hpoid', 'phenoterms'])} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
@@ -698,7 +696,7 @@ var GroupCommonDiseases = function() {
             <Input type="textarea" ref="nothpoid" label={<LabelHpoId not />} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
                 error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
-            <Input type="button" ref="getelimhpoidterm" inputClassName="btn-copy btn-last btn-sm" title="Get HPO Terms" wrapperClassName="col-sm-7 col-sm-offset-5 orphane" clickHandler={this.fetchHpoInElimName} />        
+            <Input type="button" ref="getelimhpoidterm" inputClassName="btn-copy btn-last btn-sm get-hpo" title="Get HPO Terms" wrapperClassName="col-sm-7 col-sm-offset-5 orphane" clickHandler={this.fetchHpoInElimName} />        
             <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="2" value={group && group.termsInElimination ? group.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>

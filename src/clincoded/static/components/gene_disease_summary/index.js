@@ -622,14 +622,30 @@ const GeneDiseaseEvidenceSummary = createReactClass({
         let uniqueHpoIds = allHpoIds.length ? [...(new Set(allHpoIds))] : [];
         let hpoTermsCollection = this.state.hpoTermsCollection;
         uniqueHpoIds.forEach(id => {
-            if (evidenceType === 'caseLevel') {
-                hpoTermsCollection['caseLevel'][id] = id;
-            } else if (evidenceType === 'segregation') {
-                hpoTermsCollection['segregation'][id] = id;
-            } else if (evidenceType === 'caseControl') {
-                hpoTermsCollection['caseControl'][id] = id;
-            }
-            this.setState({hpoTermsCollection: hpoTermsCollection});
+            let url = external_url_map['HPOApi'] + id.replace(/ *\([^)]*\) */g, "");
+            // Make the OLS REST API call
+            this.getRestData(url).then(result => {
+                let termLabel = result['details']['name'];
+                if (evidenceType === 'caseLevel') {
+                    hpoTermsCollection['caseLevel'][id] = termLabel ? termLabel : id + ' (note: term not found)';
+                } else if (evidenceType === 'segregation') {
+                    hpoTermsCollection['segregation'][id] = termLabel ? termLabel : id + ' (note: term not found)';
+                } else if (evidenceType === 'caseControl') {
+                    hpoTermsCollection['caseControl'][id] = termLabel ? termLabel : id + ' (note: term not found)';
+                }
+                this.setState({hpoTermsCollection: hpoTermsCollection});
+            }).catch(err => {
+                // Unsuccessful retrieval
+                console.warn('Error in fetching HPO data =: %o', err);
+                if (evidenceType === 'caseLevel') {
+                    hpoTermsCollection['caseLevel'][id] = id + ' (note: term not found)';
+                } else if (evidenceType === 'segregation') {
+                    hpoTermsCollection['segregation'][id] = id + ' (note: term not found)';
+                } else if (evidenceType === 'caseControl') {
+                    hpoTermsCollection['caseControl'][id] = id + ' (note: term not found)';
+                }
+                this.setState({hpoTermsCollection: hpoTermsCollection});
+            });
         });
     },
 
