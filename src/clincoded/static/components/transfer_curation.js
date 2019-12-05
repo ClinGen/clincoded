@@ -81,13 +81,13 @@ const TransferCuration = createReactClass({
         if (contributorType === 'affiliation' && contributorUuids === affiliationId) {
             this.setState({errorMsg: 'Selected Affiliation Id for transfer should not be the same as new Affiliation Id.'});
         } else if (contributorType === 'individual' && object.affiliation) {
-            this.setState({errorMsg: 'Cannot transfer record from an affiliation by selected individual user(s).'});
+            this.setState({errorMsg: 'Cannot transfer curation from an affiliation by selected individual user(s).'});
         } else if (contributorType === 'individual' && !object.affiliation && contributorUuids.indexOf(object.submitted_by.uuid) === -1) {
-            this.setState({errorMsg: 'Cannot transfer record because it is not belonged to any selected individual user(s).'});
+            this.setState({errorMsg: 'Cannot transfer curation because it is not belonged to any selected individual user(s).'});
         } else if (contributorType === 'affiliation' && !object.affiliation) {
-            this.setState({errorMsg: 'Cannot transfer record from an user by selected affiliation(s).'});
+            this.setState({errorMsg: 'Cannot transfer curation from an user by selected affiliation(s).'});
         } else if (contributorType === 'affiliation' && object.affiliation && contributorUuids.indexOf(object.affiliation) === -1) {
-            this.setState({errorMsg: 'Cannot transfer record because it is not belonged to any selected affiliation(s).'});
+            this.setState({errorMsg: 'Cannot transfer curation because it is not belonged to any selected affiliation(s).'});
         } else {
             valid = true;
         }
