@@ -816,7 +816,7 @@ var ExperimentalCuration = createReactClass({
                 geneSymbols = curator.capture.genes(this.getFormValue('geneWithSameFunctionSameDisease.genes'));
                 formError = this.validateFormTerms(formError, 'geneSymbols', geneSymbols, 'geneWithSameFunctionSameDisease.genes');
                 // check hpoIDs
-                hpoIDs = curator.capture.hpoIDs(this.getFormValue('geneFunctionConsistentWithPhenotype.phenotypeHPO'));
+                hpoIDs = curator.capture.hpoids(this.getFormValue('geneFunctionConsistentWithPhenotype.phenotypeHPO'));
                 formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'geneFunctionConsistentWithPhenotype.phenotypeHPO');
             }
             else if (this.state.experimentalType == 'Protein Interactions') {
@@ -858,7 +858,7 @@ var ExperimentalCuration = createReactClass({
                 }
                 // check hpoIDs
                 if (this.getFormValue('model.phenotypeHPO') !== '') {
-                    hpoIDs = curator.capture.hpoIDs(this.getFormValue('model.phenotypeHPO'));
+                    hpoIDs = curator.capture.hpoids(this.getFormValue('model.phenotypeHPO'));
                     formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'model.phenotypeHPO');
                 }
                 // check hpoMpIDs part 2
@@ -879,7 +879,7 @@ var ExperimentalCuration = createReactClass({
                 }
                 // check hpoIDs
                 if (this.getFormValue('rescue.phenotypeHPO') !== '') {
-                    hpoIDs = curator.capture.hpoIDs(this.getFormValue('rescue.phenotypeHPO'));
+                    hpoIDs = curator.capture.hpoids(this.getFormValue('rescue.phenotypeHPO'));
                     formError = this.validateFormTerms(formError, 'hpoIDs', hpoIDs, 'rescue.phenotypeHPO');
                 }
             }
