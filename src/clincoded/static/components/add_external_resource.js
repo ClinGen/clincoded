@@ -595,7 +595,7 @@ function clinvarQueryResource() {
     // for pinging and parsing data from ClinVar
     this.saveFormValue('resourceId', this.state.inputValue);
     if (clinvarValidateForm.call(this)) {
-        var url = external_url_map['ClinVarEutils'];
+        var url = external_url_map['ClinVarEutilsVCV'];
         var data;
         var id = this.state.inputValue;
         this.getRestDataXml(url + id).then(xml => {
@@ -632,7 +632,10 @@ function clinvarSubmitResource(func) {
                     if ((!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle'])
                         || (this.state.tempResource['carId'] !== result['carId'])
                         || (this.state.tempResource['dbSNPIds'] && this.state.tempResource['dbSNPIds'].length && (!result['dbSNPIds'] || (result['dbSNPIds'] && !result['dbSNPIds'].length)))
-                        || (this.state.tempResource['hgvsNames'] && Object.keys(this.state.tempResource['hgvsNames']).length && (!result['hgvsNames'] || (result['hgvsNames'] && !Object.keys(result['hgvsNames']).length)))
+                        || (this.state.tempResource['hgvsNames'] && Object.keys(this.state.tempResource['hgvsNames']).length &&
+                            ((!result['hgvsNames'] || (result['hgvsNames'] && !Object.keys(result['hgvsNames']).length))
+                            || (this.state.tempResource['hgvsNames']['GRCh37'] && !result['hgvsNames']['GRCh37'])
+                            || (this.state.tempResource['hgvsNames']['GRCh38'] && !result['hgvsNames']['GRCh38'])))
                         || (this.state.tempResource['variationType'] && !result['variationType'])
                         || (this.state.tempResource['molecularConsequenceList'] && Object.keys(this.state.tempResource['molecularConsequenceList']).length && (!result['molecularConsequenceList'] || !Object.keys(!result['molecularConsequenceList'].length)))
                         || (this.state.tempResource['otherNameList'] && this.state.tempResource['otherNameList'].length && (!result['otherNameList'] || (result['otherNameList'] && !result['otherNameList'].length)))
@@ -736,7 +739,7 @@ function carQueryResource() {
             data = parseCAR(json);
             if (data.clinvarVariantId) {
                 // if the CAR result has a ClinVar variant ID, query ClinVar with it, and use its data
-                url = external_url_map['ClinVarEutils'];
+                url = external_url_map['ClinVarEutilsVCV'];
                 this.getRestDataXml(url + data.clinvarVariantId).then(xml => {
                     var data_cv = parseClinvar(xml);
                     if (data_cv.clinvarVariantId) {
