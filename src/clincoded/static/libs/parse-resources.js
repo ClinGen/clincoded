@@ -499,3 +499,55 @@ function parseCarHgvsHandler(hgvs_temp, variant) {
     variant.hgvsNames.others.push(hgvs_temp);
     return variant;
 }
+
+
+/**
+ * Method to return the variant preferred title. Examples given as below.
+ * 
+ * When both gene name and protein effect information are available, the format will be `NM_002496.4(Gene):c.64C>T (Amino-acid change)`.
+ * 
+ * When protein effect is unavailable, the format will be `NM_002496.4(Gene):c.64C>T`.
+ * 
+ * When both gene and protein effect not available, will fall back to hgvs format `NM_002496.4:c.64C>T`.
+ * 
+ * When gene name is unavailable, amino-acid change is unavailable as well, so the format will fallback to hgvs as above.
+ * @param {string} geneName - Gene name, or gene symbol.
+ * @param {string} hgvs - A HGVS representation of the variant.
+ * @param {object} proteinEffect - An object containing the amino acid change hgvs information.
+ * @returns {string} Preferred title of the variant.
+ */
+export const generateVariantPreferredTitle = (geneName, hgvs, proteinEffect) => {
+    if (!hgvs.includes(':') || !geneName) {
+        // when gene name is unavailable, then there will be no amino-acid change, where title will fall back to hgvs
+        return hgvs;
+    }
+
+    const [transcriptId, aminoAcidChange] = hgvs.split(':');
+    
+    let aminoAcidChangeName = '';
+    if (proteinEffect && proteinEffect.hgvs && proteinEffect.hgvs.includes(':')) {
+        aminoAcidChangeName = proteinEffect.hgvs.split(':')[1];
+    }
+
+    return `${transcriptId}(${geneName}):${aminoAcidChange}${aminoAcidChangeName ? ` (${aminoAcidChangeName})` : ''}`;
+}
+
+
+/**
+ * Method to extract the unique, non-duplicated set of gene urls in genomic CAR from an array of transcripts for a variant in CAR (Clingen Allele Registry).
+ * @param {Array} transcriptAlleles - Transcripts associated with a variant from CAR.
+ * @returns {Set<string>} A set of genomic CAR gene urls.
+ */
+export const getTranscriptAllelesGeneUrlSet = (transcriptAlleles) => {
+    let geneUrls = new Set();
+    transcriptAlleles.forEach(transcript => {
+        if (transcript.gene) {
+            console.log('adding gene to set', transcript.gene);
+            geneUrls.add(transcript.gene);
+        }
+    })
+
+    console.log('just generated the set, ', geneUrls);
+
+    return geneUrls;
+}
