@@ -26,6 +26,9 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         selectedSnapshotUUID: PropTypes.string,
         updateSnapshotList: PropTypes.func,
         updateProvisionalObj: PropTypes.func,
+        trackData: PropTypes.func,
+        getContributors: PropTypes.func,
+        getGDMInfo: PropTypes.func,
         triggerPublishLinkAlert: PropTypes.func,
         clearPublishState: PropTypes.func
     },
@@ -156,8 +159,12 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         let alertClass = 'publish-error';
         let alertMsg = (<span>Request failed; please try again in a few minutes or contact helpdesk: <a
             href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a></span>);
-
         return new Promise((resolve, reject) => {
+        /*
+            let test = {};
+            test.status = 'Success';
+            resolve(test);
+        */
             if (objType && objUUID) {
                 this.getRestData('/publish?type=' + objType + '&uuid=' + objUUID, null, false).then(result => {
                     if (result.status === 'Success') {
@@ -177,6 +184,63 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                 reject(null);
             }
         });
+    },
+
+    /**
+     * Method to send GDM provisional data to UNC
+     * @param {object} provisional - provisional classification object
+     * @param {string} publishSnapshotId - current publish/unpublish snapshot Id
+     */
+    sendToUNC(provisional, publishSnapshotId) {
+        const gdm = this.props.gdm;
+        const publishSubmitter = this.props.session && this.props.session.user_properties ? this.props.session.user_properties : null;
+        const status = provisional.publishClassification ? 'published' : 'unpublished';
+        const pubRole = provisional.publishClassification ? ['publisher'] : ['unpublisher'];
+        // Get all contributors
+        const contributors = this.props.getContributors(publishSnapshotId);
+
+        // Add this provisional publisher/unpublisher to contributors list
+        if (publishSubmitter) {
+            contributors.push({ 
+                name: publishSubmitter.title ? publishSubmitter.title : '',
+                id: publishSubmitter.uuid ? publishSubmitter.uuid : '',
+                email: publishSubmitter.email ? publishSubmitter.email : '',
+                roles: pubRole
+            });
+        }
+            
+        let uncData = {
+            report_id: gdm.uuid,
+            gene_validity_evidence_level: {
+                genetic_condition: this.props.getGDMInfo(),
+                evidence_level: provisional.alteredClassification && provisional.alteredClassification !== 'No Modification' ? provisional.alteredClassification : provisional.autoClassification,
+                gene_validity_sop: provisional.sopVersion ? 'cg:gene_validity_sop_' + provisional.sopVersion : ''
+            },
+            date: provisional.publishDate ? provisional.publishDate : '',
+            status: status,
+            performed_by: {
+                name: publishSubmitter && publishSubmitter.title ? publishSubmitter.title : '',
+                id: publishSubmitter && publishSubmitter.uuid ? publishSubmitter.uuid : '',
+                email: publishSubmitter && publishSubmitter.email ? publishSubmitter.email : '',
+                on_behalf_of: {
+                    id: this.props.affiliation && this.props.affiliation.affiliation_id ? this.props.affiliation.affiliation_id : '',
+                    name: this.props.affiliation && this.props.affiliation.affiliation_fullname ? this.props.affiliation.affiliation_fullname : ''
+                }
+            },
+            contributors: contributors
+        };
+        // ??? testing
+        console.log(uncData);
+        this.props.trackData(uncData).then(response => {
+            if (response && response.message) {
+                const error = response.message.status && response.message.status.errorCount > 0 ?
+                    '' : 'track-data';
+            }
+        }).catch(error => {
+            console.log('Track %s Data error: %o', status, error);
+        });
+        // ??? testing
+        console.log("Just %s uuid = %s", status, gdm.uuid);
     },
 
     /**
@@ -202,6 +266,8 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                 resourceName = 'interpretation';
             }
 
+            //const origPublishSubmitter = this.state.selectedSnapshot.resource.publishSubmitter;
+            //const origPublishDate = this.state.selectedSnapshot.resource.publishDate;
             this.publishToDataExchange(this.state.selectedSnapshot['@type'][0], this.state.selectedSnapshot['@id'].split('/', 3)[2]).then(response => {
                 let publishProvisional = this.state.selectedProvisional && this.state.selectedProvisional.uuid ? this.state.selectedProvisional : {};
                 let currentProvisional = this.props.provisional && this.props.provisional['@id'] ? curator.flatten(this.props.provisional) : {};
@@ -285,6 +351,11 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                     }
                 }).then(resultProvisional => {
 
+                    // Send publish GDM classification data to UNC
+                    if (selectedResourceType === 'gdm' && this.props.gdm && Object.keys(this.props.gdm).length) {
+                        this.sendToUNC(resultProvisional, this.state.selectedSnapshot['@id']);
+                    }
+
                     // Create selected/published snapshot object, updated with publish event data
                     const publishSnapshot = {
                         resourceId: publishProvisional.uuid,
@@ -317,7 +388,8 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                 snapshot.resource.publishClassification && snapshot['@id'] !== this.state.selectedSnapshot['@id'])) : {};
 
                             if (previouslyPublishedSnapshot && previouslyPublishedSnapshot.resource) {
-
+                                // ??? const previouslyPublishedAt = previouslyPublishedSnapshot.resource.publishDate;
+                                // ??? const previouslyPublishedBy = previouslyPublishedSnapshot.resource.publishSubmitter;
                                 // Update previously-published snapshot with automatic unpublish data
                                 previouslyPublishedSnapshot.resource.publishComment = resourceProperName + ' previously published by ' +
                                     previouslyPublishedSnapshot.resource.publishSubmitter + ' on ' +
@@ -350,11 +422,16 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                     } else {
                                         return Promise.reject(responseSnapshot);
                                     }
+                                }).then(resultSnapshot => {
+                                    // Send unpublish GDM classification data to UNC
+                                    if (selectedResourceType === 'gdm' && resultSnapshot && resultSnapshot.resource && this.props.gdm && Object.keys(this.props.gdm).length) {
+                                        // Send publish GDM classification data to UNC
+                                        this.sendToUNC(resultSnapshot.resource, resultSnapshot['@id']);
+                                    }
                                 }).catch(error => {
                                     console.log('Automatic unpublishing snapshot error = : %o', error);
                                 });
                             }
-
                             // When publishing an interpretation (to the Evidence Repository), display a temporary "link may not work immediately" alert
                             if (selectedResourceType === 'interpretation') {
                                 this.props.triggerPublishLinkAlert();

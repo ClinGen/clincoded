@@ -5,12 +5,13 @@ import createReactClass from 'create-react-class';
 import moment from 'moment';
 import { RestMixin } from '../rest';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
-import { getAffiliationName } from '../../libs/get_affiliation_name';
+import { getAffiliationName, getAffiliationNameBySubgroupID } from '../../libs/get_affiliation_name';
 import { getAffiliationApprover } from '../../libs/get_affiliation_approver';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
 import * as CuratorHistory from '../curator_history';
 import * as curator from '../curator';
+import { removeListener } from 'cluster';
 const CurationMixin = curator.CurationMixin;
 
 const ClassificationApproval = module.exports.ClassificationApproval = createReactClass({
@@ -26,6 +27,9 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         affiliation: PropTypes.object, // User's affiliation
         updateSnapshotList: PropTypes.func,
         updateProvisionalObj: PropTypes.func,
+        trackData: PropTypes.func,
+        getContributors: PropTypes.func,
+        getGDMInfo: PropTypes.func,
         snapshots: PropTypes.array
     },
 
@@ -136,6 +140,87 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
     },
 
     /**
+     * Method to send GDM provisional data to UNC
+     * @param {object} provisional - provisional classification object
+     * @param {object} gdm - gdm object
+     */
+    sendToUNC(provisional, gdm) {
+        const approvalSubmitter = this.props.session && this.props.session.user_properties ? this.props.session.user_properties : null;
+        // Get all contributors
+        const contributors = this.props.getContributors();
+
+        // Add this approval submitter to contributors list
+        if (approvalSubmitter) {
+            contributors.push({   
+                name: approvalSubmitter.title ? approvalSubmitter.title : '',
+                id: approvalSubmitter.uuid ? approvalSubmitter.uuid : '',
+                email: approvalSubmitter.email ? approvalSubmitter.email : '',
+                roles: ['approver']
+            });
+        }
+        // ??? Add secondary approvers to contributors list
+        if (provisional.classificationApprover) {
+            contributors.push({   
+                name: provisional.classificationApprover,
+                roles: ['secondary approver']
+            });
+        }
+        if (provisional.curationApprovers) {
+            provisional.curationApprovers.forEach(approverId => {
+                contributors.push({
+                    'id': approverId,
+                    'name': getAffiliationNameBySubgroupID('gcep', approverId),
+                    'roles': ['secondary approver']
+                });
+            });
+        }
+        if (provisional.curationContributors) {
+            provisional.curationContributors.forEach(contributorId => {
+                contributors.push({
+                    'id': contributorId,
+                    'name': getAffiliationName(contributorId),
+                    'roles': ['secondary approver']
+                });
+            });
+        }
+
+        let uncData = {
+            report_id: gdm.uuid,
+            gene_validity_evidence_level: {
+                genetic_condition: this.props.getGDMInfo(),
+                evidence_level: provisional.alteredClassification && provisional.alteredClassification !== 'No Modification' ? provisional.alteredClassification : provisional.autoClassification,
+                gene_validity_sop: provisional.sopVersion ? 'cg:gene_validity_sop_' + provisional.sopVersion : ''
+            },
+            date: provisional.approvalDate ? provisional.approvalDate : '',
+            status: 'approved',
+            performed_by: {
+                name: approvalSubmitter && approvalSubmitter.title ? approvalSubmitter.title : '',
+                id: approvalSubmitter && approvalSubmitter.uuid ? approvalSubmitter.uuid : '',
+                email: approvalSubmitter && approvalSubmitter.email ? approvalSubmitter.email : '',
+                on_behalf_of: {
+                    id: this.props.affiliation && this.props.affiliation.affiliation_id ? this.props.affiliation.affiliation_id : '',
+                    name: this.props.affiliation && this.props.affiliation.affiliation_fullname ? this.props.affiliation.affiliation_fullname : ''
+                }
+            },
+            contributors: contributors
+        };
+
+        // ??? testing
+        console.log(uncData);
+        // Post UNC data
+        this.props.trackData(uncData).then(response => {
+            if (response && response.message) {
+                const error = response.message.status && response.message.status.errorCount > 0 ?
+                    '' : 'track-data';
+            }
+        }).catch(error => {
+            console.log('Track Approval Data error: %o', error);
+        });
+        // ??? testing
+        console.log("Just %s uuid = %s", provisional.classificationStatus, gdm.uuid);
+    },
+
+    /**
      * Method to handle submitting classificaiton approval form
      */
     submitForm(e) {
@@ -177,6 +262,9 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             }).then(result => {
                 // get a fresh copy of the gdm object
                 this.getRestData('/gdm/' + this.props.gdm.uuid).then(newGdm => {
+                    // Send data to UNC
+                    this.sendToUNC(result, newGdm);
+
                     let parentSnapshot = {gdm: newGdm};
                     let newSnapshot = {
                         resourceId: result.uuid,

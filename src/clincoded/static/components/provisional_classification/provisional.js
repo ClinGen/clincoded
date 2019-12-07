@@ -25,7 +25,10 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         affiliation: PropTypes.object, // User's affiliation
         updateSnapshotList: PropTypes.func,
         updateProvisionalObj: PropTypes.func,
-        approveProvisional: PropTypes.func
+        approveProvisional: PropTypes.func,
+        trackData: PropTypes.func,
+        getContributors: PropTypes.func,
+        getGDMInfo: PropTypes.func
     },
 
     getInitialState() {
@@ -91,6 +94,62 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
     },
 
     /**
+     * Method to send GDM provisional data to UNC
+     * @param {object} provisional - provisional classification object
+     * @param {object} gdm - gdm object
+     */
+    sendToUNC(provisional, gdm) {
+        // Send GDM provisional data to UNC
+        const provisionalSubmitter = this.props.session && this.props.session.user_properties ? this.props.session.user_properties : null;
+        // Get all contributors
+        const contributors = this.props.getContributors();
+
+        // Add current provisional approver to contributors list
+        if (provisionalSubmitter) {
+            contributors.push({   
+                name: provisionalSubmitter.title ? provisionalSubmitter.title : '',
+                id: provisionalSubmitter.uuid ? provisionalSubmitter.uuid : '',
+                email: provisionalSubmitter.email ? provisionalSubmitter.email : '',
+                roles: ['provisional approver']
+            });
+        }
+    
+        let uncData = {
+            report_id: gdm.uuid,
+            gene_validity_evidence_level: {
+                genetic_condition: this.props.getGDMInfo(),
+                evidence_level: provisional.alteredClassification && provisional.alteredClassification !== 'No Modification' ? provisional.alteredClassification : provisional.autoClassification,
+                gene_validity_sop: ''
+            },
+            date: provisional.provisionalDate ? provisional.provisionalDate : '',
+            status: 'provisionally approved',
+            performed_by: {
+                name: provisionalSubmitter && provisionalSubmitter.title ? provisionalSubmitter.title : '',
+                id: provisionalSubmitter && provisionalSubmitter.uuid ? provisionalSubmitter.uuid : '',
+                email: provisionalSubmitter && provisionalSubmitter.email ? provisionalSubmitter.email : '',
+                on_behalf_of: {
+                    id: this.props.affiliation && this.props.affiliation.affiliation_id ? this.props.affiliation.affiliation_id : '',
+                    name: this.props.affiliation && this.props.affiliation.affiliation_fullname ? this.props.affiliation.affiliation_fullname : ''
+                }
+            },
+            contributors: contributors
+        };
+    
+        // ??? testing
+        console.log(uncData);
+        this.props.trackData(uncData).then(response => {
+            if (response && response.message) {
+                const error = response.message.status && response.message.status.errorCount > 0 ?
+                                '' : 'track-data';
+            }
+        }).catch(error => {
+            console.log('Track Provisional Data error: %o', error);
+        });
+        
+        console.log("Just %s uuid = %s", provisional.classificationStatus, gdm.uuid);
+    },
+
+    /**
      * Method to handle submitting provisional form
      */
     submitForm(e) {
@@ -129,6 +188,9 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
             }).then(result => {
                 // get a fresh copy of the gdm object
                 this.getRestData('/gdm/' + this.props.gdm.uuid).then(newGdm => {
+                    // Send data to UNC
+                    this.sendToUNC(result, newGdm);
+
                     let parentSnapshot = {gdm: newGdm};
                     let newSnapshot = {
                         resourceId: result.uuid,
@@ -137,6 +199,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                         resource: result,
                         resourceParent: parentSnapshot
                     };
+
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
                         let provisionalSnapshot = response['@graph'][0];
                         this.props.updateSnapshotList(provisionalSnapshot['@id']);

@@ -12,8 +12,9 @@ import { parseAndLogError } from './mixins';
 import * as CuratorHistory from './curator_history';
 import ModalComponent from '../libs/bootstrap/modal';
 import { GdmDisease } from './disease';
+import { getAffiliationName } from '../libs/get_affiliation_name';
 
-var fetched = require('./fetched');
+// ??? var fetched = require('./fetched');
 var modesOfInheritance = require('./mapping/modes_of_inheritance.json');
 
 var CreateGeneDisease = createReactClass({
@@ -97,6 +98,60 @@ var CreateGeneDisease = createReactClass({
         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
     },
 
+    /**
+     * Method to send data to the Data Exchange for UNC tracking system
+     * @param {object} data - data object
+     */
+    trackGdmData: function(data) {
+        return new Promise((resolve, reject) => {
+            if (data) {
+                this.postRestData('/track-data', data).then(result => {
+                    if (result.status === 'Success') {
+                        console.log(result.message);
+                        resolve(result);
+                    } else {
+                        console.log('Data tracking failure: %s', result.message);
+                        reject(result);
+                    }
+                }).catch(error => {
+                    console.log('Internal data retrieval error: %o', error);
+                    if (error && !error.message) {
+                        error.message = 'Internal data retrieval error';
+                    }
+                    reject(error);
+                });
+            } else {
+                reject({'message': 'Missing expected parameters'});
+            }
+        });
+    },
+
+    /* ???
+    trackTestGdmData: function(resourceType, resourceUUID) {
+        return new Promise((resolve, reject) => {
+            if (resourceType && resourceUUID) {
+                this.getRestData('/track-data-test?type=' + resourceType + '&uuid=' + resourceUUID, null, false).then(result => {
+                    if (result.status === 'Success') {
+                        console.log(result.message);
+                        resolve(result);
+                    } else {
+                        console.log('Data tracking failure: %s', result.message);
+                        reject(result);
+                    }
+                }).catch(error => {
+                    console.log('Internal data retrieval error: %o', error);
+                    if (error && !error.message) {
+                        error.message = 'Internal data retrieval error';
+                    }
+                    reject(error);
+                });
+            } else {
+                reject({'message': 'Missing expected parameters'});
+            }
+        });
+    },
+    ??? */
+
     // When the form is submitted...
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
@@ -121,7 +176,9 @@ var CreateGeneDisease = createReactClass({
             var geneId = this.getFormValue('hgncgene');
             var mode = this.getFormValue('modeInheritance');
             let adjective = this.getFormValue('moiAdjective');
-            let diseaseObj = this.state.diseaseObj;
+            const diseaseObj = this.state.diseaseObj;
+            const user = this.props.session && this.props.session.user_properties ? this.props.session.user_properties : null;
+            let hgncId = '';
 
             // Get the disease and gene objects corresponding to the given Orphanet and Gene IDs in parallel.
             // If either error out, set the form error fields
@@ -130,6 +187,7 @@ var CreateGeneDisease = createReactClass({
             ], [
                 function() { this.setFormErrors('hgncgene', 'HGNC gene symbol not found'); }.bind(this)
             ]).then(response => {
+                hgncId = response[0]['hgncId'];
                 return this.getRestData('/search?type=disease&diseaseId=' + diseaseObj.diseaseId).then(diseaseSearch => {
                     let diseaseUuid;
                     if (diseaseSearch.total === 0) {
@@ -183,6 +241,57 @@ var CreateGeneDisease = createReactClass({
                             };
                             this.recordHistory('add', newGdm, meta);
 
+                            // Gather GDM creation data to be sent to UNC
+                            const start = newGdm.modeInheritance ? newGdm.modeInheritance.indexOf('(') : -1;
+                            const end = newGdm.modeInheritance ? newGdm.modeInheritance.indexOf(')') : -1;
+                            const hpoNumber = (start && end) ? newGdm.modeInheritance.substring(start + 1, end) : newGdm.modeInheritance ? newGdm.modeInheritance : '';
+                            let uncData = {
+                                report_id: newGdm.uuid,
+                                gene_validity_evidence_level: {
+                                    genetic_condition: {
+                                        mode_of_inheritance: hpoNumber,
+                                        condition: diseaseObj.diseaseId ? diseaseObj.diseaseId.replace('_', ':') : '',
+                                        gene: hgncId
+                                    },
+                                    evidence_level: '',
+                                    gene_validity_sop: ''
+                                },
+                                date: newGdm.date_created,
+                                status: 'created',
+                                performed_by: {
+                                    name: user && user.title ? user.title : '',
+                                    id: user && user.uuid ? user.uuid : '',
+                                    email: user && user.email ? user.email : '',
+                                    on_behalf_of: {
+                                        id: newGdm.affiliation ? newGdm.affiliation : '',
+                                        name: newGdm.affiliation ? getAffiliationName(newGdm.affiliation, 'gcep') : ''
+                                    }
+                                },
+                                contributors: [
+                                    {
+                                        name: user && user.title ? user.title : '',
+                                        id: user && user.uuid ? user.uuid : '',
+                                        email: user && user.email ? user.email : '',
+                                        roles: ["creator"]
+                                    }
+                                ]
+                            };
+
+                            // ???
+                            console.log(JSON.stringify(uncData));
+
+                            // Send GDM creation data to UNC
+                            this.trackGdmData(uncData).then(response => {
+                            //??? this.trackTestGdmData('gdm', newGdm.uuid).then(response => {
+                                if (response && response.message) {
+                                    const error = response.message.status && response.message.status.errorCount > 0 ?
+                                        '' : 'track-data';
+                                }
+                            }).catch(error => {
+                                console.log('Track Create Classification Data error: %o', error);
+                            });
+                            // ??? testing msg
+                            console.log("Just %s uuid = %s", newGdm.gdm_status, newGdm.uuid);
                             // Navigate to Record Curation
                             var uuid = data['@graph'][0].uuid;
                             this.context.navigate('/curation-central/?gdm=' + uuid);
