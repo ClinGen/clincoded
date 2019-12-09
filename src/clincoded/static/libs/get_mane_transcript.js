@@ -1,5 +1,39 @@
 'use strict';
 
+import { generateVariantPreferredTitle } from "./parse-resources";
+
+
+/**
+ * Method to return the MANE transcript object given the MANE trnascript id and the json fetched from variant CAR.
+ * @param {string} maneTranscriptId - MANE transcript id.
+ * @param {object} carJson - Variant CAR json response object.
+ * @returns {string} Variant title for the MANE transcript.
+ */
+export const getManeTranscriptTitleFromCar = (maneTranscriptId, carJson) => {
+    // given the id of MANE transcript, reverse lookup in CAR to obtain complete transcript info
+    const {
+        transcriptAlleles = []
+    } = carJson;
+
+    for (let transcript of transcriptAlleles) {
+        const { hgvs: [ hgvsValue = '' ] = [] } = transcript;
+        if (!hgvsValue) {
+            continue;
+        }
+        
+        const transcriptId = hgvsValue.split(':')[0]
+        if (transcriptId === maneTranscriptId) {
+            // Only return the transcript preferred title for now.
+            // Can add more transcript info here if needed in the future.
+            console.log(`ready to generate perferred title...geneName=${transcript.geneSymbol}, hgvs=${hgvsValue}, protein change=${transcript.proteinEffect}`)
+            return generateVariantPreferredTitle(transcript.geneSymbol, hgvsValue, transcript.proteinEffect);
+        }
+    }
+
+    // in case there's a inconsistency between LDH and CAR (MANE transcript found in LDH, but no such transcript in CAR, which shouldn't happen), just fall back to no MANE transcript result in CAR
+    return '';
+}
+
 
 /**
  * Method to return the MANE transcript id given the json fetched from Link Data Hub (LDH).
@@ -46,37 +80,4 @@ export const parseManeTranscriptIdFromGenomicCar = (genomicCarJson) => {
     } = genomicCarJson;
 
     return id;
-}
-
-
-/**
- * Method to return the MANE transcript object given the MANE trnascript id and the json fetched from variant CAR.
- * @param {string} maneTranscriptId - MANE transcript id.
- * @param {object} carJson - Variant CAR json response object.
- * @returns {(object|null)} MANE transcript.
- */
-export const getManeTranscriptFromCar = (maneTranscriptId, carJson) => {
-    // given the id of MANE transcript, reverse lookup in CAR to obtain complete transcript info
-    const {
-        transcriptAlleles = []
-    } = carJson;
-    for (let transcript of transcriptAlleles) {
-        const { hgvs: [ hgvsValue = '' ] = [] } = transcript;
-        if (!hgvsValue) {
-            continue;
-        }
-        
-        const transcriptId = hgvsValue.split(':')[0]
-        if (transcriptId === maneTranscriptId) {
-            return {
-                geneSymbol: transcript.geneSymbol,
-                proteinEffect: transcript.proteinEffect,
-                hgvs: hgvsValue,
-                preferredTitle: generateVariantPreferredTitle(transcript.geneSymbol, hgvsValue, transcript.proteinEffect)
-            };
-        }
-    }
-
-    // in case there's a inconsistency between LDH and CAR (MANE transcript found in LDH, but no such transcript in CAR, which shouldn't happen), just fall back to no MANE transcript result in CAR
-    return null;
 }

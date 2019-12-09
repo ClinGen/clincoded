@@ -1329,9 +1329,11 @@ var FamilyCuration = createReactClass({
                 'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
                 'carId': data.carId ? data.carId : null,
                 'canonicalTranscriptTitle': data.canonicalTranscriptTitle ? data.canonicalTranscriptTitle : null,
+                'maneTranscriptTitle': data.maneTranscriptTitle ? data.maneTranscriptTitle : null,
                 'hgvsNames': data.hgvsNames ? data.hgvsNames : null,
                 'uuid': data.uuid
             };
+            console.log('update form variant', newVariantInfo[fieldNum]);
             variantCount += 1;  // We have one more variant to show
         } else {
             // Reset the form and display values

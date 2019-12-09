@@ -12,7 +12,7 @@ import { parseAndLogError } from './mixins';
 import * as CuratorHistory from './curator_history';
 import { parsePubmed } from '../libs/parse-pubmed';
 import { parseClinvar, parseCAR, getTranscriptAllelesGeneUrlSet } from '../libs/parse-resources';
-import { parseManeTranscriptIdFromLdh, parseManeTranscriptIdFromGenomicCar, getManeTranscriptFromCar } from "../libs/get_mane_transcript";
+import { parseManeTranscriptIdFromLdh, parseManeTranscriptIdFromGenomicCar, getManeTranscriptTitleFromCar } from "../libs/get_mane_transcript";
 import ModalComponent from '../libs/bootstrap/modal';
 import { getHgvsNotation } from './variant_central/helpers/hgvs_notation';
 import { getCanonicalTranscript } from '../libs/get_canonical_transcript';
@@ -833,14 +833,17 @@ function carQueryResource() {
             console.log('ready to query MANE, finalState =', finalState);
             if (finalState.resourceFetched) {
                 try {
+                    console.log('fetch for MANE');
+                    console.log('query LDH...');
                     const ldhJson = await this.getRestData('/ldh/' + id);
                     let maneTranscriptId = parseManeTranscriptIdFromLdh(ldhJson);
                     if (!maneTranscriptId) {
                         // TODO: LDH doesn't have such variant record yet
                         // TODO: search for Allele Registry genes (slow)
                         console.log('LDH 404 for the variant');
+                        console.log('prepare to query genomic CAR')
+                        
                         const geneSet = getTranscriptAllelesGeneUrlSet(json.transcriptAlleles)
-
                         console.log('geneSet is', geneSet);
 
                         for (let geneUrl of geneSet) {
@@ -859,19 +862,18 @@ function carQueryResource() {
                     }
 
                     if (maneTranscriptId) {
-                        const maneTranscript = getManeTranscriptFromCar(maneTranscriptId, json);
-                        if (maneTranscript) {
-                            finalState.tempResource['maneTranscript'] = maneTranscript;
-                        }
+                        finalState.tempResource['maneTranscriptTitle'] = getManeTranscriptTitleFromCar(maneTranscriptId, json);
                     }
                 }
                 catch (error) {
                     console.warn('oh no, LDH error!', error);
                 }    
+            } else {
+                console.warn('CAR not available, not gonna fetch MANE');
             }
 
             // update all the state once here to ensure state update occurs at the end
-            console.log('final data is now', finalState.tempResource)
+            console.log('final data to save & submit is now', finalState.tempResource)
             this.setState(finalState);
         }).catch(e => {
             // error handling for CAR query
@@ -940,11 +942,13 @@ function carSubmitResource(func) {
                         this.putRestData('/variants/' + result['uuid'], this.state.tempResource).then(result => {
                             console.log('update our db, result =', result)
                             return this.getRestData(result['@graph'][0]['@id']).then(result => {
+                                console.log('updateParentForm', result);
                                 this.props.updateParentForm(result, this.props.fieldNum);
                             });
                         });
                     } else {
-                        console.log('no need to update our db, identical.')
+                        console.log('no need to update our db, identical:');
+                        console.log('updateParentForm', result);
                         this.props.updateParentForm(result, this.props.fieldNum);
                     }
                 });
@@ -954,6 +958,7 @@ function carSubmitResource(func) {
                     console.log('newly created in our db, result =', result);
                     // record the user adding a new variant entry
                     this.recordHistory('add', result['@graph'][0]).then(history => {
+                        console.log('updateParentForm', result['@graph'][0]);
                         this.props.updateParentForm(result['@graph'][0], this.props.fieldNum);
                     });
                 });
