@@ -501,12 +501,6 @@ class PmidGdmAddHistory extends Component {
 
 history_views.register(PmidGdmAddHistory, 'article', 'add');
 
-// Display a history item for deleting a PMID from a GDM
-// class PmidGdmDeleteHistory extends Component {
-//     render() {
-//         return <div>PMIDGDMDELETE</div>;
-//     }
-// }
 const PmidGdmDeleteHistory = ({ history }) => {
     const article = history.primary;
     const gdm = history.meta.article.gdm;
