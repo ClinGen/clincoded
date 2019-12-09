@@ -201,7 +201,7 @@
                 "id": "50013",
                 "fullname": "TP53 VCEP",
                 "guidelines_name": "ClinGen TP53 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
-                "guidelines": "https://www.clinicalgenome.org/affiliation/50013/docs/assertion-criteria"
+                "guidelines_url": "https://www.clinicalgenome.org/affiliation/50013/docs/assertion-criteria"
             }
         },
         "approver": [
@@ -754,5 +754,9 @@
                 "fullname": "Limb Girdle Muscular Dystrophy GCEP"
             }
         }
+    },
+    {
+        "affiliation_id": "10062",
+        "affiliation_fullname": "InSiGHT_Dev"
     }
 ]
