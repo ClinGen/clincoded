@@ -1253,7 +1253,7 @@ function IndividualCommonDiseases() {
                 )
             }
             <Input type="textarea" ref="phenoterms" label={LabelPhenoTerms()} rows="2"
-                value={individual && individual.termsInDiagnosis ? individual.termsInDiagnosis : ''} error={this.getFormError('phenoterms')}
+                value={individual && individual.termsInDiagnosis ? individual.termsInDiagnosis : ''} error={this.getFormError('phenoterms')} customErrorMsg="Required when individual is a proband"
                 clearError={this.clrFormErrors.bind(null, 'phenoterms')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" required={this.state.proband_selected} />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
                 <Input type="button" ref="phenotypecopygroup" wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm" title="Copy Phenotype from Associated Group"
