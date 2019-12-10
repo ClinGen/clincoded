@@ -103,3 +103,10 @@ def individual_5_6(value, system):
     # https://github.com/ClinGen/clincoded/issues/1406
     # Add new genotype methods and update schema version
     return
+
+@upgrade_step('individual', '6', '7')
+def individual_6_7(value, system):
+	# https://github.com/ClinGen/clincoded/issues/1848
+	# Add new properties for semidom questions and update schema version
+	return
+	

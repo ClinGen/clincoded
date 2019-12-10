@@ -11,6 +11,7 @@ saved_affiliation = None
 
 def includeme(config):
     config.add_route('publish', '/publish')
+    config.add_route('generate-clinvar-data', '/generate-clinvar-data')
     config.scan(__name__)
 
 # Retrieve data from search result(s) using a path (list of keys)
@@ -602,6 +603,33 @@ def transform_interpretation(source_data, request_host):
     except Exception:
         raise Exception('Result of data transformation not in expected format')
 
+# Generate ClinVar submission data for interpretation (via ClinVar submitter service)
+def request_clinvar_data(source_data):
+    # Prepare interpretation to be sent to ClinVar submitter service
+    try:
+        source_data_str = json.dumps(source_data, separators=(',', ':'))
+
+    except Exception:
+        raise Exception('Preparation of source data for generation service failed')
+
+    # Send interpretation to ClinVar submitter service
+    try:
+        service_url = 'http://clinvar-submitter.clinicalgenome.org/api/v1/submission'
+        clinvar_result = requests.post('{}'.format(service_url), headers={'Content-Type': 'application/json'}, data=source_data_str, timeout=10)
+
+    except Exception:
+        raise Exception('Data generation service unavailable')
+
+    if clinvar_result.status_code != requests.codes.ok:
+        raise Exception('Data generation failed')
+
+    # Return result of ClinVar submitter service as JSON-encoded content
+    try:
+        return clinvar_result.json()
+
+    except Exception:
+        raise Exception('Result of data generation not in expected format')
+
 # Publish the message
 @view_config(route_name='publish', request_method='GET')
 def publish(request):
@@ -747,3 +775,77 @@ def publish(request):
     except Exception as e:
         return_object['message'] = 'Message delivery failed'
         return return_object
+
+# Generate data for a ClinVar submission file
+@view_config(route_name='generate-clinvar-data', request_method='GET')
+def generate_clinvar_data(request):
+    elasticsearch_server = 'http://localhost:9200/clincoded'
+    return_object = {'status': 'Fail',
+        'message': 'Unable to generate data'}
+
+    # Check that required parameters have been provided
+    if not('type' in request.params and 'uuid' in request.params):
+        return_object['message'] = 'Required parameters missing in request'
+        return return_object
+
+    # Attempt to retrieve data (from Elasticsearch)
+    try:
+        searchRes = requests.get('{}/{}/{}'.format(elasticsearch_server, request.params['type'], request.params['uuid']), timeout=10)
+
+        if searchRes.status_code != requests.codes.ok:
+            return_object['message'] = 'Data search failed'
+            return return_object
+
+    except Exception as e:
+        return_object['message'] = 'Data search could not be completed'
+        return return_object
+
+    # Store JSON-encoded content of search result(s)
+    try:
+        resultJSON = searchRes.json()
+
+    except Exception as e:
+        return_object['message'] = 'Retrieved data not in expected format'
+        return return_object
+
+    # Check that search found data
+    if 'found' not in resultJSON or not(resultJSON['found']):
+        return_object['message'] = 'Requested data could not be found'
+        return return_object
+
+    # Check that data has expected elements
+    try:
+        if resultJSON['_source']['embedded']['resourceType'] != 'interpretation':
+            raise Exception
+
+    except Exception as e:
+        return_object['message'] = 'Retrieved data missing expected elements'
+        return return_object
+
+    # Check that data can be submitted to ClinVar? (approved status? permission to generate?)
+
+    # Collect data
+    try:
+        data_set_template = deepcopy(clincoded.messaging.templates.vci_to_dx.message_template)
+        data_to_remove = clincoded.messaging.templates.vci_to_dx.data_to_remove
+        add_data_to_msg_template(resultJSON['_source']['embedded'], None, None, data_set_template)
+
+    except Exception as e:
+        return_object['message'] = 'Failed to build complete data set'
+        return return_object
+
+    # Transform data (for ClinVar submission)
+    try:
+        remove_data_from_msg_template(data_to_remove, data_set_template['interpretation'])
+        data_set_template['interpretation'] = transform_interpretation(data_set_template['interpretation'], request.host)
+        data_set = request_clinvar_data(data_set_template['interpretation'])
+        return_object = {'status': 'Success',
+            'message': data_set}
+
+    except Exception as e:
+        if e.args:
+            return_object['message'] = e.args
+        else:
+            return_object['message'] = 'Failed to build complete data set'
+
+    return return_object
