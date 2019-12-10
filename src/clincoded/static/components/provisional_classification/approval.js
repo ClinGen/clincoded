@@ -37,7 +37,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             affiliationsList: [],
             approversList: [],
             classificationContributors: this.props.provisional && this.props.provisional.classificationContributors ? this.props.provisional.classificationContributors : [],
-            additionalApprover: this.props.provisional && this.props.provisional.additionalApprover ? this.props.provisional.additionalApprover : [],
+            additionalApprover: this.props.provisional && this.props.provisional.additionalApprover ? this.props.provisional.additionalApprover : '',
             retainSelectedApprover: this.props.provisional && this.props.provisional.retainSelectedApprover ? this.props.provisional.retainSelectedApprover : [],
             retainSelectedContributor: this.props.provisional && this.props.provisional.retainSelectedContributor ? this.props.provisional.retainSelectedContributor : [],
             contributorComment: this.props.provisional && this.props.provisional.contributorComment ? this.props.provisional.contributorComment : '',

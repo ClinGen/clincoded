@@ -607,11 +607,7 @@
         "additionalApprover": {
             "title": "Classification Approver(s)",
             "description": "Additional (secondary) curator(s) who approved the classification",
-            "type": "array",
-            "items": {
-                "title": "Approver(s)",
-                "type": "string"
-            }
+            "type": "string"
         },
         "approvalDate": {
             "title": "Approval Date",
@@ -763,21 +759,11 @@
         },
         "classificationContributors": {
             "title": "Curation Contributor(s)",
-            "description": "Curator(s) who contributed to the classification",
-            "type": "array",
-            "items": {
-                "title": "Contributor(s)",
-                "type": "string"
-            }
+            "type": "array"
         },
         "additionalApprover": {
             "title": "Curation Approver(s)",
-            "description": "Curator(s) who approved the classification",
-            "type": "array",
-            "items": {
-                "title": "Approver(s)",
-                "type": "string"
-            }
+            "type": "string"
         },
         "approvalDate": {
             "title": "Approval Date",
@@ -793,7 +779,6 @@
         },
         "contributorComment": {
             "title": "Review Comments for the contributor(s)",
-            "description": "Review comments for the classification contributor(s)",
             "type": "string"
         },
         "provisionalSubmitter": {

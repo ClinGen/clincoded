@@ -23,7 +23,7 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
         const modeInheritanceAdjective = gdm && gdm.modeInheritanceAdjective ? gdm.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
         const publishStatus = provisional.publishClassification || snapshotPublishDate ? true : false;
         const publishDate = provisional.publishDate ? provisional.publishDate : snapshotPublishDate;
-        const additionalApprover = provisional.additionalApprover ? provisional.additionalApprover.sort() : null;
+        const additionalApprover = provisional.additionalApprover ? provisional.additionalApprover : null;
         const classificationContributors = provisional.classificationContributors ? provisional.classificationContributors.sort() : null;
         const sopVersion = determineSOPVersion(provisional);
 

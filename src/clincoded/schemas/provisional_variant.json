@@ -94,11 +94,7 @@
         "additionalApprover": {
             "title": "Additional Classification Approver",
             "description": "Additional (secondary) curator(s) who approved the classification",
-            "type": "array",
-            "items": {
-                "title": "Approver(s)",
-                "type": "string"
-            }
+            "type": "string"
         },
         "sopVersion": {
             "title": "SOP Version",
@@ -219,6 +215,14 @@
             "title": "Approved By",
             "type": "string"
         },
+        "classificationContributors": {
+            "title": "Curation Contributor(s)",
+            "type": "array"
+        },
+        "additionalApprover": {
+            "title": "Curation Approver(s)",
+            "type": "string"
+        },
         "approvalDate": {
             "title": "Approval Date",
             "type": "string"
@@ -229,6 +233,10 @@
         },
         "approvalComment": {
             "title": "Review Comments",
+            "type": "string"
+        },
+        "contributorComment": {
+            "title": "Review Comments for the contributor(s)",
             "type": "string"
         },
         "provisionalSubmitter": {
