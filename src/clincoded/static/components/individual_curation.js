@@ -2435,7 +2435,7 @@ class IndividualDeleteHistory extends Component {
         return (
             <div>
                 <span>Individual {individual.label} deleted</span>
-                <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                <span>; {moment(individual.last_modified).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
     }
