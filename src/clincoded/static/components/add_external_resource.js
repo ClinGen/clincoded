@@ -648,6 +648,7 @@ function clinvarSubmitResource(func) {
                     // In this case, save ClinVar data into the variant.
                     if ((!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle'])
                         || (this.state.tempResource['carId'] !== result['carId'])
+                        || (this.state.tempResource['maneTranscriptTitle'] !== result['maneTranscriptTitle'])
                         || (this.state.tempResource['dbSNPIds'] && this.state.tempResource['dbSNPIds'].length && (!result['dbSNPIds'] || (result['dbSNPIds'] && !result['dbSNPIds'].length)))
                         || (this.state.tempResource['hgvsNames'] && Object.keys(this.state.tempResource['hgvsNames']).length &&
                             ((!result['hgvsNames'] || (result['hgvsNames'] && !Object.keys(result['hgvsNames']).length))
@@ -926,7 +927,10 @@ function carSubmitResource(func) {
                     console.log('checking consistency w/ our db', result);
                     // if no variant title in db, or db's variant title not matching the retrieved title,
                     // then update db and fetch result again
-                    if (!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle'] || result['carId'] !== this.state.tempResource['carId']) {
+                    if (!result['clinvarVariantTitle'].length
+                        || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle'] 
+                        || result['carId'] !== this.state.tempResource['carId']
+                        || result['maneTranscriptTitle'] !== this.state.tempResource['maneTranscriptTitle']) {
                         this.putRestData('/variants/' + result['uuid'], this.state.tempResource).then(result => {
                             console.log('update our db, result =', result)
                             return this.getRestData(result['@graph'][0]['@id']).then(result => {
