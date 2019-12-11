@@ -599,10 +599,26 @@ function clinvarQueryResource() {
         var url = external_url_map['ClinVarEutilsVCV'];
         var data;
         var id = this.state.inputValue;
-        this.getRestDataXml(url + id).then(xml => {
+        this.getRestDataXml(url + id).then(async (xml) => {
             data = parseClinvar(xml);
             if (data.clinvarVariantId) {
                 // found the result we want
+
+                // try to query MANE transcript title as well (based on CAR), even if ClinVar title will always be favored for displaying variant title; MANE transcript title will have other use due to unique status of MANE.
+                if (data.carId) {
+                    try {
+                        const url = this.props.protocol + external_url_map['CARallele'];
+                        const carJson = await this.getRestData(url + data.carId);
+                        const maneTranscriptTitle = await queryManeTranscriptTitle.call(this, data.carId, carJson);
+                        if (maneTranscriptTitle) {
+                            data['maneTranscriptTitle'] = maneTranscriptTitle;
+                        }
+                    }
+                    catch (error) {
+                        console.warn('Error in querying MANE transcript data = %o', error);
+                    }
+                }
+
                 this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
             } else {
                 // no result from ClinVar
@@ -738,15 +754,17 @@ function carQueryResource() {
         var data;
         var id = this.state.inputValue;
         this.getRestData(url + id).then(async (json) => {
+            // final state values after query; default to nothing happened
+            let finalState = {
+                queryResourceBusy: false,
+                resourceFetched: true
+            }
+
             console.log('\n\n\nCAR raw json', json);
             data = parseCAR(json);
             console.log('\n\nparsedCar data = ', data);
-            // default state values after query
-            let finalState = {
-                queryResourceBusy: false,
-                tempResource: data,
-                resourceFetched: true
-            }
+            finalState.tempResource = data;
+            
             if (data.clinvarVariantId) {
                 // if the CAR result has a ClinVar variant ID, query ClinVar with it, and use its data
                 url = external_url_map['ClinVarEutilsVCV'];
@@ -833,40 +851,10 @@ function carQueryResource() {
             console.log('ready to query MANE, finalState =', finalState);
             if (finalState.resourceFetched) {
                 try {
-                    console.log('fetch for MANE');
-                    console.log('query LDH...');
-                    const ldhJson = await this.getRestData('/ldh/' + id);
-                    let maneTranscriptId = parseManeTranscriptIdFromLdh(ldhJson);
-                    if (!maneTranscriptId) {
-                        // TODO: LDH doesn't have such variant record yet
-                        // TODO: search for Allele Registry genes (slow)
-                        console.log('LDH 404 for the variant');
-                        console.log('prepare to query genomic CAR')
-                        
-                        const geneSet = getTranscriptAllelesGeneUrlSet(json.transcriptAlleles)
-                        console.log('geneSet is', geneSet);
-
-                        for (let geneUrl of geneSet) {
-                            const genomicCarJson = await this.getRestData(geneUrl);
-                            console.log(`querying CarG ${geneUrl} json =`, genomicCarJson);
-                            maneTranscriptId = parseManeTranscriptIdFromGenomicCar(genomicCarJson);
-                            if (maneTranscriptId) {
-                                console.log('FOUND mane in CarG!')
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!maneTranscriptId) {
-                        console.log('still no mane in CarG!');
-                    }
-
-                    if (maneTranscriptId) {
-                        finalState.tempResource['maneTranscriptTitle'] = getManeTranscriptTitleFromCar(maneTranscriptId, json);
-                    }
+                    finalState.tempResource['maneTranscriptTitle'] = await queryManeTranscriptTitle.call(this, id, json);
                 }
                 catch (error) {
-                    console.warn('oh no, LDH error!', error);
+                    console.warn('Error in querying MANE transcript data = %o', error);
                 }    
             } else {
                 console.warn('CAR not available, not gonna fetch MANE');
@@ -968,4 +956,46 @@ function carSubmitResource(func) {
             });
         });
     }
+}
+
+
+async function queryManeTranscriptTitle(carId, carJson) {
+    if (!(carId && carJson)) {
+        return null;
+    }
+
+    console.log('in async function, this is', this);
+    console.log(`fetch for MANE, id=${carId}, carjson=${carJson}`);
+    console.log('query LDH...');
+    const ldhJson = await this.getRestData('/ldh/' + carId);
+    let maneTranscriptId = parseManeTranscriptIdFromLdh(ldhJson);
+    if (!maneTranscriptId) {
+        // TODO: LDH doesn't have such variant record yet
+        // TODO: search for Allele Registry genes (slow)
+        console.log('LDH 404 for the variant');
+        console.log('prepare to query genomic CAR')
+        
+        const geneSet = getTranscriptAllelesGeneUrlSet(carJson.transcriptAlleles)
+        console.log('geneSet is', geneSet);
+
+        for (let geneUrl of geneSet) {
+            const genomicCarJson = await this.getRestData(geneUrl);
+            console.log(`querying CarG ${geneUrl} json =`, genomicCarJson);
+            maneTranscriptId = parseManeTranscriptIdFromGenomicCar(genomicCarJson);
+            if (maneTranscriptId) {
+                console.log('FOUND mane in CarG!')
+                break;
+            }
+        }
+    }
+
+    if (!maneTranscriptId) {
+        console.log('still no mane in CarG!');
+    }
+
+    if (maneTranscriptId) {
+        return getManeTranscriptTitleFromCar(maneTranscriptId, carJson);
+    }
+
+    return null;
 }

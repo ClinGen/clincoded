@@ -7,7 +7,7 @@ import { generateVariantPreferredTitle } from "./parse-resources";
  * Method to return the MANE transcript object given the MANE trnascript id and the json fetched from variant CAR.
  * @param {string} maneTranscriptId - MANE transcript id.
  * @param {object} carJson - Variant CAR json response object.
- * @returns {string} Variant title for the MANE transcript.
+ * @returns {(string|null)} Variant title for the MANE transcript.
  */
 export const getManeTranscriptTitleFromCar = (maneTranscriptId, carJson) => {
     // given the id of MANE transcript, reverse lookup in CAR to obtain complete transcript info
@@ -31,7 +31,7 @@ export const getManeTranscriptTitleFromCar = (maneTranscriptId, carJson) => {
     }
 
     // in case there's a inconsistency between LDH and CAR (MANE transcript found in LDH, but no such transcript in CAR, which shouldn't happen), just fall back to no MANE transcript result in CAR
-    return '';
+    return null;
 }
 
 
