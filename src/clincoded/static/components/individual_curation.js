@@ -1768,7 +1768,7 @@ const IndividualViewer = createReactClass({
 
     handleScoreSubmitError: function(err) {
         this.setState({ submitBusy: false });
-        toast.error('Something went wrong! Help us improve your experience by sending an error report.');
+        toast.error('Something went wrong! Help us improve your experience by sending an error report to clingen-helpdesk@lists.stanford.edu');
         console.log('Individual score submit error: ', err);
     },
 
