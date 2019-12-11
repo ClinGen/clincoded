@@ -12,13 +12,11 @@ export function getContributorNames(classificationContributors) {
 
 // Takes in a list of affiliation subgroup IDs and renders names for display
 export function getApproverNames(additionalApprover) {
-    const approverNames = [];
-    additionalApprover.forEach(approverId => {
-        if (approverId.startsWith('5')) {
-            approverNames.push(getAffiliationNameBySubgroupID('vcep', approverId));
-        } else if (approverId.startsWith('4')) {
-            approverNames.push(getAffiliationNameBySubgroupID('gcep', approverId));
-        }
-    });
-    return approverNames;
+    let approverName;
+    if (additionalApprover.startsWith('5')) {
+        approverName = getAffiliationNameBySubgroupID('vcep', additionalApprover);
+    } else if (additionalApprover.startsWith('4')) {
+        approverName = getAffiliationNameBySubgroupID('gcep', additionalApprover);
+    }
+    return approverName;
 }

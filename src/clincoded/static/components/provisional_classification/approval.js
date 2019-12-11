@@ -161,8 +161,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
 
     // Only saves affiliation subgroup IDs from react-select
     handleApproverSelect(selectedApprover) {
-        const approver = [];
-        approver.push(selectedApprover.value);
+        let approver = selectedApprover.value;
         this.setState({ additionalApprover: approver, retainSelectedApprover: selectedApprover });
     },
 
