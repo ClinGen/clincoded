@@ -547,7 +547,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                 {this.state.showAttributionForm ?
                                     <div className="col-md-6 approval-form">
                                         <div className="curation-approvers approval-form">
-                                            <label className="control-label">Classification Approver(s):</label>
+                                            <label className="control-label">Classification Approver:</label>
                                             <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={approverHelpText}>
                                                 <i className="icon icon-info-circle secondary-approvers-help"></i>
                                             </span>
