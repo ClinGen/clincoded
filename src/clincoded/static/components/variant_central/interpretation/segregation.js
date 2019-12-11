@@ -92,7 +92,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
             evidenceCriteria: evidence.evidenceCriteria,
             evidenceDescription: evidence.evidenceDescription,
             affiliation: evidence.affiliation,
-            source: evidence.source,
+            sourceInfo: evidence.sourceInfo,
             status: 'deleted'
         };
 
@@ -155,7 +155,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                     articles: evidence.metadata._kind_key === 'PMID' ? [evidence.metadata.pmid] : [],
                     evidenceCriteria: '',  // criteria has value which is not used for case segregation
                     evidenceDescription: '',
-                    source: evidence
+                    sourceInfo: evidence
                 };
 
                 // Set the evidence created date to its original date if editing evidence

@@ -769,8 +769,10 @@ var CurationInterpretationComputational = module.exports.CurationInterpretationC
                             </div>
                             <div className="panel panel-info datasource-conservation">
                                 <div className="panel-heading">
-                                    <h3 className="panel-title">Conservation Analysis
+                                    <h3 className="panel-title">
+                                        Conservation Analysis
                                         <a href="#credit-myvariant" className="credit-myvariant" title="MyVariant.info"><span>MyVariant</span></a>
+                                        {links_37 ? <a href={links_37.ucsc_url_37} target="_blank" title={'UCSC Genome Browser for ' + gRCh37 + ' in a new window'}>View position in UCSC Genome Browser</a> : null}
                                     </h3>
                                 </div>
                                 <div className="panel-content-wrapper">
