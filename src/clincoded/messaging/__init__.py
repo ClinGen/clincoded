@@ -906,9 +906,8 @@ def track_data(request):
             'ssl.ca.location': 'etc/certs/dataexchange/server.crt'}
 
         # kafka topic
-        if request.host == 'curation.clinicalgenome.org':
-            kafka_topic = 'gene_validity_events'
-        else:
+        kafka_topic = 'gene_validity_events'
+        if request.host != 'curation.clinicalgenome.org':
             kafka_topic += '_dev'
 
     # Send message
