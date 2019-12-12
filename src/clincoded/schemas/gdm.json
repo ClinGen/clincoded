@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "6"
+            "default": "8"
         },
         "gene": {
             "title": "HGNC Symbol",
@@ -39,6 +39,7 @@
                 "Undetermined mode of inheritance (HP:0000005)",
                 "Mitochondrial inheritance (HP:0001427)",
                 "Multifactorial inheritance (HP:0001426)",
+                "Semidominant inheritance (HP:0032113)",
                 "Somatic mutation (HP:0001428)",
                 "X-linked inheritance (HP:0001417)",
                 "Y-linked inheritance (HP:0001450)",

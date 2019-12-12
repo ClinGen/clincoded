@@ -241,6 +241,80 @@ $status-types:
     font-size: 0.9rem;
 }
 
+// For variant interpretation Case/Segregation tab master/tally table
+.masterTable {
+    width: 100%;
+    display: block;
+    overflow-x: scroll;
+
+    .evidence-detail {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .evidence-links {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn.master-icon {
+        padding: 2px 6px;
+    }
+
+    .more-text {
+        color: #337ab7;
+        font-weight: bold;
+        text-align: center;
+    }
+}
+.masterTable tbody tr td:nth-child(2) > div {
+    width: 230px;
+    min-height:37px;
+    max-height:77px;
+}
+.masterTable thead tr th:nth-child(n+2),
+.masterTable tbody tr td:nth-child(n+2) {
+    min-width: 100px;
+    max-width: 250px;
+}
+.masterTable thead tr:nth-child(n+1) th:nth-child(n+3),
+.masterTable tbody tr td:nth-child(n+3) {
+    background-color: $table-row-odd-bg;
+}
+.masterTable thead tr:nth-child(n+1) th:nth-child(2n+3),
+.masterTable tbody tr td:nth-child(2n+3) {
+    background-color: $table-row-even-bg;
+}
+.masterTable thead tr th.rotate {
+    height: 400px;
+    white-space: nowrap;
+    vertical-align: inherit;
+    border: none;
+}
+.masterTable thead tr th.rotate > div {
+    transform: translate(20px, 177px) rotate(-45deg);
+    width: 30px;
+}
+.masterTable thead tr th.rotate > div > span {
+    border-top: 1px solid #ddd;
+    padding-bottom: 10px;
+    padding-left: 33px;
+    margin-left: -33px;
+    padding-top: 4px;
+}
+
+// For variant interpretation Case/Segregation tab evidence tables
+.evidenceTable thead tr th,
+.evidenceTable tbody tr td {
+    min-width: 100px;
+}
+
+// For variant interpretation Case/Segregation tab modal dialogs
+.case-seg-modal {
+    font-weight: normal;
+}
+
 //style for the text displaying the number of entries for each gdm search and for each interpretation search
 .number-of-entries {
     color: grey;
