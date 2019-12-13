@@ -409,7 +409,7 @@ var RecordHeader = module.exports.RecordHeader = createReactClass({
                                                 <h5 className="text-warning"><i className="icon icon-chevron-right"></i> Other classifications</h5>
                                                 {otherClassifications.map((classification, i) => {
                                                     return (
-                                                        <div key={i} className="gene-disease-record-classification">{renderClassificationContent(classification, gdm, context, false)}</div>
+                                                        <div key={i} className="gene-disease-record-classification">{renderClassificationContent(classification, gdm, context, true)}</div>
                                                     );
                                                 })}
                                             </div>
