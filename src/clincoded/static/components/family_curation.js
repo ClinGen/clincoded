@@ -1715,8 +1715,8 @@ function FamilyCommonDiseases() {
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
                 curator.renderPhenotype(associatedGroups, 'Family', 'ft', 'Group') : curator.renderPhenotype(null, 'Family', 'ft')
             }
-            <Input type="textarea" ref="phenoterms" label={LabelPhenoTerms()} rows="2" value={family && family.termsInDiagnosis ? family.termsInDiagnosis : ''}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+            <Input type="textarea" ref="phenoterms" label={LabelPhenoTerms()} rows="2" value={family && family.termsInDiagnosis ? family.termsInDiagnosis : ''} groupClassName="form-group"
+                error={this.getFormError('phenoterms')} clearError={this.clrFormErrors.bind(null, 'phenoterms')} labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" required />
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
                 <Input type="button" ref={(button) => { this.phenotypecopygroup = button; }} wrapperClassName="col-sm-7 col-sm-offset-5 orphanet-copy" inputClassName="btn-copy btn-last btn-sm"
                     title="Copy all Phenotype(s) from Associated Group" clickHandler={this.handleCopyGroupPhenotypes} />
@@ -2760,7 +2760,7 @@ class FamilyDeleteHistory extends Component {
             <div>
                 <span>Family {family.label} deleted</span>
                 <span>{collateralObjects ? ' along with any individuals' : ''}</span>
-                <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                <span>; {moment(family.last_modified).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
     }

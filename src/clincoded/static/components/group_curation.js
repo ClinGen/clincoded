@@ -1129,7 +1129,7 @@ class GroupDeleteHistory extends Component {
             <div>
                 <span>Group {group.label} deleted</span>
                 <span>{collateralObjects ? ' along with any associated families and individuals' : ''}</span>
-                <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                <span>; {moment(group.last_modified).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
     }
