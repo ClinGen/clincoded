@@ -5,13 +5,13 @@ import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
 import url from 'url';
-import { toast } from 'react-toastify';
 import { curator_page, content_views, history_views, queryKeyValue, external_url_map, country_codes } from './globals';
 import { RestMixin } from './rest';
 import { Form, FormMixin, Input } from '../libs/bootstrap/form';
 import { PanelGroup, Panel } from '../libs/bootstrap/panel';
 import { parseAndLogError } from './mixins';
 import { parsePubmed } from '../libs/parse-pubmed';
+import { showErrorNotification } from '../libs/error_notification';
 import { AddResourceId } from './add_external_resource';
 import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
@@ -1768,7 +1768,7 @@ const IndividualViewer = createReactClass({
 
     handleScoreSubmitError: function(err) {
         this.setState({ submitBusy: false });
-        toast.error('Something went wrong! Help us improve your experience by sending an error report to clingen-helpdesk@lists.stanford.edu');
+        showErrorNotification();
         console.log('Individual score submit error: ', err);
     },
 

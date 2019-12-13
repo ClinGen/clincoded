@@ -5,12 +5,12 @@ import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
 import url from 'url';
-import { toast } from 'react-toastify';
 import { queryKeyValue, country_codes, external_url_map, curator_page, history_views, content_views } from './globals';
 import { RestMixin } from './rest';
 import { Form, FormMixin, Input } from '../libs/bootstrap/form';
 import { PanelGroup, Panel } from '../libs/bootstrap/panel';
 import { parsePubmed } from '../libs/parse-pubmed';
+import { showErrorNotification } from '../libs/error_notification';
 import * as methods from './methods';
 import * as CaseControlEvalScore from './case_control/evaluation_score';
 import * as CuratorHistory from './curator_history';
@@ -1560,7 +1560,7 @@ var CaseControlViewer = createReactClass({
 
     handleScoreSubmitError: function(err) {
         this.setState({ submitBusy: false });
-        toast.error('Something went wrong! Help us improve your experience by sending an error report to clingen-helpdesk@lists.stanford.edu');
+        showErrorNotification();
         console.log('Case-control score submit error: ', err);
     },
 

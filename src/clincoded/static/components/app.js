@@ -276,7 +276,7 @@ var App = module.exports = createReactClass({
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>
                     <div>
-                        <ToastContainer autoClose={5000} hideProgressBar pauseOnHover />
+                        <ToastContainer />
                         <Header session={this.state.session} href={this.props.href} affiliation={affiliation} />
                         {this.state.demoWarning ?
                             <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Data entered will be deleted upon release of updated versions, which occurs roughly once per month. Please contact us with any questions at <a href="mailto:clingen-helpdesk@lists.stanford.edu" style={{color: '#FFFFFF'}}>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a></span>} />
