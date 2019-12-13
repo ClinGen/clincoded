@@ -969,14 +969,19 @@ async function queryManeTranscriptTitle(carId, carJson) {
         return null;
     }
 
+    // get genes from transcript; also make sure no duplicated gene to avoid unecessary query
+    const geneSet = getTranscriptAllelesGeneUrlSet(carJson.transcriptAlleles);
+
+    // if 2 or more than 2 genes then just abort and provide no MANE title.
+    if (geneSet.size >= 2) {
+        return null;
+    }
+
     const ldhJson = await this.getRestData('/ldh/' + carId);
     let maneTranscriptId = parseManeTranscriptIdFromLdh(ldhJson);
     if (!maneTranscriptId) {
         // LDH doesn't have such variant record yet; as a workaround, search for MANE info from genomic AR (Allele Registry)
-
-        // get genes from transcript; also make sure no duplicated gene to avoid unecessary query
-        const geneSet = getTranscriptAllelesGeneUrlSet(carJson.transcriptAlleles)
-
+        
         // query genomic AR for each gene
         for (let geneUrl of geneSet) {
             const genomicCarJson = await this.getRestData(geneUrl);
