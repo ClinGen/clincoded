@@ -79,5 +79,7 @@ export const parseManeTranscriptIdFromGenomicCar = (genomicCarJson) => {
         }
     } = genomicCarJson;
 
+    console.log('genomic AR', genomicCarJson);
+
     return id;
 }

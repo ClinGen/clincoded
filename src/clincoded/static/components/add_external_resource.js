@@ -964,37 +964,28 @@ function carSubmitResource(func) {
 
 
 async function queryManeTranscriptTitle(carId, carJson) {
+    // retrieving MANE transcript requires CAR data in place first
     if (!(carId && carJson)) {
         return null;
     }
 
-    console.log('in async function, this is', this);
-    console.log(`fetch for MANE, id=${carId}, carjson=${carJson}`);
-    console.log('query LDH...');
     const ldhJson = await this.getRestData('/ldh/' + carId);
     let maneTranscriptId = parseManeTranscriptIdFromLdh(ldhJson);
     if (!maneTranscriptId) {
-        // TODO: LDH doesn't have such variant record yet
-        // TODO: search for Allele Registry genes (slow)
-        console.log('LDH 404 for the variant');
-        console.log('prepare to query genomic CAR')
-        
-        const geneSet = getTranscriptAllelesGeneUrlSet(carJson.transcriptAlleles)
-        console.log('geneSet is', geneSet);
+        // LDH doesn't have such variant record yet; as a workaround, search for MANE info from genomic AR (Allele Registry)
 
+        // get genes from transcript; also make sure no duplicated gene to avoid unecessary query
+        const geneSet = getTranscriptAllelesGeneUrlSet(carJson.transcriptAlleles)
+
+        // query genomic AR for each gene
         for (let geneUrl of geneSet) {
             const genomicCarJson = await this.getRestData(geneUrl);
-            console.log(`querying CarG ${geneUrl} json =`, genomicCarJson);
             maneTranscriptId = parseManeTranscriptIdFromGenomicCar(genomicCarJson);
+            // stop when we found the MANE
             if (maneTranscriptId) {
-                console.log('FOUND mane in CarG!')
                 break;
             }
         }
-    }
-
-    if (!maneTranscriptId) {
-        console.log('still no mane in CarG!');
     }
 
     if (maneTranscriptId) {
