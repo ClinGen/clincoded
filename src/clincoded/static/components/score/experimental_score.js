@@ -248,7 +248,7 @@ var ScoreExperimental = module.exports.ScoreExperimental = createReactClass({
              this.state.modifiedScore === 'none' && this.state.origScore === null) &&
             (this.state.scoreExplanation === this.state.origScoreExplanation ||
              this.state.scoreExplanation === '' && this.state.origScoreExplanation === null)) {
-                this.setState({scoreError: true, scoreErrorMsg: 'Cannot save because no field has been modified.  Please make your changes then save.'});
+                this.setState({scoreError: true, scoreErrorMsg: 'Cannot save because score/explanation has not been modified.  Please make your changes then save.'});
             }
             else {
                 this.props.scoreSubmit(e);

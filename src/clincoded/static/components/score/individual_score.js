@@ -342,7 +342,7 @@ const ScoreIndividual = module.exports.ScoreIndividual = createReactClass({
             (this.state.scoreExplanation === this.state.origScoreExplanation ||
              this.state.scoreExplanation === '' && this.state.origScoreExplanation === null) &&
             this.state.caseInfoType === this.state.origCaseInfoType) {
-                this.setState({scoreError: true, scoreErrorMsg: 'Cannot save because no field has been modified.  Please make your changes then save.'});
+                this.setState({scoreError: true, scoreErrorMsg: 'Cannot save because score/explanation has not been modified.  Please make your changes then save.'});
             }
             else {
                 this.props.scoreSubmit(e);
