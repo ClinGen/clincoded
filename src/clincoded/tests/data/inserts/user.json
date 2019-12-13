@@ -16741,5 +16741,39 @@
             "/labs/curator/"
         ],
         "timezone": "US/Pacific"
+    },
+    {
+        "email": "shaungc@stanford.edu",
+        "first_name": "Shaung",
+        "last_name": "Cheng",
+        "uuid": "a21447ed-5f4e-4c17-9b62-6601ffec8659",
+        "groups": [
+            "admin"
+        ],
+        "affiliation": [
+            "88888",
+            "99999"
+        ],
+        "job_title": "Admin",
+        "lab": "/labs/j-michael-cherry/",
+        "submits_for": [
+            "/labs/j-michael-cherry/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "shaung.cheng@stanford.edu",
+        "first_name": "Shaung",
+        "last_name": "Cheng",
+        "uuid": "463e88c0-14b5-493f-9c93-09ee7920791d",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
     }
 ]
