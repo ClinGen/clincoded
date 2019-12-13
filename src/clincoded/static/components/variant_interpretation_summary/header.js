@@ -63,7 +63,9 @@ class VariantInterpretationSummaryHeader extends Component {
                             {classification ?
                                 <div>
                                     <dt>Date interpretation saved:</dt>
-                                    <dd className="classificationSaved">{moment(lastSavedDate).format("YYYY MMM DD, h:mm a")}</dd>
+                                    {lastSavedDate ? 
+                                        <dd className="classificationSaved">{moment(lastSavedDate).format("YYYY MMM DD, h:mm a")}</dd>
+                                        : null}
                                 </div>
                                 : null}
                             {publishStatus && publishDate ?
