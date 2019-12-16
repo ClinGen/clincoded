@@ -138,7 +138,6 @@ const ProvisionalClassification = createReactClass({
 
     loadData() {
         var gdmUuid = this.queryValues.gdmUuid;
-
         // get gdm from db.
         var uris = _.compact([
             gdmUuid ? '/gdm/' + gdmUuid : '' // search for entire data set of the gdm
@@ -170,7 +169,7 @@ const ProvisionalClassification = createReactClass({
                     let curatorAffiliation = this.props.affiliation;
                     let affiliation = provisionalClassification.affiliation ? provisionalClassification.affiliation : null;
                     let creator = provisionalClassification.submitted_by;
-                    if ((affiliation && curatorAffiliation && affiliation === curatorAffiliation.affiliation_id) || (!affiliation && !curatorAffiliation && creator.uuid === stateObj.user)) {
+                    if ((affiliation && curatorAffiliation) || (!affiliation && !curatorAffiliation && creator.uuid === stateObj.user)) {
                         stateObj.provisional = provisionalClassification;
                         stateObj.classificationStatus = stateObj.provisional.hasOwnProperty('classificationStatus') ? stateObj.provisional.classificationStatus : 'In progress';
                     }
