@@ -530,12 +530,6 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                         </div>
                                     </div>
                                 </div>
-                                {!gdm ?
-                                    <div className="col-xs-12 col-sm-3">
-                                        <Input type="textarea" ref={(input) => { this.approvalCommentInput = input; }} label="Approver Comments:" rows="5"
-                                            value={approvalComment} labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="additional-comment form-group"/>
-                                    </div>
-                                    : null}
                                 {gdm ? 
                                     <div className="sop-version">
                                         <Input type="select" ref={(input) => { this.sopVersionInput = input; }} label="SOP Version:"
@@ -545,7 +539,12 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             })}
                                         </Input>
                                     </div>
-                                    : null}
+                                    : 
+                                    <div className="col-xs-12 col-sm-3">
+                                        <Input type="textarea" ref={(input) => { this.approvalCommentInput = input; }} label="Approver Comments:" rows="5"
+                                            value={approvalComment} labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="additional-comment form-group"/>
+                                    </div>
+                                }
                                 {(classificationContributorsList && classificationContributorsList.length) && this.state.showAttributionForm ?
                                     <div className="col-md-6 contributor-form">
                                         <div className="contributor-form">
