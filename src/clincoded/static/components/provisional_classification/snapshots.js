@@ -268,6 +268,7 @@ class CurationSnapshots extends Component {
         const snapshotUUID = snapshot.uuid ? snapshot.uuid : snapshot['@id'].split('/', 3)[2];
         const affiliationID = snapshot.resource && snapshot.resource.affiliation ? snapshot.resource.affiliation : '';
         const isPublishEventActive = this.props.isPublishEventActive;
+        const gdmAssociated = snapshot.resource && snapshot.resource.gdm_associated ? snapshot.resource.gdm_associated : false;
         let resourceParent, isSnapshotOnCurrentSOP;
         let allowClinVarSubmission = false;
         if (snapshot.resourceType === 'classification' && snapshot.resourceParent.gdm) {
@@ -390,10 +391,6 @@ class CurationSnapshots extends Component {
                                         <dt><span>Final Approval Date:</span></dt>
                                         <dd><span>{snapshot.resource.approvalReviewDate ? formatDate(snapshot.resource.approvalReviewDate, "YYYY MMM DD") : null}</span></dd>
                                     </dl>
-                                    <dl className="inline-dl clearfix snapshot-sop-version">
-                                        <dt><span>SOP Version:</span></dt>
-                                        <dd><span>{determineSOPVersion(snapshot.resource)}</span></dd>
-                                    </dl>
                                     <dl className="inline-dl clearfix snapshot-final-approval-classification">
                                         <dt><span>{type === 'interpretation' ? 'Saved Pathogenicity:' : 'Saved Classification:'}</span></dt>
                                         <dd><span>
@@ -413,10 +410,18 @@ class CurationSnapshots extends Component {
                                         <dt><span>Approver comments:</span></dt>
                                         <dd><span>{snapshot.resource.approvalComment ? snapshot.resource.approvalComment : null}</span></dd>
                                     </dl>
-                                    <dl className="inline-dl clearfix">
-                                        <dt><span>Contributor comments:</span></dt>
-                                        <dd><span>{snapshot.resource.contributorComment ? snapshot.resource.contributorComment : null}</span></dd>
-                                    </dl>
+                                    {gdmAssociated ? 
+                                        <div>
+                                            <dl className="inline-dl clearfix">
+                                                <dt><span>Contributor comments:</span></dt>
+                                                <dd><span>{snapshot.resource.contributorComment ? snapshot.resource.contributorComment : null}</span></dd>
+                                            </dl>
+                                            <dl className="inline-dl clearfix snapshot-sop-version">
+                                                <dt><span>SOP Version:</span></dt>
+                                                <dd><span>{determineSOPVersion(snapshot.resource)}</span></dd>
+                                            </dl>
+                                        </div>
+                                        : null}
                                 </td>
                                 <td className="approval-snapshot-buttons">
                                     {this.renderSnapshotStatusIcon(snapshot, 'Approved')}

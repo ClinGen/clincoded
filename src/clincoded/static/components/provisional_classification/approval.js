@@ -230,12 +230,14 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         newProvisional.classificationStatus = 'Approved';
         newProvisional.approvedClassification = true;
         newProvisional.approvalSubmitter = this.state.approvalSubmitter;
-        newProvisional.classificationApprover = this.state.classificationApprover;
-        newProvisional.additionalApprover = this.state.additionalApprover;
-        newProvisional.classificationContributors = this.state.classificationContributors;
         newProvisional.approvalDate = moment().toISOString();
         newProvisional.approvalReviewDate = this.state.approvalReviewDate;
-        newProvisional.sopVersion = this.state.sopVersion;
+        newProvisional.classificationApprover = this.state.classificationApprover;
+        if (this.props.gdm) {
+            newProvisional.additionalApprover = this.state.additionalApprover;
+            newProvisional.classificationContributors = this.state.classificationContributors;
+            newProvisional.sopVersion = this.state.sopVersion;
+        }
         if (this.state.contributorComment && this.state.contributorComment.length) {
             newProvisional.contributorComment = this.state.contributorComment;
         } else {
@@ -370,6 +372,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const additionalApprover = this.state.additionalApprover ? this.state.additionalApprover : null;
         const session = this.props.session;
         const sopVersion = this.state.sopVersion;
+        const gdm = this.props.gdm;
         const provisional = this.props.provisional;
         const classification = this.props.classification;
         const affiliation = provisional.affiliation ? provisional.affiliation : (this.props.affiliation ? this.props.affiliation : null);
@@ -408,24 +411,28 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             </dl>
                                         </div>
                                         : null}
-                                    <div className="sop-version">
-                                        <dl className="inline-dl clearfix">
-                                            <dt><span>SOP Version:</span></dt>
-                                            <dd>{sopVersion}</dd>
-                                        </dl>
-                                    </div>
-                                    <div>
-                                        <dl className="inline-dl clearfix">
-                                            <dt><span>Classification Contributor(s):</span></dt>
-                                            <dd>{classificationContributors ? getContributorNames(classificationContributors).join(', ') : null}</dd>
-                                        </dl>
-                                    </div>
-                                    <div>
-                                        <dl className="inline-dl clearfix">
-                                            <dt><span>Contributor Comments:</span></dt>
-                                            <dd><span>{contributorComment}</span></dd>
-                                        </dl>
-                                    </div>
+                                    {gdm ?
+                                        <div>
+                                            <div className="sop-version">
+                                                <dl className="inline-dl clearfix">
+                                                    <dt><span>SOP Version:</span></dt>
+                                                    <dd>{sopVersion}</dd>
+                                                </dl>
+                                            </div>
+                                            <div>
+                                                <dl className="inline-dl clearfix">
+                                                    <dt><span>Classification Contributor(s):</span></dt>
+                                                    <dd>{classificationContributors ? getContributorNames(classificationContributors).join(', ') : null}</dd>
+                                                </dl>
+                                            </div>
+                                            <div>
+                                                <dl className="inline-dl clearfix">
+                                                    <dt><span>Contributor Comments:</span></dt>
+                                                    <dd><span>{contributorComment}</span></dd>
+                                                </dl>
+                                            </div>
+                                        </div>
+                                        : null}
                                 </div>
                                 <div className="col-xs-12 col-sm-5">
                                     <div className="approval-date">
@@ -440,18 +447,20 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             <dd><span>{approvalReviewDate ? formatDate(parseDate(approvalReviewDate), "YYYY MMM DD") : null}</span></dd>
                                         </dl>
                                     </div>
-                                    <div className="additional-approver">
-                                        <dl className="inline-dl clearfix">
-                                            <dt><span>Classification Approver:</span></dt>
-                                            <dd>{additionalApprover ? getApproverNames(additionalApprover) : null}</dd>
-                                        </dl>
-                                    </div>
                                     <div className="approval-comments">
                                         <dl className="inline-dl clearfix preview-approval-comment">
                                             <dt><span>Approver Comments:</span></dt>
                                             <dd><span>{approvalComment ? approvalComment : null}</span></dd>
                                         </dl>
                                     </div>
+                                    {gdm ?
+                                        <div className="additional-approver">
+                                            <dl className="inline-dl clearfix">
+                                                <dt><span>Classification Approver:</span></dt>
+                                                <dd>{additionalApprover ? getApproverNames(additionalApprover) : null}</dd>
+                                            </dl>
+                                        </div>
+                                        : null}
                                 </div>
                             </div>
                             <div className="col-md-12 alert alert-warning approval-preview-note">
@@ -521,14 +530,22 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                         </div>
                                     </div>
                                 </div>
-                                <div className="sop-version">
-                                    <Input type="select" ref={(input) => { this.sopVersionInput = input; }} label="SOP Version:"
-                                        value={sopVersion} labelClassName="sop-label col-sm-2 control-label" wrapperClassName="col-sm-1" groupClassName="form-group">
-                                        {sopVersions.map((version, i) => {
-                                            return <option key={i} value={version}>{version}</option>;
-                                        })}
-                                    </Input>
-                                </div>
+                                {!gdm ?
+                                    <div className="col-xs-12 col-sm-3">
+                                        <Input type="textarea" ref={(input) => { this.approvalCommentInput = input; }} label="Approver Comments:" rows="5"
+                                            value={approvalComment} labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="additional-comment form-group"/>
+                                    </div>
+                                    : null}
+                                {gdm ? 
+                                    <div className="sop-version">
+                                        <Input type="select" ref={(input) => { this.sopVersionInput = input; }} label="SOP Version:"
+                                            value={sopVersion} labelClassName="sop-label col-sm-2 control-label" wrapperClassName="col-sm-1" groupClassName="form-group">
+                                            {sopVersions.map((version, i) => {
+                                                return <option key={i} value={version}>{version}</option>;
+                                            })}
+                                        </Input>
+                                    </div>
+                                    : null}
                                 {(classificationContributorsList && classificationContributorsList.length) && this.state.showAttributionForm ?
                                     <div className="col-md-6 contributor-form">
                                         <div className="contributor-form">
@@ -560,7 +577,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     </div>
                                     : null}
                             </div>
-                            {!this.state.showAttributionForm ?
+                            {gdm && !this.state.showAttributionForm ?
                                 <div className="col-md-12 contributor-toggle-button">
                                     <button className="btn btn-primary btn-inline-spacer" onClick={this.openAttributionForm}>{attributionButtonText}</button>
                                     <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={formHelpText}>
