@@ -13,7 +13,7 @@ const defaultOptions = {
 /**
  * 
  * @param {string | node} message A string or React element for what to display within the notification
- * @param {object} options https://www.npmjs.com/package/react-toastify/v/4.5.1 to see what the available options are
+ * @param {object} options https://www.npmjs.com/package/react-toastify/v/4.5.2 to see what the available options are
  */
 const showErrorNotification = (message = defaultMessage, options = defaultOptions) => {
     const combinedOptions = Object.assign({}, defaultOptions, options);
