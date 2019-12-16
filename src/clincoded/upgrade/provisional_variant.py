@@ -19,3 +19,4 @@ def provisional_variant_3_4(value, system):
     # https://github.com/ClinGen/clincoded/issues/1802
     # Add publication properties and update schema version
     return
+
