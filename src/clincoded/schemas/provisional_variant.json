@@ -82,30 +82,6 @@
             "description": "Review comments for the classification",
             "type": "string"
         },
-        "classificationContributors": {
-            "title": "Classification Contributor(s)",
-            "description": "Curator(s) who contributed to the classification",
-            "type": "array",
-            "items": {
-                "title": "Contributor(s)",
-                "type": "string"
-            }
-        },
-        "additionalApprover": {
-            "title": "Additional Classification Approver",
-            "description": "Additional (secondary) curator(s) who approved the classification",
-            "type": "string"
-        },
-        "sopVersion": {
-            "title": "SOP Version",
-            "description": "SOP Version chosen by user in approval form",
-            "type": "string"
-        },
-        "contributorComment": {
-            "title": "Review Comments for the contributor(s)",
-            "description": "Review comments for the classification contributor(s)",
-            "type": "string"
-        },
         "provisionalSubmitter": {
             "title": "Provisional Submitter",
             "description": "Curator who entered the provisional approval",
@@ -215,14 +191,6 @@
             "title": "Approved By",
             "type": "string"
         },
-        "classificationContributors": {
-            "title": "Curation Contributor(s)",
-            "type": "array"
-        },
-        "additionalApprover": {
-            "title": "Curation Approver(s)",
-            "type": "string"
-        },
         "approvalDate": {
             "title": "Approval Date",
             "type": "string"
@@ -233,10 +201,6 @@
         },
         "approvalComment": {
             "title": "Review Comments",
-            "type": "string"
-        },
-        "contributorComment": {
-            "title": "Review Comments for the contributor(s)",
             "type": "string"
         },
         "provisionalSubmitter": {
