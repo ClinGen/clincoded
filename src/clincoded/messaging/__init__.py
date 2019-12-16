@@ -852,7 +852,8 @@ def generate_clinvar_data(request):
 
     return return_object
 
-# track data - send data to UNC
+# track data - send GCI events tracking data(message) to Data Exchange
+# Events include GDM creation, provisional, approval, published, and unpublished
 @view_config(route_name='track-data', request_method='POST')
 def track_data(request):
     elasticsearch_server = 'http://localhost:9200/clincoded'
@@ -867,8 +868,6 @@ def track_data(request):
         return_object['message'] = 'Retrieved data not in expected format'
         return return_object
 
-    # ??? Check that message should be sent? (provisional, approved status? permission to publish, unpublish?)
-
     # Construct message
     try:
         message = json.dumps(resultJSON, separators=(',', ':'))
@@ -879,6 +878,9 @@ def track_data(request):
         else:
             return_object['message'] = 'Failed to build complete message'
         return return_object
+
+    # Get performer uuid as message key
+    key = resultJSON['performed_by']['id']
 
     # Configure message delivery parameters
     kafka_cert_pw = ''
@@ -925,7 +927,7 @@ def track_data(request):
                          'offset': msg.offset()}
 
     try:
-        p.produce(kafka_topic, message, callback=delivery_callback)
+        p.produce(kafka_topic, message, key, callback=delivery_callback)
         p.flush(kafka_timeout)
         return return_object
 
