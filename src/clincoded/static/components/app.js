@@ -269,6 +269,7 @@ var App = module.exports = createReactClass({
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="@@cssFile" />
                     <link rel="stylesheet" href="https://unpkg.com/react-day-picker/lib/style.css" />
+                    <link rel="stylesheet" href="https://unpkg.com/react-toastify@4.5.2/dist/ReactToastify.css" />
                     <script src="@@bundleJsFile"></script>
                 </head>
                 <body onClick={this.handleClick} onSubmit={this.handleSubmit} className={this.state.demoWarning ? "demo-background" : ""}>
