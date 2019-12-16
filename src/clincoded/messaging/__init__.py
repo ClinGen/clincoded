@@ -880,7 +880,7 @@ def track_data(request):
         return return_object
 
     # Get performer uuid as message key
-    key = resultJSON['performed_by']['id']
+    key = resultJSON['performed_by']['id'] + '-' + resultJSON['date']
 
     # Configure message delivery parameters
     kafka_cert_pw = ''
