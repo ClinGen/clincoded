@@ -758,5 +758,16 @@
     {
         "affiliation_id": "10062",
         "affiliation_fullname": "InSiGHT_Dev"
+    },
+    {
+        "affiliation_id": "10063",
+        "affiliation_fullname": "Charcot-Marie-Tooth",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40063",
+                "fullname": "Charcot-Marie-Tooth GCEP"
+            }
+        }
     }
 ]
