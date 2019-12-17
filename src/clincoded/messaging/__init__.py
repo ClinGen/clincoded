@@ -8,7 +8,8 @@ import json
 import clincoded.messaging.templates.gci_to_dx, clincoded.messaging.templates.vci_to_dx
 # ??? import clincoded.messaging.templates.gci_to_dx, clincoded.messaging.templates.vci_to_dx, clincoded.messaging.templates.gdm_track
 
-saved_affiliation = None
+affiliation_data = []
+saved_affiliation = []
 
 def includeme(config):
     config.add_route('publish', '/publish')
@@ -362,23 +363,89 @@ def add_contradictory_evidence(data, evidence, template):
     else:
         template['Value'] = 'NO'
 
-# Lookup affiliation data associated with a provided ID (using a JSON file maintained for the UI)
+# Load affiliation data from a JSON file maintained for the UI
+def load_affiliation_data():
+    global affiliation_data
+
+    if not affiliation_data:
+        try:
+            affiliation_data = json.load(open('src/clincoded/static/components/affiliation/affiliations.json'))
+
+        except Exception:
+            pass
+
+# Add dictionary containing secondary contributors/approver to the message template
+def add_secondary_contributors_approver(data, template):
+    global affiliation_data
+    contributors = get_data_by_path(data, ['resource', 'classificationContributors'], [])
+    approver = get_data_by_path(data, ['resource', 'additionalApprover'])
+
+    if len(contributors) > 0 or approver:
+        load_affiliation_data()
+        template['contributors'] = []
+
+    if len(contributors) > 0:
+        for affiliation in affiliation_data:
+            try:
+                if affiliation['affiliation_id'] in contributors:
+                    template['contributors'].append({
+                        'id': affiliation['affiliation_id'],
+                        'name': affiliation['affiliation_fullname'],
+                        'role': 'secondary contributor'
+                    })
+
+            except Exception:
+                pass
+
+    try:
+        template['contributors'].sort(key = lambda contributor: contributor['name'])
+
+    except Exception:
+        pass
+
+    if approver:
+        for affiliation in affiliation_data:
+            try:
+                if approver == affiliation['subgroups']['gcep']['id']:
+                    template['contributors'].append({
+                        'id': approver,
+                        'name': affiliation['subgroups']['gcep']['fullname'],
+                        'role': 'secondary approver'
+                    })
+                    break
+
+            except Exception:
+                pass
+
+            try:
+                if approver == affiliation['subgroups']['vcep']['id']:
+                    template['contributors'].append({
+                        'id': approver,
+                        'name': affiliation['subgroups']['vcep']['fullname'],
+                        'role': 'secondary approver'
+                    })
+                    break
+
+            except Exception:
+                pass
+
+# Lookup affiliation data associated with a provided ID
 def lookup_affiliation_data(affiliation_id, affiliation_key, affiliation_subgroup=None):
+    global affiliation_data
     global saved_affiliation
 
     if affiliation_id and affiliation_key:
         if not saved_affiliation or 'affiliation_id' not in saved_affiliation or affiliation_id != saved_affiliation['affiliation_id']:
-            try:
-                affiliation_data = json.load(open('src/clincoded/static/components/affiliation/affiliations.json'))
+            load_affiliation_data()
 
-                for affiliation in affiliation_data:
+            for affiliation in affiliation_data:
+                try:
                     if affiliation_id == affiliation['affiliation_id']:
                         saved_affiliation = affiliation
                         break
 
-            except Exception:
-                pass
-                return None
+                except Exception:
+                    pass
 
         try:
             if affiliation_subgroup:
@@ -534,6 +601,10 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
             # Special handling to incorporate contradictory evidence (articles)
             if key == 'ValidContradictoryEvidence':
                 add_contradictory_evidence(data, evidence, value)
+
+            # Special handling to incorporate secondary contributors/approver
+            elif key == 'summary':
+                add_secondary_contributors_approver(data, value)
 
             if not template[key]:
                 keys_to_delete.append(key)

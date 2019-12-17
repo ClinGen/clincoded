@@ -14,7 +14,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "7"
+            "default": "8"
         },
         "label": {
             "title": "Label",
@@ -210,12 +210,18 @@
             "properties": {
                 "organOfTissue": {
                     "title": "Organ of Tissue",
-                    "description": "Uberon ID (required if free text for organ of tissue is not provided)",
-                    "type": "string"
+                    "description": "List of Uberon ID (required if free text for organ of tissue is not provided)",
+                    "type": "array",
+                    "default": [],
+                    "items": {
+                        "title": "Uberon ID",
+                        "description": "Uberon id",
+                        "type": "string"
+                    }
                 },
                 "organOfTissueFreeText": {
                     "title": "Organ of Tissue (Free text)",
-                    "description": "Free text (required if Uberon ID is not provided)",
+                    "description": "Free text (required if no Uberon ID is provided)",
                     "type": "string"
                 },
                 "normalExpression": {
