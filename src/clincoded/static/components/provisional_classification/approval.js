@@ -382,6 +382,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const attributionButtonText = 'Acknowledge Other Contributors';
         const formHelpText = 'Acknowledge contributing and approving affiliation(s) for this gene-disease classification. Single or multiple affiliations or entities may be chosen.';
         const contributorHelpText = 'In the event that more than one affiliation or external curation group has contributed to the evidence and/or overall classification of this record, please select each from the dropdown menu.';
+        const contributorWarningText = 'At present, designation of Classification Contributors is restricted to the GCI. In the future, Classification Contributors will appear on curation summaries published to the ClinGen website and/or Evidence Repository to facilitate recognition.';
         const approverHelpText = 'In the event that another affiliation approved the final approved classification, please select that affiliation from the dropdown menu.';
 
         return (
@@ -467,6 +468,9 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                 <i className="icon icon-exclamation-circle"></i> This is a Preview only; you must still Submit to save
                                 this {interpretation && Object.keys(interpretation).length ? 'Interpretation' : 'Classification'} as Approval.
                                 {interpretation && Object.keys(interpretation).length ? <strong> Approving an Interpretation does not submit it to ClinVar.</strong> : null}
+                                {gdm ? 
+                                    <p className="contributor-warning"><i className="icon icon-exclamation-circle"></i> {contributorWarningText}</p>
+                                    : null}
                             </div>
                         </div>
                         :
