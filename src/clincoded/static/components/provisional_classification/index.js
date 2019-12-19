@@ -164,6 +164,7 @@ const ProvisionalClassification = createReactClass({
             }
 
             // search for provisional owned by affiliation or login user
+            console.log('provisionalClassifications', stateObj.gdm.provisionalClassifications);
             if (stateObj.gdm.provisionalClassifications && stateObj.gdm.provisionalClassifications.length > 0) {
                 for (let provisionalClassification of stateObj.gdm.provisionalClassifications) {
                     let curatorAffiliation = this.props.affiliation;
@@ -172,6 +173,7 @@ const ProvisionalClassification = createReactClass({
                     if ((affiliation && curatorAffiliation) || (!affiliation && !curatorAffiliation && creator.uuid === stateObj.user)) {
                         stateObj.provisional = provisionalClassification;
                         stateObj.classificationStatus = stateObj.provisional.hasOwnProperty('classificationStatus') ? stateObj.provisional.classificationStatus : 'In progress';
+                        // TODO: do we want to break; here? Should we just get the latest provisional classification?
                     }
                 }
             }
