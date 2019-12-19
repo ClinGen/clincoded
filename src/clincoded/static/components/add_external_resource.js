@@ -852,7 +852,10 @@ function carQueryResource() {
             console.log('ready to query MANE, finalState =', finalState);
             if (finalState.resourceFetched) {
                 try {
-                    finalState.tempResource['maneTranscriptTitle'] = await queryManeTranscriptTitle.call(this, id, json);
+                    const maneTranscriptTitle = await queryManeTranscriptTitle.call(this, id, json);
+                    if (maneTranscriptTitle) {
+                        finalState.tempResource['maneTranscriptTitle'] = maneTranscriptTitle;
+                    }
                 }
                 catch (error) {
                     console.warn('Error in querying MANE transcript data = %o', error);
@@ -969,30 +972,27 @@ async function queryManeTranscriptTitle(carId, carJson) {
         return null;
     }
 
-    // get genes from transcript; also make sure no duplicated gene to avoid unecessary query
+    // collect genes from transcript
     const geneSet = getTranscriptAllelesGeneUrlSet(carJson.transcriptAlleles);
 
-    // if 2 or more than 2 genes then just abort and provide no MANE title.
-    if (geneSet.size >= 2) {
+    // if no gene, or 2 or more than 2 genes, then just abort and don't fetch MANE for variant title
+    if (geneSet.size != 1) {
         return null;
     }
 
+    // use LDH (linked data hub) to try to fetch MANE info first
     const ldhJson = await this.getRestData('/ldh/' + carId);
     let maneTranscriptId = parseManeTranscriptIdFromLdh(ldhJson);
+
+    // if LDH doesn't have such variant record yet, as a workaround, query genomic AR (Allele Registry) for MANE
     if (!maneTranscriptId) {
-        // LDH doesn't have such variant record yet; as a workaround, search for MANE info from genomic AR (Allele Registry)
-        
-        // query genomic AR for each gene
-        for (let geneUrl of geneSet) {
-            const genomicCarJson = await this.getRestData(geneUrl);
-            maneTranscriptId = parseManeTranscriptIdFromGenomicCar(genomicCarJson);
-            // stop when we found the MANE
-            if (maneTranscriptId) {
-                break;
-            }
-        }
+        // geneSet should be a set of size of one, we'll just query for this single gene
+        const geneUrl = Array.from(geneSet)[0];
+        const genomicCarJson = await this.getRestData(geneUrl);
+        maneTranscriptId = parseManeTranscriptIdFromGenomicCar(genomicCarJson);
     }
 
+    // in case we got MANE transcript from either LDH or genomic AR, we construct the MANE title
     if (maneTranscriptId) {
         return getManeTranscriptTitleFromCar(maneTranscriptId, carJson);
     }
