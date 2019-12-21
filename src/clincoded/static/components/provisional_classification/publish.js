@@ -27,9 +27,9 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         selectedSnapshotUUID: PropTypes.string,
         updateSnapshotList: PropTypes.func,
         updateProvisionalObj: PropTypes.func,
-        trackData: PropTypes.func,
+        postTrackData: PropTypes.func,
         getContributors: PropTypes.func,
-        getGDMInfo: PropTypes.func,
+        setUNCData: PropTypes.func,
         triggerPublishLinkAlert: PropTypes.func,
         clearPublishState: PropTypes.func
     },
@@ -161,11 +161,6 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         let alertMsg = (<span>Request failed; please try again in a few minutes or contact helpdesk: <a
             href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a></span>);
         return new Promise((resolve, reject) => {
-        /*
-            let test = {};
-            test.status = 'Success';
-            resolve(test);
-        */
             if (objType && objUUID) {
                 this.getRestData('/publish?type=' + objType + '&uuid=' + objUUID, null, false).then(result => {
                     if (result.status === 'Success') {
@@ -188,11 +183,11 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
     },
 
     /**
-     * Method to send GDM provisional data to UNC
+     * Method to send GDM un/publish provisional data to Data Exchange
      * @param {object} provisional - provisional classification object
      * @param {string} publishSnapshotId - current publish/unpublish snapshot Id
      */
-    sendToUNC(provisional, publishSnapshotId) {
+    sendToDataExchange(provisional, publishSnapshotId) {
         const gdm = this.props.gdm;
         const publishSubmitter = this.props.session && this.props.session.user_properties ? this.props.session.user_properties : null;
         const status = provisional.publishClassification ? 'published' : 'unpublished';
@@ -209,14 +204,14 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                 roles: pubRole
             });
         }
-            
+
+        // Create data object to be sent to Data Exchange
+        const publishDate = provisional.publishDate ? provisional.publishDate : '';
+        let uncData = this.props.setUNCData(provisional, status, publishDate, publishSubmitter, contributors);
+/* ???
         let uncData = {
             report_id: gdm.uuid,
-            gene_validity_evidence_level: {
-                genetic_condition: this.props.getGDMInfo(),
-                evidence_level: provisional.alteredClassification && provisional.alteredClassification !== 'No Modification' ? provisional.alteredClassification : provisional.autoClassification,
-                gene_validity_sop: provisional.sopVersion ? 'cg:gene_validity_sop_' + provisional.sopVersion : ''
-            },
+            gene_validity_evidence_level: this.props.getGeneEvidenceData(provisional),
             date: provisional.publishDate ? provisional.publishDate : '',
             status: status,
             performed_by: {
@@ -230,18 +225,14 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
             },
             contributors: contributors
         };
-        // ??? testing
-        console.log(uncData);
-        this.props.trackData(uncData).then(response => {
-            if (response && response.message) {
-                const error = response.message.status && response.message.status.errorCount > 0 ?
-                    '' : 'track-data';
-            }
+*/
+        // Post published/unpublished data to Data Exchange
+        const postedTime = provisional.publishDate ? provisional.publishDate : provisional.last_modified;
+        this.props.postTrackData(uncData).then(response => {
+            console.log('Successfully post %s data to Data Exchange for provisional %s at %s', status, provisional.uuid, postedTime);
         }).catch(error => {
-            console.log('Track %s Data error: %o', status, error);
+            console.log('Error sending %s data to Data Exchange for provisional %s at %s - Error: %o', status, provisional.uuid, postedTime, error);
         });
-        // ??? testing
-        console.log("Just %s uuid = %s", status, gdm.uuid);
     },
 
     /**
@@ -267,8 +258,8 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                 resourceName = 'interpretation';
             }
 
-            //const origPublishSubmitter = this.state.selectedSnapshot.resource.publishSubmitter;
-            //const origPublishDate = this.state.selectedSnapshot.resource.publishDate;
+            //??? const origPublishSubmitter = this.state.selectedSnapshot.resource.publishSubmitter;
+            //??? const origPublishDate = this.state.selectedSnapshot.resource.publishDate;
             this.publishToDataExchange(this.state.selectedSnapshot['@type'][0], this.state.selectedSnapshot['@id'].split('/', 3)[2]).then(response => {
                 let publishProvisional = this.state.selectedProvisional && this.state.selectedProvisional.uuid ? this.state.selectedProvisional : {};
                 let currentProvisional = this.props.provisional && this.props.provisional['@id'] ? curator.flatten(this.props.provisional) : {};
@@ -351,10 +342,9 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                         return Promise.reject(responseProvisional);
                     }
                 }).then(resultProvisional => {
-
-                    // Send publish GDM classification data to UNC
+                    // Send publish GDM provisional data to Data Exchange
                     if (selectedResourceType === 'gdm' && this.props.gdm && Object.keys(this.props.gdm).length) {
-                        this.sendToUNC(resultProvisional, this.state.selectedSnapshot['@id']);
+                        this.sendToDataExchange(resultProvisional, this.state.selectedSnapshot['@id']);
                     }
 
                     // Create selected/published snapshot object, updated with publish event data
@@ -424,10 +414,9 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                         return Promise.reject(responseSnapshot);
                                     }
                                 }).then(resultSnapshot => {
-                                    // Send unpublish GDM classification data to UNC
+                                    // Send unpublish GDM provisional data to Data Exchange
                                     if (selectedResourceType === 'gdm' && resultSnapshot && resultSnapshot.resource && this.props.gdm && Object.keys(this.props.gdm).length) {
-                                        // Send publish GDM classification data to UNC
-                                        this.sendToUNC(resultSnapshot.resource, resultSnapshot['@id']);
+                                        this.sendToDataExchange(resultSnapshot.resource, resultSnapshot['@id']);
                                     }
                                 }).catch(error => {
                                     console.log('Automatic unpublishing snapshot error = : %o', error);

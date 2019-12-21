@@ -950,7 +950,7 @@ def track_data(request):
             return_object['message'] = 'Failed to build complete message'
         return return_object
 
-    # Get performer uuid as message key
+    # Set performer uuid and action date as message key
     key = resultJSON['performed_by']['id'] + '-' + resultJSON['date']
 
     # Configure message delivery parameters
@@ -989,7 +989,9 @@ def track_data(request):
     def delivery_callback(err, msg):
         nonlocal return_object
         if err:
-            return_object['message'] = err
+            return_object = {'status': 'Error',
+                        'message': message,
+                        'error': err}
 
         else:
             return_object = {'status': 'Success',

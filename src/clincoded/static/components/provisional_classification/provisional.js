@@ -7,7 +7,7 @@ import { RestMixin } from '../rest';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
-import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
+import { formatDate, parseDate } from 'react-day-picker/moment';
 import * as CuratorHistory from '../curator_history';
 import * as curator from '../curator';
 const CurationMixin = curator.CurationMixin;
@@ -26,9 +26,9 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         updateSnapshotList: PropTypes.func,
         updateProvisionalObj: PropTypes.func,
         approveProvisional: PropTypes.func,
-        trackData: PropTypes.func,
+        postTrackData: PropTypes.func,
         getContributors: PropTypes.func,
-        getGDMInfo: PropTypes.func
+        setUNCData: PropTypes.func
     },
 
     getInitialState() {
@@ -94,12 +94,10 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
     },
 
     /**
-     * Method to send GDM provisional data to UNC
+     * Method to send GDM provisional data to Data Exchange
      * @param {object} provisional - provisional classification object
-     * @param {object} gdm - gdm object
      */
-    sendToUNC(provisional, gdm) {
-        // Send GDM provisional data to UNC
+    sendToDataExchange(provisional) {
         const provisionalSubmitter = this.props.session && this.props.session.user_properties ? this.props.session.user_properties : null;
         // Get all contributors
         const contributors = this.props.getContributors();
@@ -114,13 +112,13 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
             });
         }
     
+        // Create data object to be sent to Data Exchange
+        const provisionalDate = provisional.provisionalDate ? provisional.provisionalDate : '';
+        const uncData = this.props.setUNCData(provisional, 'provisional approved', provisionalDate, provisionalSubmitter, contributors);
+        /*
         let uncData = {
             report_id: gdm.uuid,
-            gene_validity_evidence_level: {
-                genetic_condition: this.props.getGDMInfo(),
-                evidence_level: provisional.alteredClassification && provisional.alteredClassification !== 'No Modification' ? provisional.alteredClassification : provisional.autoClassification,
-                gene_validity_sop: ''
-            },
+            gene_validity_evidence_level: this.props.getGeneEvidenceData(provisional),
             date: provisional.provisionalDate ? provisional.provisionalDate : '',
             status: 'provisionally approved',
             performed_by: {
@@ -134,19 +132,14 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
             },
             contributors: contributors
         };
-    
-        // ??? testing
-        console.log(uncData);
-        this.props.trackData(uncData).then(response => {
-            if (response && response.message) {
-                const error = response.message.status && response.message.status.errorCount > 0 ?
-                                '' : 'track-data';
-            }
+        */
+        // Post provisional data to Data Exchange
+        const postedTime = provisional.provisionalDate ? provisional.provisionalDate : provisional.last_modified;
+        this.props.postTrackData(uncData).then(response => {
+            console.log('Successfully send provisionally approved data to Data Exchange for provisional %s at %s', provisional.uuid, postedTime);
         }).catch(error => {
-            console.log('Track Provisional Data error: %o', error);
+            console.log('Error sending provisionally approved data to Data Exchange for provisional %s at %s - Error: %o', provisional.uuid, postedTime, error);
         });
-        
-        console.log("Just %s uuid = %s", provisional.classificationStatus, gdm.uuid);
     },
 
     /**
@@ -188,8 +181,8 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
             }).then(result => {
                 // get a fresh copy of the gdm object
                 this.getRestData('/gdm/' + this.props.gdm.uuid).then(newGdm => {
-                    // Send data to UNC
-                    this.sendToUNC(result, newGdm);
+                    // Send provisional data to Data Exchange
+                    this.sendToDataExchange(result);
 
                     let parentSnapshot = {gdm: newGdm};
                     let newSnapshot = {

@@ -11,10 +11,9 @@ import { getApproverNames, getContributorNames } from '../../libs/get_approver_n
 import { sopVersions } from '../../libs/sop';
 import Select from 'react-select';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
-import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
+import { formatDate, parseDate } from 'react-day-picker/moment';
 import * as CuratorHistory from '../curator_history';
 import * as curator from '../curator';
-import { removeListener } from 'cluster';
 const CurationMixin = curator.CurationMixin;
 
 const ClassificationApproval = module.exports.ClassificationApproval = createReactClass({
@@ -30,9 +29,9 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         affiliation: PropTypes.object, // User's affiliation
         updateSnapshotList: PropTypes.func,
         updateProvisionalObj: PropTypes.func,
-        trackData: PropTypes.func,
+        postTrackData: PropTypes.func,
         getContributors: PropTypes.func,
-        getGDMInfo: PropTypes.func,
+        getGeneEvidenceData: PropTypes.func,
         snapshots: PropTypes.array
     },
 
@@ -225,11 +224,10 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
     },
 
     /**
-     * Method to send GDM provisional data to UNC
+     * Method to send GDM approval data to Data Exchange
      * @param {object} provisional - provisional classification object
-     * @param {object} gdm - gdm object
      */
-    sendToUNC(provisional, gdm) {
+    sendToDataExchange(provisional) {
         const approvalSubmitter = this.props.session && this.props.session.user_properties ? this.props.session.user_properties : null;
         // Get all contributors
         const contributors = this.props.getContributors();
@@ -243,39 +241,38 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                 roles: ['approver']
             });
         }
-        // ??? Add secondary approvers to contributors list
+        // Add curator approved this classification to contributors list
         if (provisional.classificationApprover) {
             contributors.push({   
                 name: provisional.classificationApprover,
                 roles: ['secondary approver']
             });
         }
-        if (provisional.curationApprovers) {
-            provisional.curationApprovers.forEach(approverId => {
-                contributors.push({
-                    'id': approverId,
-                    'name': getAffiliationNameBySubgroupID('gcep', approverId),
-                    'roles': ['secondary approver']
-                });
+        // Add secondary approver (affiliation) to contributors list
+        if (provisional.additionalApprover) {
+            contributors.push({
+                name: getApproverNames(provisional.additionalApprover),
+                roles: ['secondary approver']
             });
         }
-        if (provisional.curationContributors) {
-            provisional.curationContributors.forEach(contributorId => {
+        // Add secondary contributors (affiliations) to contributors list
+        if (provisional.classificationContributors) {
+            provisional.classificationContributors.forEach(contributorId => {
                 contributors.push({
-                    'id': contributorId,
-                    'name': getAffiliationName(contributorId),
-                    'roles': ['secondary approver']
+                    id: contributorId,
+                    name: getAffiliationName(contributorId),
+                    roles: ['secondary contributor']
                 });
             });
         }
 
+        // Create data object to be sent to Data Exchange
+        const approvalDate = provisional.approvalDate ? provisional.approvalDate : '';
+        const uncData = this.props.setUNCData(provisional, 'approved', approvalDate, approvalSubmitter, contributors);
+/*
         let uncData = {
             report_id: gdm.uuid,
-            gene_validity_evidence_level: {
-                genetic_condition: this.props.getGDMInfo(),
-                evidence_level: provisional.alteredClassification && provisional.alteredClassification !== 'No Modification' ? provisional.alteredClassification : provisional.autoClassification,
-                gene_validity_sop: provisional.sopVersion ? 'cg:gene_validity_sop_' + provisional.sopVersion : ''
-            },
+            gene_validity_evidence_level: this.props.getGeneEvidenceData(provisional),
             date: provisional.approvalDate ? provisional.approvalDate : '',
             status: 'approved',
             performed_by: {
@@ -289,20 +286,14 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             },
             contributors: contributors
         };
-
-        // ??? testing
-        console.log(uncData);
-        // Post UNC data
-        this.props.trackData(uncData).then(response => {
-            if (response && response.message) {
-                const error = response.message.status && response.message.status.errorCount > 0 ?
-                    '' : 'track-data';
-            }
+*/
+        // Post approval data to Data Exchange
+        const postedTime = provisional.approvalDate ? provisional.approvalDate : provisional.last_modified;
+        this.props.postTrackData(uncData).then(response => {
+            console.log('Successfully post approval data to Data Exchange for provisional %s at %s', provisional.uuid, postedTime);
         }).catch(error => {
-            console.log('Track Approval Data error: %o', error);
+            console.log('Error sending approval data to Data Exchange for provisional %s at %s - Error: %o', provisional.uuid, postedTime, error);
         });
-        // ??? testing
-        console.log("Just %s uuid = %s", provisional.classificationStatus, gdm.uuid);
     },
 
     /**
@@ -360,8 +351,8 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             }).then(result => {
                 // get a fresh copy of the gdm object
                 this.getRestData('/gdm/' + this.props.gdm.uuid).then(newGdm => {
-                    // Send data to UNC
-                    this.sendToUNC(result, newGdm);
+                    // Send approval data to Data Exchange
+                    this.sendToDataExchange(result);
 
                     let parentSnapshot = { gdm: newGdm };
                     let newSnapshot = {
