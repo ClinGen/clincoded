@@ -690,11 +690,23 @@
     },
     {
         "affiliation_id": "10051",
-        "affiliation_fullname": "Von Willebrand"
+        "affiliation_fullname": "von Willebrand Disease",
+        "subgroups": {
+            "vcep": {
+                "id": "50051",
+                "fullname": "von Willebrand Disease VCEP"
+            }
+        }
     },
     {
         "affiliation_id": "10052",
-        "affiliation_fullname": "Hemoglobinopathies"
+        "affiliation_fullname": "Hemoglobinopathy",
+        "subgroups": {
+            "vcep": {
+                "id": "50052",
+                "fullname": "Hemoglobinopathy VCEP"
+            }
+        }
     },
     {
         "affiliation_id": "10053",
