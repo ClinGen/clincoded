@@ -261,7 +261,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                 contributors.push({
                     id: contributorId,
                     name: getAffiliationName(contributorId),
-                    roles: ['secondary contributor']
+                    roles: ['secondary approver']
                 });
             });
         }
@@ -269,24 +269,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         // Create data object to be sent to Data Exchange
         const approvalDate = provisional.approvalDate ? provisional.approvalDate : '';
         const uncData = this.props.setUNCData(provisional, 'approved', approvalDate, approvalSubmitter, contributors);
-/*
-        let uncData = {
-            report_id: gdm.uuid,
-            gene_validity_evidence_level: this.props.getGeneEvidenceData(provisional),
-            date: provisional.approvalDate ? provisional.approvalDate : '',
-            status: 'approved',
-            performed_by: {
-                name: approvalSubmitter && approvalSubmitter.title ? approvalSubmitter.title : '',
-                id: approvalSubmitter && approvalSubmitter.uuid ? approvalSubmitter.uuid : '',
-                email: approvalSubmitter && approvalSubmitter.email ? approvalSubmitter.email : '',
-                on_behalf_of: {
-                    id: this.props.affiliation && this.props.affiliation.affiliation_id ? this.props.affiliation.affiliation_id : '',
-                    name: this.props.affiliation && this.props.affiliation.affiliation_fullname ? this.props.affiliation.affiliation_fullname : ''
-                }
-            },
-            contributors: contributors
-        };
-*/
+
         // Post approval data to Data Exchange
         const postedTime = provisional.approvalDate ? provisional.approvalDate : provisional.last_modified;
         this.props.postTrackData(uncData).then(response => {

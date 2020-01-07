@@ -280,7 +280,7 @@ const ProvisionalClassification = createReactClass({
                                 contributors.push({
                                     id: contributorId,
                                     name: getAffiliationName(contributorId),
-                                    roles: ['secondary contributor']
+                                    roles: ['secondary approver']
                                 });
                             });
                         }

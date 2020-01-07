@@ -208,24 +208,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         // Create data object to be sent to Data Exchange
         const publishDate = provisional.publishDate ? provisional.publishDate : '';
         let uncData = this.props.setUNCData(provisional, status, publishDate, publishSubmitter, contributors);
-/* ???
-        let uncData = {
-            report_id: gdm.uuid,
-            gene_validity_evidence_level: this.props.getGeneEvidenceData(provisional),
-            date: provisional.publishDate ? provisional.publishDate : '',
-            status: status,
-            performed_by: {
-                name: publishSubmitter && publishSubmitter.title ? publishSubmitter.title : '',
-                id: publishSubmitter && publishSubmitter.uuid ? publishSubmitter.uuid : '',
-                email: publishSubmitter && publishSubmitter.email ? publishSubmitter.email : '',
-                on_behalf_of: {
-                    id: this.props.affiliation && this.props.affiliation.affiliation_id ? this.props.affiliation.affiliation_id : '',
-                    name: this.props.affiliation && this.props.affiliation.affiliation_fullname ? this.props.affiliation.affiliation_fullname : ''
-                }
-            },
-            contributors: contributors
-        };
-*/
+
         // Post published/unpublished data to Data Exchange
         const postedTime = provisional.publishDate ? provisional.publishDate : provisional.last_modified;
         this.props.postTrackData(uncData).then(response => {

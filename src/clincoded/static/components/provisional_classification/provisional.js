@@ -115,24 +115,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         // Create data object to be sent to Data Exchange
         const provisionalDate = provisional.provisionalDate ? provisional.provisionalDate : '';
         const uncData = this.props.setUNCData(provisional, 'provisional approved', provisionalDate, provisionalSubmitter, contributors);
-        /*
-        let uncData = {
-            report_id: gdm.uuid,
-            gene_validity_evidence_level: this.props.getGeneEvidenceData(provisional),
-            date: provisional.provisionalDate ? provisional.provisionalDate : '',
-            status: 'provisionally approved',
-            performed_by: {
-                name: provisionalSubmitter && provisionalSubmitter.title ? provisionalSubmitter.title : '',
-                id: provisionalSubmitter && provisionalSubmitter.uuid ? provisionalSubmitter.uuid : '',
-                email: provisionalSubmitter && provisionalSubmitter.email ? provisionalSubmitter.email : '',
-                on_behalf_of: {
-                    id: this.props.affiliation && this.props.affiliation.affiliation_id ? this.props.affiliation.affiliation_id : '',
-                    name: this.props.affiliation && this.props.affiliation.affiliation_fullname ? this.props.affiliation.affiliation_fullname : ''
-                }
-            },
-            contributors: contributors
-        };
-        */
+
         // Post provisional data to Data Exchange
         const postedTime = provisional.provisionalDate ? provisional.provisionalDate : provisional.last_modified;
         this.props.postTrackData(uncData).then(response => {
