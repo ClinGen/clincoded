@@ -8867,6 +8867,12 @@
         "groups": [
             "curator"
         ],
+        "affiliation": [
+            "10006",
+            "10007",
+            "10023",
+            "10029"
+        ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
         "submits_for": [
@@ -13557,6 +13563,9 @@
         "groups": [
             "curator"
         ],
+        "affiliation": [
+            "10052"
+        ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",
         "submits_for": [
@@ -16877,6 +16886,237 @@
         "uuid": "fab2c0ec-fed1-40bd-bb90-c6baf9e6643e",
         "groups": [
             "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "swati.tomar00@gmail.com",
+        "first_name": "Swati",
+        "last_name": "Tomar",
+        "uuid": "405b6b0b-cbb8-448f-88ac-007718d35bb0",
+        "groups": [
+            "curator"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "petrosk@cing.ac.cy",
+        "first_name": "Petros",
+        "last_name": "Kountouris",
+        "uuid": "52097f3a-4c50-4288-9ec9-870f53f2ac9e",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10052"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "marinakl@cing.ac.cy",
+        "first_name": "Marina",
+        "last_name": "Kleanthous",
+        "uuid": "b7303412-908b-474b-965e-274622065412",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10052"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "coraleas@cing.ac.cy",
+        "first_name": "Coralea",
+        "last_name": "Stephanou",
+        "uuid": "1349bcc3-3911-47df-b648-5a5d928dc82c",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10052"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "npsatha@altius.org",
+        "first_name": "Nikoletta",
+        "last_name": "Psatha",
+        "uuid": "f6ba164e-f4e2-4abe-8dff-4f3c829307ac",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10052"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "leon.tshilolo2012@gmail.com",
+        "first_name": "Léon",
+        "last_name": "Tshilolo",
+        "uuid": "c111c807-f5a4-4a63-9cbe-5c5214151c2c",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10052"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "jtraeger@med.uoa.gr",
+        "first_name": "Joanne",
+        "last_name": "Traeger-Synodinos",
+        "uuid": "63804206-cf89-4fcb-b404-d3cacd2a107e",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10052"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "halimfikri@gmail.com",
+        "first_name": "Hashim",
+        "last_name": "Halim-Fikri",
+        "uuid": "3f60bd43-9522-4e22-80c6-ecc456a4d752",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10052"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "francknzengulukusa@gmail.com",
+        "first_name": "Franck",
+        "last_name": "Nzengu Lukusa",
+        "uuid": "874d3fc8-ddfd-4eb3-ad05-58f293dc0f36",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10052"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "efylaktou@med.uoa.gr",
+        "first_name": "Irini",
+        "last_name": "Fylaktou",
+        "uuid": "a665d04b-7ca5-48b6-ac83-ffba57fe667d",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10052"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "c.l.harteveld@lumc.nl",
+        "first_name": "Cornelis",
+        "last_name": "Harteveld",
+        "uuid": "d5978acc-4d15-403a-a0fe-b74387333fbd",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10052"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "t.t.koopmann@lumc.nl",
+        "first_name": "Tamara",
+        "last_name": "Koopmann",
+        "uuid": "51d6834a-45e0-4286-9471-146f0621fc90",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10052"
+        ],
+        "job_title": "ClinGen Curator",
+        "lab": "/labs/curator/",
+        "submits_for": [
+            "/labs/curator/"
+        ],
+        "timezone": "US/Pacific"
+    },
+    {
+        "email": "thesalia@cing.ac.cy",
+        "first_name": "Thessalia",
+        "last_name": "Papasavva",
+        "uuid": "a72a5e1d-f86b-4c50-9d25-ce6654ca564a",
+        "groups": [
+            "curator"
+        ],
+        "affiliation": [
+            "10052"
         ],
         "job_title": "ClinGen Curator",
         "lab": "/labs/curator/",

@@ -691,6 +691,7 @@
     {
         "affiliation_id": "10051",
         "affiliation_fullname": "von Willebrand Disease",
+        "publish_approval": true,
         "subgroups": {
             "vcep": {
                 "id": "50051",
@@ -701,6 +702,7 @@
     {
         "affiliation_id": "10052",
         "affiliation_fullname": "Hemoglobinopathy",
+        "publish_approval": true,
         "subgroups": {
             "vcep": {
                 "id": "50052",
