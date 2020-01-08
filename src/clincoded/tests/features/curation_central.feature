@@ -37,19 +37,19 @@ Feature: Curation Central
         Then I should see "Any user may explore the demo version of the ClinGen interfaces"
 
 
-    Scenario: Test PMID modal in Curation-central
+    Scenario: Test Article modal in Curation-central
         When I visit "/logout"
         Then I should see "Demo Login"
         When I press "Demo Login"
         And I wait for 10 seconds
         Then I should see "Logout ClinGen Test Curator"
         When I go to "/curation-central/?gdm=9ffd7c1e-16d9-11e5-b283-60f81dc5b05a/"
-        Then I should see "Add New PMID" within 5 seconds
-        When I press "Add New PMID"
+        Then I should see "Add New Article" within 5 seconds
+        When I press "Add New Article"
         Then I should see an element with the css selector ".modal-dialog" within 5 seconds
-        Then I should see "Enter a PMID"
+        Then I should see "Enter a PMID or DOI"
         When I fill in the css element field "input.form-control" with "123456"
-        When I press the button "Retrieve PubMed Article"
+        When I press the button "Retrieve Article"
         Then I should see "Grados OB. " within 10 seconds
         When I press the button "Add Article"
         Then I should not see an element with the css selector ".modal-open"

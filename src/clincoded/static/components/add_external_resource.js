@@ -368,19 +368,19 @@ function pubmedTxt(field, extra) {
     }
     switch(field) {
         case 'modalTitle':
-            txt = 'Add new PubMed Article';
+            txt = 'Add new Article';
             break;
         case 'inputLabel':
-            txt = 'Enter a PMID';
+            txt = 'Enter a PMID or DOI';
             break;
         case 'editLabel':
-            txt = 'Edit PMID';
+            txt = 'Edit PMID/DOI';
             break;
         case 'inputButton':
-            txt = 'Retrieve PubMed Article';
+            txt = 'Retrieve Article';
             break;
         case 'resourceResponse':
-            txt = "Select \"" + extra + "\" (below) if the following citation is correct; otherwise, edit the PMID (above) to retrieve a different article.";
+            txt = "Select \"" + extra + "\" (below) if the following citation is correct; otherwise, edit the PMID/DOI (above) to retrieve a different article.";
             break;
     }
     return txt;
@@ -419,16 +419,25 @@ function pubmedValidateForm() {
         this.setFormErrors('resourceId', 'Please re-enter PMID without any leading 0\'s');
         this.setState({submitBusy: false});
     }
-    // valid if the input only has numbers
-    if (valid && !formInput.match(/^[0-9]*$/)) {
+    // Check if form input is a DOI/PMID, then validate
+    if (valid && formInput.match(/^10.\d{4,9}\/[-._;()\/:A-Z0-9]+$/gi)) {
+        var doiPresent = true;    
+    } else if (valid && formInput.match(/^[0-9]*$/)) {
+        var pmidPresent = true;
+    } else if (valid && !doiPresent && !formInput.match(/^[0-9]*$/)) {
         valid = false;
         this.setFormErrors('resourceId', 'PMID should contain only numbers');
         this.setState({submitBusy: false});
-    }
+    } else if (valid && !pmidPresent && !formInput.match(/^10.\d{4,9}\/[-._;()\/:A-Z0-9]+$/gi)) {
+        valid = false;
+        this.setFormErrors('resourceId', 'Invalid DOI');
+        this.setState({submitBusy: false});
+    } 
+    
     // valid if parent object is GDM and input isn't already associated with it
     if (valid && this.props.parentObj && this.props.parentObj['@type'] && this.props.parentObj['@type'][0] == 'gdm') {
         for (var i = 0; i < this.props.parentObj.annotations.length; i++) {
-            if (this.props.parentObj.annotations[i].article.pmid == formInput) {
+            if (this.props.parentObj.annotations[i].article.pmid == formInput || this.props.parentObj.annotations[i].article.doi == formInput) {
                 valid = false;
                 this.setFormErrors('resourceId', 'This article has already been associated with this Gene-Disease Record');
                 this.setState({submitBusy: false});
@@ -437,50 +446,76 @@ function pubmedValidateForm() {
         }
     }
     // valid if parent object is evidence list (VCI) and input isn't already associated with it - final behavior TBD
-    /*
     if (valid && this.props.parentObj && this.props.parentObj['@type'] && this.props.parentObj['@type'][0] == 'evidenceList') {
         for (var j = 0; j < this.props.parentObj.evidenceList.length; j++) {
-            if (this.props.parentObj.evidenceList[j].articles[0].pmid == formInput) {
+            if (this.props.parentObj.evidenceList[j].articles[0].pmid == formInput || this.props.parentObj.evidenceList[j].articles[0].doi == formInput) {
                 valid = false;
                 this.setFormErrors('resourceId', 'This article has already been associated with this evidence group');
                 this.setState({submitBusy: false});
                 break;
             }
         }
-    }*/
+    }
     return valid;
+}
+function getPubmedResponse(id) {
+    this.getRestData('/articles/' + id)
+    .then(article => {
+        // article already exists in db
+        this.setState({queryResourceBusy: false, tempResource: article, resourceFetched: true});
+    }, () => {
+        var url = external_url_map['PubMedSearch'];
+        // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
+        this.getRestDataXml(external_url_map['PubMedSearch'] + id).then(xml => {
+            var data = parsePubmed(xml);
+            if (data.pmid) {
+                // found the result we want
+                this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+            } else {
+                // no result from ClinVar
+                this.setFormErrors('resourceId', 'PMID not found');
+                this.setState({queryResourceBusy: false, resourceFetched: false});
+            }
+        });
+    }).catch(e => {
+        // error handling for PubMed query
+        this.setFormErrors('resourceId', 'Error querying PubMed. Please check your input and try again.');
+        this.setState({queryResourceBusy: false, resourceFetched: false});
+    });
 }
 function pubmedQueryResource() {
     // for pinging and parsing data from PubMed
     this.saveFormValue('resourceId', this.state.inputValue);
+    // Give 'getPubmedResponse' correct scope for 'this'
+    const receivePubmed = getPubmedResponse.bind(this);
     if (pubmedValidateForm.call(this)) {
         var url = external_url_map['PubMedSearch'];
         var data;
 
         // Remove possible prefix like "PMID:" before sending queries
         var id = this.state.inputValue.replace(/^PMID\s*:\s*(\S*)$/i, '$1');
-        this.getRestData('/articles/' + id).then(article => {
-            // article already exists in db
-            this.setState({queryResourceBusy: false, tempResource: article, resourceFetched: true});
-        }, () => {
-            var url = external_url_map['PubMedSearch'];
-            // PubMed article not in our DB; go out to PubMed itself to retrieve it as XML
-            this.getRestDataXml(external_url_map['PubMedSearch'] + id).then(xml => {
-                var data = parsePubmed(xml);
-                if (data.pmid) {
-                    // found the result we want
-                    this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
-                } else {
-                    // no result from ClinVar
-                    this.setFormErrors('resourceId', 'PMID not found');
-                    this.setState({queryResourceBusy: false, resourceFetched: false});
-                }
+        // Check whether input is a valid DOI
+        const doiRegex = /^10.\d{4,9}\/[-._;()\/:A-Z0-9]+$/gi;
+        const validDoi = id.match(doiRegex);
+        // Handle search via DOI
+        if (validDoi) {
+            const doiUrl = external_url_map['DoiToPubMed'] + validDoi[0];
+            const doiData = this.getRestDataXml(doiUrl).then(xml => {
+                let data = parsePubmed(xml);
+                return data;
+            })
+            Promise.resolve(doiData).then(res => {
+                id = res.pmid;
+                return id;
+            })
+            // Take the resolved PMID and then query PubMed
+            .then(id => {
+                receivePubmed(id);
             });
-        }).catch(e => {
-            // error handling for PubMed query
-            this.setFormErrors('resourceId', 'Error querying PubMed. Please check your input and try again.');
-            this.setState({queryResourceBusy: false, resourceFetched: false});
-        });
+        // If not a DOI, query PubMed using PMID
+        } else {
+            receivePubmed(id);
+        }
     } else {
         this.setState({queryResourceBusy: false});
     }

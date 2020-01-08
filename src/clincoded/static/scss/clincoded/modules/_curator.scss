@@ -2,9 +2,6 @@
     margin-top: 10px;
 }
 
-.curr-pmid-overview {
-}
-
 .pmid-doi-btns {
     margin: 10px 0;
 
@@ -255,6 +252,7 @@
     border: 1px solid darken(#dddddd, 10%);
     cursor: pointer;
     background-color: #ffffff;
+    overflow: hidden;
     @include border-radius(3px);
 
     div {
@@ -276,7 +274,7 @@
 }
 
 .pmid-selection-list-pmid {
-    font-weight: bold;
+    font-weight: bold;        
 }
 
 .pmid-selection-help {
