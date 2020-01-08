@@ -113,3 +113,9 @@ def family_6_7(value, system):
     # https://github.com/ClinGen/clincoded/issues/1848
     # Add new properties moiDisplayedForFamily/probandIs/lodRequirements and upgrade schema version
     return
+
+@upgrade_step('family', '7', '8')
+def family_7_8(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1585
+    # Add new properties to handle human readable HPO terms
+    return

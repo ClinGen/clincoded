@@ -109,4 +109,9 @@ def individual_6_7(value, system):
 	# https://github.com/ClinGen/clincoded/issues/1848
 	# Add new properties for semidom questions and update schema version
 	return
-	
+
+@upgrade_step('individual', '7', '8')
+def individual_7_8(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1585
+    # Add new properties to handle human readable HPO terms
+    return
