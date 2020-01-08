@@ -765,7 +765,14 @@
                 "id": "40061",
                 "fullname": "Limb Girdle Muscular Dystrophy GCEP"
             }
-        }
+        },
+        "approver": [
+            "Chris Weihl",
+            "Elizabeth Kearns",
+            "Courtney Thaxton",
+            "Shruthi Mohan",
+            "May Flowers"
+        ]
     },
     {
         "affiliation_id": "10062",
@@ -780,6 +787,13 @@
                 "id": "40063",
                 "fullname": "Charcot-Marie-Tooth GCEP"
             }
-        }
+        },
+        "approver": [
+            "Stephan Zuchner",
+            "Dana Bis-Brewer",
+            "Courtney Thaxton",
+            "Megan Mayers",
+            "May Flowers"
+        ]
     }
 ]
