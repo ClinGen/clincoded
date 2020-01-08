@@ -6,7 +6,6 @@ import urllib.request
 import requests
 import json
 import clincoded.messaging.templates.gci_to_dx, clincoded.messaging.templates.vci_to_dx
-# ??? import clincoded.messaging.templates.gci_to_dx, clincoded.messaging.templates.vci_to_dx, clincoded.messaging.templates.gdm_track
 
 affiliation_data = []
 saved_affiliation = []
@@ -951,7 +950,7 @@ def track_data(request):
         return return_object
 
     # Set performer uuid and action date as message key
-    key = resultJSON['performed_by']['id'] + '-' + resultJSON['date']
+    key = resultJSON['report_id'] + '-' + resultJSON['date']
 
     # Configure message delivery parameters
     kafka_cert_pw = ''
