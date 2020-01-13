@@ -83,11 +83,11 @@ const TransferCuration = createReactClass({
         } else if (contributorType === 'individual' && object.affiliation) {
             this.setState({errorMsg: 'Cannot transfer curation from an affiliation by selected individual user(s).'});
         } else if (contributorType === 'individual' && !object.affiliation && contributorUuids.indexOf(object.submitted_by.uuid) === -1) {
-            this.setState({errorMsg: 'Cannot transfer curation because it is not belonged to any selected individual user(s).'});
+            this.setState({errorMsg: 'Cannot transfer curation because it does not belong to any selected individual user(s).'});
         } else if (contributorType === 'affiliation' && !object.affiliation) {
-            this.setState({errorMsg: 'Cannot transfer curation from an user by selected affiliation(s).'});
+            this.setState({errorMsg: 'Cannot transfer curation from a user by selected affiliation(s).'});
         } else if (contributorType === 'affiliation' && object.affiliation && contributorUuids.indexOf(object.affiliation) === -1) {
-            this.setState({errorMsg: 'Cannot transfer curation because it is not belonged to any selected affiliation(s).'});
+            this.setState({errorMsg: 'Cannot transfer curation because it does not belong to any selected affiliation(s).'});
         } else {
             valid = true;
         }
@@ -252,7 +252,7 @@ const TransferCuration = createReactClass({
                                             <option value="gdm">GDM</option>
                                             <option value="interpretaton">Interpretation</option>
                                         </Input>
-                                        <Input type="text" ref="uuid" label={uuidLabel} handleChange={this.handleChange}
+                                        <Input type="text" ref="uuid" label={uuidLabel} value="" handleChange={this.handleChange}
                                             error={this.getFormError('uuid')} clearError={this.clrFormErrors.bind(null, 'uuid')}
                                             labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" required />
                                         <Input type="select" ref="contributor_type" label="Select Individual Contributor or Affiliation for Transfer" defaultValue="individual" handleChange={this.handleChange}
@@ -261,11 +261,11 @@ const TransferCuration = createReactClass({
                                             <option value="individual">Individual</option>
                                             <option value="affiliation">Affiliation</option>
                                         </Input>
-                                        <Input type="text" ref="contributor_uuid" label={ownerLabel} handleChange={this.handleChange}
+                                        <Input type="text" ref="contributor_uuid" label={ownerLabel} value="" handleChange={this.handleChange}
                                             error={this.getFormError('contributor_uuid')} clearError={this.clrFormErrors.bind(null, 'contributor_uuid')}
                                             labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group"
                                             placeholder={listHelp} required />
-                                        <Input type="text" ref="affiliation_id" label="New Affiliation ID" handleChange={this.handleChange}
+                                        <Input type="text" ref="affiliation_id" label="New Affiliation ID" value="" handleChange={this.handleChange}
                                             error={this.getFormError('affiliation_id')} clearError={this.clrFormErrors.bind(null, 'affiliation_id')}
                                             labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" required />
                                         <div className="curation-submit clearfix">
