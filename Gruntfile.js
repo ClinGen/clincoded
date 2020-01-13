@@ -203,7 +203,7 @@ module.exports = function(grunt) {
         },
         watch: {
             scripts: {
-                files: ['src/clincoded/static/components/**/*.js', 'src/clincoded/static/libs/**/*.js'],
+                files: ['src/clincoded/static/components/**/*.js'],
                 tasks: ['browserify:browser', 'browserify:server', 'replace:dev']
             },
             css: {
