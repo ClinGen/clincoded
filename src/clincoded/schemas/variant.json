@@ -43,7 +43,8 @@
         "maneTranscriptTitle": {
             "title": "MANE Transcript Title",
             "description": "Variant title constructed with mane transcript, gene symbol and protein change. Will try to fetch MANE transcript even if the variant is in ClinVar",
-            "type": "string"
+            "type": "string",
+            "default": ""
         },
         "clinVarRCVs": {
             "title": "ClinVar RCV Accession",
