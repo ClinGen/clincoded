@@ -2762,7 +2762,7 @@ class FamilyDeleteHistory extends Component {
             <div>
                 <span>Family {family.label} deleted</span>
                 <span>{collateralObjects ? ' along with any individuals' : ''}</span>
-                <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                <span>; {moment(family.last_modified).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
     }
