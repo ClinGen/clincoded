@@ -241,7 +241,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                 roles: ['approver']
             });
         }
-        // Add curator approved this classification to contributors list
+        // Add curator who approved this classification to contributors list
         if (provisional.classificationApprover) {
             contributors.push({   
                 name: provisional.classificationApprover,
@@ -273,14 +273,13 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         // Post approval data to Data Exchange
         const postedTime = provisional.approvalDate ? provisional.approvalDate : provisional.last_modified;
         this.props.postTrackData(uncData).then(response => {
-            console.log('Successfully post approval data to Data Exchange for provisional %s at %s', provisional.uuid, postedTime);
+            console.log('Successfully sent approval data to Data Exchange for provisional %s at %s', provisional.uuid, postedTime);
         }).catch(error => {
             console.log('Error sending approval data to Data Exchange for provisional %s at %s - Error: %o', provisional.uuid, postedTime, error);
         });
     },
 
     /**
-     * Method to handle submitting classificaiton approval form
      * Method to handle submitting classification approval form
      */
     submitForm(e) {

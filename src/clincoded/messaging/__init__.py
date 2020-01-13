@@ -923,7 +923,7 @@ def generate_clinvar_data(request):
     return return_object
 
 # track data - send GCI events tracking data(message) to Data Exchange
-# Events include GDM creation, provisional, approval, published, and unpublished
+# Events include GDM is created, classification is provisionally approved, approved, published, and unpublished
 @view_config(route_name='track-data', request_method='POST')
 def track_data(request):
     elasticsearch_server = 'http://localhost:9200/clincoded'
@@ -949,7 +949,7 @@ def track_data(request):
             return_object['message'] = 'Failed to build complete message'
         return return_object
 
-    # Set performer uuid and action date as message key
+    # Set GDM uuid and action date as message key
     key = resultJSON['report_id'] + '-' + resultJSON['date']
 
     # Configure message delivery parameters

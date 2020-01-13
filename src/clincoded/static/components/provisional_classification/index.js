@@ -133,18 +133,18 @@ const ProvisionalClassification = createReactClass({
             if (data) {
                 this.postRestData('/track-data', data).then(result => {
                     if (result.status === 'Success') {
-                        console.log('Post tracking data success: %s', result.message);
+                        console.log('Post tracking data succeeded: %s', result.message);
                         resolve(result);
                     } else {
-                        console.log('Post tracking data failure: %s', result.message);
+                        console.log('Post tracking data failed: %s', result.message);
                         reject(result);
                     }
                 }).catch(error => {
-                    console.log('Internal data retrieval error: %o', error);
+                    console.log('Post tracking data internal data retrieval error: %o', error);
                     reject(error);
                 });
             } else {
-                console.log('Missing experted data');
+                console.log('Post tracking data Error: Missing experted data');
                 reject({'message': 'Missing expected data'});
             }
         });
@@ -172,7 +172,7 @@ const ProvisionalClassification = createReactClass({
 
     /**
      * Method to get given provisional's gene_validity_evidence_level data that is used for UNC tracking
-     * @param {string} provisional - provisional data object
+     * @param {object} provisional - provisional data object
      */
     getGeneEvidenceData(provisional) {
         return {
@@ -188,7 +188,7 @@ const ProvisionalClassification = createReactClass({
      * @param {string} status - current classification status
      * @param {string} date - datetime current action performed
      * @param {object} submitter - current classification action submitter
-     * @param {array} contributros - classification contributor list
+     * @param {array} contributors - classification contributor list
      */
     setUNCData(provisional, status, date, submitter, contributors) {
         let uncData = {};
@@ -216,12 +216,13 @@ const ProvisionalClassification = createReactClass({
     },
 
     /**
-     * Method to get user(s) who has performed an action in current provisional classification.
+     * Method to get list of user who has performed an action in current provisional classification.
      * But skip the publish/unpublish user in the snapshot with given snapshot id.
      * @param {string} publishSnapshotId - snapshot id
      */
     getActionContributors(publishSnapshotId) {
         let contributors = [];
+
         // Add GDM creator
         if (this.state.gdm) {
             const gdm = this.state.gdm;
@@ -284,7 +285,7 @@ const ProvisionalClassification = createReactClass({
                                 });
                             });
                         }
-                        // Get the publisher/unpublisher data
+                        // Get the publisher/unpublisher data if it's not to be skipped
                         if (snapshot.resource.publishDate) {
                             if (publishSnapshotId === null || publishSnapshotId !== snapshot['@id']) {
                                 contributors.push({
@@ -302,8 +303,8 @@ const ProvisionalClassification = createReactClass({
     },
 
     /**
-     * Method to get the users who has made contribution to current provisional classification.
-     * But skip the un/publisher user in the snapshot with given snapshot id.
+     * Method to get the list of user who has made contribution to current provisional classification.
+     * But skip the publish/unpublish user in the snapshot with given snapshot id.
      * @param {string} publishSnapshotId - snapshot id
      */
     getContributors(publishSnapshotId=null) {
@@ -313,8 +314,9 @@ const ProvisionalClassification = createReactClass({
             const gdm = this.state.gdm;
             const gdmSubmitter = gdm.submitted_by && gdm.submitted_by.uuid ? gdm.submitted_by.uuid : '';
 
+            // Get the list of evidences from current GDM
             const allObjects = getAllGdmObjects(gdm);
-            // Remove objects created by the same user who started the GDM
+            // Remove objects created by the same user who created the GDM
             const filteredObjects = allObjects.filter(obj => {
                 return gdmSubmitter.indexOf(obj.submitted_by.uuid) < 0;
             });
@@ -327,6 +329,7 @@ const ProvisionalClassification = createReactClass({
                 return submitter.uuid;
             });
             // Add submitters to contributors list
+            // No role is set in this case
             contributors = uniqueUsers.map(user => {
                 return {
                     name: user.title ? user.title : '',

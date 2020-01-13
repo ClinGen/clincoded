@@ -106,30 +106,29 @@ var CreateGeneDisease = createReactClass({
             if (data) {
                 this.postRestData('/track-data', data).then(result => {
                     if (result.status === 'Success') {
-                        console.log('Post tracking data success: %s', result.message);
+                        console.log('Post tracking data succeeded: %s', result.message);
                         resolve(result);
                     } else {
-                        console.log('Post tracking data failure: %s', result.message);
+                        console.log('Post tracking data failed: %s', result.message);
                         reject(result);
                     }
                 }).catch(error => {
-                    console.log('Internal data retrieval error: %o', error);
+                    console.log('Post tracking data internal data retrieval error: %o', error);
                     reject(error);
                 });
             } else {
-                console.log('Missing experted GDM creation data');
-                reject({'message': 'Missing expected GDM createion data'});
+                console.log('Post tracking data Error: Missing experted GDM creation data');
+                reject({'message': 'Missing expected GDM creation data'});
             }
         });
     },
 
     /**
-     * Method to create necessary data object that needs to be sent to Data Exchange for UNC tracking
-     * @param {object} gdm - gdm object
-     * @param {object} diseaseObj - disease object
+     * Method to create necessary data object to be sent to Data Exchange for UNC tracking
+     * @param {object} gdm - GDM object
      * @param {string} hgncId - HGNC Id
      */
-    setUNCData: function(gdm, diseaseobj, hgncId) {
+    setUNCData: function(gdm, hgncId) {
         const diseaseObj = this.state.diseaseObj
         const submitter = this.props.session && this.props.session.user_properties ? this.props.session.user_properties : null;
         const submitterName = submitter && submitter.title ? submitter.title : '';
@@ -196,7 +195,6 @@ var CreateGeneDisease = createReactClass({
             var mode = this.getFormValue('modeInheritance');
             let adjective = this.getFormValue('moiAdjective');
             const diseaseObj = this.state.diseaseObj;
-            //???const user = this.props.session && this.props.session.user_properties ? this.props.session.user_properties : null;
             let hgncId = '';
 
             // Get the disease and gene objects corresponding to the given Orphanet and Gene IDs in parallel.
@@ -206,6 +204,7 @@ var CreateGeneDisease = createReactClass({
             ], [
                 function() { this.setFormErrors('hgncgene', 'HGNC gene symbol not found'); }.bind(this)
             ]).then(response => {
+                // Save HGNC Id to be used for data tracking
                 hgncId = response[0]['hgncId'];
                 return this.getRestData('/search?type=disease&diseaseId=' + diseaseObj.diseaseId).then(diseaseSearch => {
                     let diseaseUuid;
@@ -261,7 +260,7 @@ var CreateGeneDisease = createReactClass({
                             this.recordHistory('add', newGdm, meta);
 
                             // Gather GDM creation data to be sent to Data Exchange
-                            let uncData = this.setUNCData(newGdm, diseaseObj, hgncId);
+                            let uncData = this.setUNCData(newGdm, hgncId);
 
                             // Post GDM creation data to Data Exchange
                             this.postGdmCreationData(uncData).then(response => {

@@ -114,12 +114,12 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
     
         // Create data object to be sent to Data Exchange
         const provisionalDate = provisional.provisionalDate ? provisional.provisionalDate : '';
-        const uncData = this.props.setUNCData(provisional, 'provisional approved', provisionalDate, provisionalSubmitter, contributors);
+        const uncData = this.props.setUNCData(provisional, 'provisionally_approved', provisionalDate, provisionalSubmitter, contributors);
 
         // Post provisional data to Data Exchange
         const postedTime = provisional.provisionalDate ? provisional.provisionalDate : provisional.last_modified;
         this.props.postTrackData(uncData).then(response => {
-            console.log('Successfully send provisionally approved data to Data Exchange for provisional %s at %s', provisional.uuid, postedTime);
+            console.log('Successfully sent provisionally approved data to Data Exchange for provisional %s at %s', provisional.uuid, postedTime);
         }).catch(error => {
             console.log('Error sending provisionally approved data to Data Exchange for provisional %s at %s - Error: %o', provisional.uuid, postedTime, error);
         });
@@ -175,7 +175,6 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                         resource: result,
                         resourceParent: parentSnapshot
                     };
-
                     this.postRestData('/snapshot/', newSnapshot).then(response => {
                         let provisionalSnapshot = response['@graph'][0];
                         this.props.updateSnapshotList(provisionalSnapshot['@id']);

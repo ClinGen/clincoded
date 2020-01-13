@@ -160,6 +160,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         let alertClass = 'publish-error';
         let alertMsg = (<span>Request failed; please try again in a few minutes or contact helpdesk: <a
             href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a></span>);
+
         return new Promise((resolve, reject) => {
             if (objType && objUUID) {
                 this.getRestData('/publish?type=' + objType + '&uuid=' + objUUID, null, false).then(result => {
@@ -183,15 +184,14 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
     },
 
     /**
-     * Method to send GDM un/publish provisional data to Data Exchange
+     * Method to send GDM publish/unpublish provisional data to Data Exchange
      * @param {object} provisional - provisional classification object
      * @param {string} publishSnapshotId - current publish/unpublish snapshot Id
      */
     sendToDataExchange(provisional, publishSnapshotId) {
-        const gdm = this.props.gdm;
         const publishSubmitter = this.props.session && this.props.session.user_properties ? this.props.session.user_properties : null;
         const status = provisional.publishClassification ? 'published' : 'unpublished';
-        const pubRole = provisional.publishClassification ? ['publisher'] : ['unpublisher'];
+        const publishRole = provisional.publishClassification ? ['publisher'] : ['unpublisher'];
         // Get all contributors
         const contributors = this.props.getContributors(publishSnapshotId);
 
@@ -201,7 +201,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                 name: publishSubmitter.title ? publishSubmitter.title : '',
                 id: publishSubmitter.uuid ? publishSubmitter.uuid : '',
                 email: publishSubmitter.email ? publishSubmitter.email : '',
-                roles: pubRole
+                roles: publishRole
             });
         }
 
@@ -212,7 +212,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         // Post published/unpublished data to Data Exchange
         const postedTime = provisional.publishDate ? provisional.publishDate : provisional.last_modified;
         this.props.postTrackData(uncData).then(response => {
-            console.log('Successfully post %s data to Data Exchange for provisional %s at %s', status, provisional.uuid, postedTime);
+            console.log('Successfully sent %s data to Data Exchange for provisional %s at %s', status, provisional.uuid, postedTime);
         }).catch(error => {
             console.log('Error sending %s data to Data Exchange for provisional %s at %s - Error: %o', status, provisional.uuid, postedTime, error);
         });
@@ -241,8 +241,6 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                 resourceName = 'interpretation';
             }
 
-            //??? const origPublishSubmitter = this.state.selectedSnapshot.resource.publishSubmitter;
-            //??? const origPublishDate = this.state.selectedSnapshot.resource.publishDate;
             this.publishToDataExchange(this.state.selectedSnapshot['@type'][0], this.state.selectedSnapshot['@id'].split('/', 3)[2]).then(response => {
                 let publishProvisional = this.state.selectedProvisional && this.state.selectedProvisional.uuid ? this.state.selectedProvisional : {};
                 let currentProvisional = this.props.provisional && this.props.provisional['@id'] ? curator.flatten(this.props.provisional) : {};
@@ -362,8 +360,6 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                 snapshot.resource.publishClassification && snapshot['@id'] !== this.state.selectedSnapshot['@id'])) : {};
 
                             if (previouslyPublishedSnapshot && previouslyPublishedSnapshot.resource) {
-                                // ??? const previouslyPublishedAt = previouslyPublishedSnapshot.resource.publishDate;
-                                // ??? const previouslyPublishedBy = previouslyPublishedSnapshot.resource.publishSubmitter;
                                 // Update previously-published snapshot with automatic unpublish data
                                 previouslyPublishedSnapshot.resource.publishComment = resourceProperName + ' previously published by ' +
                                     previouslyPublishedSnapshot.resource.publishSubmitter + ' on ' +
@@ -405,6 +401,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                     console.log('Automatic unpublishing snapshot error = : %o', error);
                                 });
                             }
+
                             // When publishing an interpretation (to the Evidence Repository), display a temporary "link may not work immediately" alert
                             if (selectedResourceType === 'interpretation') {
                                 this.props.triggerPublishLinkAlert();
