@@ -6,6 +6,7 @@ import moment from 'moment';
 import { RestMixin } from '../rest';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
+import { getApproverNames, getContributorNames } from '../../libs/get_approver_names';
 import AlertMessage from '../../libs/bootstrap/alert';
 import * as CuratorHistory from '../curator_history';
 import * as curator from '../curator';
@@ -381,6 +382,8 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         const publishComment = this.state.publishComment && this.state.publishComment.length ? this.state.publishComment : '';
         const session = this.props.session;
         const provisional = this.state.selectedProvisional;
+        const additionalApprover = provisional ? provisional.additionalApprover : null;
+        const classificationContributors = provisional ? provisional.classificationContributors : null;
         const classification = this.props.classification;
         const affiliation = provisional.affiliation ? provisional.affiliation : (this.props.affiliation ? this.props.affiliation : null);
         const interpretation = this.props.interpretation;
@@ -408,6 +411,14 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                         <dl className="inline-dl clearfix">
                                             <dt><span>ClinGen Affiliation:</span></dt>
                                             <dd>{affiliation ? getAffiliationName(affiliation, affiliationSubgroup) : null}</dd>
+                                        </dl>
+                                        <dl className="inline-dl clearfix">
+                                            <dt><span>Classification Approver:</span></dt>
+                                            <dd>{additionalApprover ? getApproverNames(additionalApprover) : null}</dd>
+                                        </dl>
+                                        <dl className="inline-dl clearfix">
+                                            <dt><span>Classification Contributor(s):</span></dt>
+                                            <dd>{classificationContributors ? getContributorNames(classificationContributors).join(', ') : null}</dd>
                                         </dl>
                                     </div>
                                     <div className="publish-submitter">
