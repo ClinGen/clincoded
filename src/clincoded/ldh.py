@@ -40,7 +40,7 @@ def get_allele_frequency_impact_statements(request):
     except (ValueError, TypeError, KeyError) as e:
         return http_error(HTTPBadRequest(), request)
     try:
-        afis_url = 'https://ldh.genome.network/fdr/AlleleFunctionalImpactStatement/id/' + afis_id
+        afis_url = 'https://ldh.clinicalgenome.org/fdr/AlleleFunctionalImpactStatement/id/' + afis_id
         afis_record = requests.get(afis_url)
         afis_record = afis_record.json()
         return afis_record['data']

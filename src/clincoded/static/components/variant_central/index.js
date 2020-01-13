@@ -459,7 +459,7 @@ var VariantCurationHub = createReactClass({
         const afisUrls = [];
         if (afisRecords.length > 0) {
             afisRecords.forEach(record => {
-                afisUrls.push(`/afis/${record.entId}`);
+                afisUrls.push(`/afis/${record.ldhId}`);
             });
             this.getRestDatas(afisUrls).then(fdrData => {
                 fdrData.forEach((results, index) => {
