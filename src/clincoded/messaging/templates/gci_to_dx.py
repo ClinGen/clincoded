@@ -9,10 +9,11 @@ message_template = {
                     'interpretation': 'VCI'
                 }
             ],
-            2: '6'
+            2: '7'
         }
     ],    
-    'sopVersion': '6',
+    'sopVersion': '7',
+    'selectedSOPVersion': ['$PATH_TO_DATA', 'resource', 'sopVersion'],
     'curationVersion': 'TO BE DETERMINED',
     'title': ['$COMBINE_DATA', ' : ',
         {
@@ -355,6 +356,7 @@ message_template = {
             'FinalClassification': ['$USE_FIRST_DATA', 'No Modification', ['resource', 'alteredClassification'], ['resource', 'autoClassification']],
             'FinalClassificationDate': ['$USE_FIRST_DATA', '', ['resource', 'approvalReviewDate'], ['resource', 'approvalDate']],
             'FinalClassificationNotes': ['$PATH_TO_DATA', 'resource', 'evidenceSummary']
+            # Secondary contributors/approver (at key "contributors") added here (dynamically)
         },
         'ReplicationOverTime': ['$CONVERT_DATA', ['resource', 'replicatedOverTime'],
             {

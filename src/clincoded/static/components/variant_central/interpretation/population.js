@@ -284,8 +284,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
                 }
             }
             // get the source version
-            if (metadata && metadata.src_version && metadata.src_version.exac) {
-                populationObj.exac._version = metadata.src_version.exac;
+            if (metadata && metadata.src && metadata.src.exac && metadata.src.exac.version) {
+                populationObj.exac._version = metadata.src.exac.version;
             }
             // update populationObj, and set flag indicating that we have ExAC data
             this.setState({hasExacData: true, populationObj: populationObj});
@@ -481,8 +481,8 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
             }
 
             // Get the source version
-            if (metadata && metadata.src_version && metadata.src_version.gnomad) {
-                populationObj.gnomAD._version = metadata.src_version.gnomad;
+            if (metadata && metadata.src && metadata.src.gnomad && metadata.src.gnomad.version) {
+                populationObj.gnomAD._version = metadata.src.gnomad.version;
             }
         }
 
@@ -979,8 +979,9 @@ var CurationInterpretationPopulation = module.exports.CurationInterpretationPopu
         }
 
         // Set the source version
-        if (metadata && metadata.src_version) {
-            version = (datasetName === 'ExAC') ? metadata.src_version.exac : (datasetName === 'gnomAD') ? metadata.src_version.gnomad : '';
+        if (metadata && metadata.src) {
+            version = (datasetName === 'ExAC' && metadata.src.exac && metadata.src.exac.version) ? metadata.src.exac.version :
+                      (datasetName === 'gnomAD' && metadata.src.gnomad && metadata.src.gnomad.version) ? metadata.src.gnomad.version : '';
         }
 
         return (

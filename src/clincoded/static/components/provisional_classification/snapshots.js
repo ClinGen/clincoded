@@ -5,9 +5,9 @@ import moment from 'moment';
 import { Input } from '../../libs/bootstrap/form';
 import { getAffiliationName, getAffiliationNameBySubgroupID } from '../../libs/get_affiliation_name';
 import { renderSelectedModeInheritance } from '../../libs/render_mode_inheritance';
+import { getApproverNames, getContributorNames } from '../../libs/get_approver_names';
 import { sortListByDate } from '../../libs/helpers/sort';
-import { isScoringForCurrentSOP } from '../../libs/sop';
-import DayPickerInput from 'react-day-picker/DayPickerInput';
+import { isScoringForCurrentSOP, determineSOPVersion } from '../../libs/sop';
 import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
 import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
 import AlertMessage from '../../libs/bootstrap/alert';
@@ -268,6 +268,7 @@ class CurationSnapshots extends Component {
         const snapshotUUID = snapshot.uuid ? snapshot.uuid : snapshot['@id'].split('/', 3)[2];
         const affiliationID = snapshot.resource && snapshot.resource.affiliation ? snapshot.resource.affiliation : '';
         const isPublishEventActive = this.props.isPublishEventActive;
+        const gdmAssociated = snapshot.resource && snapshot.resource.gdm_associated ? snapshot.resource.gdm_associated : false;
         let resourceParent, isSnapshotOnCurrentSOP;
         let allowClinVarSubmission = false;
         if (snapshot.resourceType === 'classification' && snapshot.resourceParent.gdm) {
@@ -365,8 +366,20 @@ class CurationSnapshots extends Component {
                                     </dl>
                                     {snapshot.resource && snapshot.resource.classificationApprover ?
                                         <dl className="inline-dl clearfix snapshot-final-approval-classification-approver">
-                                            <dt><span>Approver:</span></dt>
+                                            <dt><span>Affiliation Approver:</span></dt>
                                             <dd>{snapshot.resource.classificationApprover}</dd>
+                                        </dl>
+                                        : null}
+                                    {snapshot.resource && snapshot.resource.additionalApprover ?
+                                        <dl className="inline-dl clearfix">
+                                            <dt><span>Classification Approver:</span></dt>
+                                            <dd><span>{getApproverNames(snapshot.resource.additionalApprover)}</span></dd>
+                                        </dl>
+                                        : null}
+                                    {snapshot.resource && snapshot.resource.classificationContributors ?
+                                        <dl className="inline-dl clearfix">
+                                            <dt><span>Classification Contributors:</span></dt>
+                                            <dd><span>{getContributorNames(snapshot.resource.classificationContributors).sort().join(', ')}</span></dd>
                                         </dl>
                                         : null}
                                     <dl className="inline-dl clearfix snapshot-final-approval-date">
@@ -375,7 +388,7 @@ class CurationSnapshots extends Component {
                                         {renderSimpleStatusLabel(snapshot.approvalStatus)}
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-review-date">
-                                        <dt><span>Date approved:</span></dt>
+                                        <dt><span>Final Approval Date:</span></dt>
                                         <dd><span>{snapshot.resource.approvalReviewDate ? formatDate(snapshot.resource.approvalReviewDate, "YYYY MMM DD") : null}</span></dd>
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-approval-classification">
@@ -394,9 +407,21 @@ class CurationSnapshots extends Component {
                                         <dd className="modeInheritance">{renderSelectedModeInheritance(resourceParent)}</dd>
                                     </dl>
                                     <dl className="inline-dl clearfix snapshot-final-approval-comment">
-                                        <dt><span>Additional comments:</span></dt>
+                                        <dt><span>Approver comments:</span></dt>
                                         <dd><span>{snapshot.resource.approvalComment ? snapshot.resource.approvalComment : null}</span></dd>
                                     </dl>
+                                    {gdmAssociated ? 
+                                        <div>
+                                            <dl className="inline-dl clearfix">
+                                                <dt><span>Contributor comments:</span></dt>
+                                                <dd><span>{snapshot.resource.contributorComment ? snapshot.resource.contributorComment : null}</span></dd>
+                                            </dl>
+                                            <dl className="inline-dl clearfix snapshot-sop-version">
+                                                <dt><span>SOP Version:</span></dt>
+                                                <dd><span>{determineSOPVersion(snapshot.resource)}</span></dd>
+                                            </dl>
+                                        </div>
+                                        : null}
                                 </td>
                                 <td className="approval-snapshot-buttons">
                                     {this.renderSnapshotStatusIcon(snapshot, 'Approved')}
