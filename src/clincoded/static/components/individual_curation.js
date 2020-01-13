@@ -257,6 +257,7 @@ const IndividualCuration = createReactClass({
                                 'clinvarVariantTitle': variants[i].clinvarVariantTitle ? variants[i].clinvarVariantTitle : null,
                                 'carId': variants[i].carId ? variants[i].carId : null,
                                 'canonicalTranscriptTitle': variants[i].canonicalTranscriptTitle ? variants[i].canonicalTranscriptTitle : null,
+                                'maneTranscriptTitle': variants[i].maneTranscriptTitle ? variants[i].maneTranscriptTitle : null,
                                 'hgvsNames': variants[i].hgvsNames ? variants[i].hgvsNames : null,
                                 'uuid': variants[i].uuid,
                                 'associatedPathogenicities': variants[i].associatedPathogenicities && variants[i].associatedPathogenicities.length ? variants[i].associatedPathogenicities : []
@@ -845,6 +846,7 @@ const IndividualCuration = createReactClass({
                 'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
                 'carId': data.carId ? data.carId : null,
                 'canonicalTranscriptTitle': data.canonicalTranscriptTitle ? data.canonicalTranscriptTitle : null,
+                'maneTranscriptTitle': data.maneTranscriptTitle ? data.maneTranscriptTitle : null,
                 'hgvsNames': data.hgvsNames ? data.hgvsNames : null,
                 'uuid': data.uuid,
                 'associatedPathogenicities': data.associatedPathogenicities && data.associatedPathogenicities.length ? data.associatedPathogenicities : []

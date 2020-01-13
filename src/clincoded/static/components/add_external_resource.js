@@ -610,9 +610,7 @@ function clinvarQueryResource() {
                         const url = this.props.protocol + external_url_map['CARallele'];
                         const carJson = await this.getRestData(url + data.carId);
                         const maneTranscriptTitle = await queryManeTranscriptTitle.call(this, data.carId, carJson);
-                        if (maneTranscriptTitle) {
-                            data['maneTranscriptTitle'] = maneTranscriptTitle;
-                        }
+                        data['maneTranscriptTitle'] = maneTranscriptTitle || "";
                     }
                     catch (error) {
                         console.warn('Error in querying MANE transcript data = %o', error);
@@ -853,9 +851,7 @@ function carQueryResource() {
             if (finalState.resourceFetched) {
                 try {
                     const maneTranscriptTitle = await queryManeTranscriptTitle.call(this, id, json);
-                    if (maneTranscriptTitle) {
-                        finalState.tempResource['maneTranscriptTitle'] = maneTranscriptTitle;
-                    }
+                    finalState.tempResource['maneTranscriptTitle'] = maneTranscriptTitle || "";
                 }
                 catch (error) {
                     console.warn('Error in querying MANE transcript data = %o', error);

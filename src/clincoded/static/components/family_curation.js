@@ -586,6 +586,7 @@ var FamilyCuration = createReactClass({
                                     'clinvarVariantTitle': segregation.variants[i].clinvarVariantTitle,
                                     'carId': segregation.variants[i].carId ? segregation.variants[i].carId : null,
                                     'canonicalTranscriptTitle': segregation.variants[i].canonicalTranscriptTitle ? segregation.variants[i].canonicalTranscriptTitle : null,
+                                    'maneTranscriptTitle': segregation.variants[i].maneTranscriptTitle ? segregation.variants[i].maneTranscriptTitle : null,
                                     'hgvsNames': segregation.variants[i].hgvsNames ? segregation.variants[i].hgvsNames : null,
                                     'uuid': segregation.variants[i].uuid // Needed for links to variant assessment/curation
                                 };

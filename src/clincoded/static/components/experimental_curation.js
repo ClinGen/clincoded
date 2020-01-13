@@ -645,6 +645,7 @@ var ExperimentalCuration = createReactClass({
                                     'clinvarVariantTitle': variants[i].clinvarVariantTitle ? variants[i].clinvarVariantTitle : null,
                                     'carId': variants[i].carId ? variants[i].carId : null,
                                     'canonicalTranscriptTitle': variants[i].canonicalTranscriptTitle ? variants[i].canonicalTranscriptTitle : null,
+                                    'maneTranscriptTitle': variants[i].maneTranscriptTitle ? variants[i].maneTranscriptTitle : null,
                                     'hgvsNames': variants[i].hgvsNames ? variants[i].hgvsNames : null,
                                     'uuid': variants[i].uuid
                                 };
@@ -1364,6 +1365,7 @@ var ExperimentalCuration = createReactClass({
     updateVariantId: function(data, fieldNum) {
         var newVariantInfo = _.clone(this.state.variantInfo);
         var addVariantDisabled;
+        console.log(`experimental curation updateVariantId. data =`, data);
         if (data) {
             // Enable/Disable Add Variant button as needed
             if (fieldNum < MAX_VARIANTS - 1) {
@@ -1378,6 +1380,7 @@ var ExperimentalCuration = createReactClass({
                 'clinvarVariantTitle': data.clinvarVariantTitle ? data.clinvarVariantTitle : null,
                 'carId': data.carId ? data.carId : null,
                 'canonicalTranscriptTitle': data.canonicalTranscriptTitle ? data.canonicalTranscriptTitle : null,
+                'maneTranscriptTitle': data.maneTranscriptTitle ? data.maneTranscriptTitle : null,
                 'hgvsNames': data.hgvsNames ? data.hgvsNames : null,
                 'uuid': data.uuid
             };
