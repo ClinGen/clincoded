@@ -32,7 +32,7 @@ before_install:
   - postgres --version
   - initdb --version
   - elasticsearch -v
-  - nvm install 8
+  - nvm install --lts=carbon
   - node --version
   - pip install setuptools==15.2
 install:
