@@ -106,10 +106,10 @@ var CreateGeneDisease = createReactClass({
             if (data) {
                 this.postRestData('/track-data', data).then(result => {
                     if (result.status === 'Success') {
-                        console.log('Post tracking data succeeded: %s', result.message);
+                        console.log('Post tracking data succeeded: %o', result);
                         resolve(result);
                     } else {
-                        console.log('Post tracking data failed: %s', result.message);
+                        console.log('Post tracking data failed with Error - %o ', result);
                         reject(result);
                     }
                 }).catch(error => {

@@ -5,6 +5,7 @@ import os
 import urllib.request
 import requests
 import json
+import sys
 import clincoded.messaging.templates.gci_to_dx, clincoded.messaging.templates.vci_to_dx
 
 affiliation_data = []
@@ -927,7 +928,7 @@ def generate_clinvar_data(request):
 @view_config(route_name='track-data', request_method='POST')
 def track_data(request):
     elasticsearch_server = 'http://localhost:9200/clincoded'
-    return_object = {'status': 'Fail',
+    return_object = {'status': 'Error',
         'message': 'Unable to deliver track data'}
 
     # Store JSON-encoded content of data
@@ -935,6 +936,7 @@ def track_data(request):
         resultJSON = request.json
 
     except Exception as e:
+        sys.stderr.write('********** Error sending data to Data Exchange - data not in expected format **********\n')
         return_object['message'] = 'Retrieved data not in expected format'
         return return_object
 
@@ -943,11 +945,16 @@ def track_data(request):
         message = json.dumps(resultJSON, separators=(',', ':'))
 
     except Exception as e:
+        sys.stderr.write('********** Error sending data to Data Exchange - failed to build complete message **********\n')
         if e.args:
             return_object['message'] = e.args
         else:
             return_object['message'] = 'Failed to build complete message'
         return return_object
+
+    return_object = {'status': 'Error',
+                    'message': message,
+                    'error': 'Unable to deliver track data'}
 
     # Set GDM uuid and action date as message key
     key = resultJSON['report_id'] + '-' + resultJSON['date']
@@ -1001,8 +1008,11 @@ def track_data(request):
     try:
         p.produce(kafka_topic, message, key, callback=delivery_callback)
         p.flush(kafka_timeout)
+        if return_object['status'] == 'Error':
+            sys.stderr.write('********** Error sending data to Data Exchange - kafka sever error **********\n')
         return return_object
 
     except Exception as e:
         return_object['message'] = 'Message delivery failed'
+        sys.stderr.write('********** Error sending data to Data Exchange - delivery failed **********\n')
         return return_object
