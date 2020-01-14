@@ -2,6 +2,29 @@
     margin-top: 25px;
     margin-bottom: 25px;
 
+    .number-of-entries {
+        color: inherit;
+        font-size: 80%;
+    }
+
+    .filter-by {
+        background-color: #f5f5f5;
+        padding: 5px;
+
+        .filter-term {
+            padding-bottom: 4px;
+        }
+
+        .multi-select {
+            z-index: 3;
+        }
+    }
+
+    .download-button button {
+        border-radius: 4px;
+        margin-top: -6px;
+    }
+
     .panel {
         border-radius: 4px;
 
