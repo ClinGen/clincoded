@@ -46,10 +46,10 @@ let EvidenceModalManager = createReactClass({
 
     getInitData(){
         let source = {};
-        // If current evidence has source data, set as default
-        if (this.props.data && this.props.data.source) {
-            source = this.props.data.source;
-            // If pmid is not set in source metadata, check current evidence articles array
+        // If current evidence has sourceInfo data, set as default
+        if (this.props.data && this.props.data.sourceInfo) {
+            source = this.props.data.sourceInfo;
+            // If pmid is not set in sourceInfo metadata, check current evidence articles array
             if (source.metadata['_kind_key'] === 'PMID') {
                 if (source.metadata.pmid == undefined) {
                     source.metadata.pmid = this.props.data.articles && this.props.data.articles.length > 0 ? this.props.data.articles[0].pmid : '';
@@ -80,9 +80,9 @@ let EvidenceModalManager = createReactClass({
     },
 
     componentWillReceiveProps(nextProps) {
-        if(nextProps.data != null && nextProps.data.source != null) {
+        if(nextProps.data != null && nextProps.data.sourceInfo != null) {
             this.setState({
-                sourceData: nextProps.data.source
+                sourceData: nextProps.data.sourceInfo
             });
         }
         if (nextProps.isNew != null && nextProps.isNew !== this.state.isNew) {
@@ -125,8 +125,8 @@ let EvidenceModalManager = createReactClass({
 
         // Determine if this is meant to be linked to an existing piece of evidence that current user can modify
         let candidates = this.props.allData ? this.props.allData
-            .filter(o => identifierCol in o.source.metadata
-                && o.source.metadata[identifierCol] === metadata[identifierCol]) : [];
+            .filter(o => identifierCol in o.sourceInfo.metadata
+                && o.sourceInfo.metadata[identifierCol] === metadata[identifierCol]) : [];
         let result = null;
         if (candidates.length > 0) {
             candidates.forEach(candidate => {
@@ -153,8 +153,8 @@ let EvidenceModalManager = createReactClass({
             if (this.props.isNew) {
                 if (candidate) {
                     // Editing a piece of evidence initially input in a different panel
-                    Object.assign(candidate.source.metadata, metadata);
-                    Object.assign(newData, candidate.source);
+                    Object.assign(candidate.sourceInfo.metadata, metadata);
+                    Object.assign(newData, candidate.sourceInfo);
                     this.setState({
                         isNew: false
                     });
@@ -236,7 +236,9 @@ let EvidenceModalManager = createReactClass({
             this.props.evidenceCollectionDone(false, this.state.sourceData, this.getCurrentEvidenceId(), this.props.subcategory, null);
         }
         else {
-            this.props.setBusy(true);
+            if (this.props.setBusy) {
+                this.props.setBusy(true);
+            }
             // Remove empty fields and unnecessary fields - submitted_by, last_modified, _kind_title from source data
             let hasData = Object.keys(data).reduce((object, key) => { 
                 if (data[key] !== '' && !key.startsWith('_') ) {

@@ -11,6 +11,7 @@ import { RestMixin } from '../../rest';
 import { CompleteSection } from './shared/complete_section';
 import { scrollElementIntoView } from '../../../libs/helpers/scroll_into_view';
 import { extraEvidenceHasSource } from '../../../libs/extra_evidence_version';
+import { ContextualHelp } from '../../../libs/bootstrap/contextual_help';
 
 const vciFormHelper = require('./shared/form');
 const CurationInterpretationForm = vciFormHelper.CurationInterpretationForm;
@@ -91,7 +92,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
             evidenceCriteria: evidence.evidenceCriteria,
             evidenceDescription: evidence.evidenceDescription,
             affiliation: evidence.affiliation,
-            source: evidence.source,
+            sourceInfo: evidence.sourceInfo,
             status: 'deleted'
         };
 
@@ -154,7 +155,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                     articles: evidence.metadata._kind_key === 'PMID' ? [evidence.metadata.pmid] : [],
                     evidenceCriteria: '',  // criteria has value which is not used for case segregation
                     evidenceDescription: '',
-                    source: evidence
+                    sourceInfo: evidence
                 };
 
                 // Set the evidence created date to its original date if editing evidence
@@ -274,6 +275,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
     render() {
         const variantUUID = this.state.data ? this.state.data['@id'] : null;
         const affiliation = this.props.affiliation, session = this.props.session;
+        const help = 'The evidence shown in this table was added in a format that has now been retired.  To include retired format evidence in the new granular format then you will have to re-add each one manually. You can start this process by clicking the "Add in New Format" button next to each evidence. Once you have transferred a retired format evidence to the new format and it appears in the new table, then please go ahead and delete the retired format version.';
         let panel_data = [
             {
                 title: 'Observed in healthy adult(s)',
@@ -288,7 +290,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 extraEvidence: {
                     subcategory: 'observed-in-healthy',
                     tableName: <span>Curated Evidence (Observed in healthy adult(s))</span>,
-                    oldTableName: <span>Curated Literature Evidence (Observed in healthy adult(s)) - Retired Format</span>
+                    oldTableName: <span>Curated Literature Evidence (Observed in healthy adult(s)) - Retired Format <ContextualHelp content={help}></ContextualHelp></span>
                 }
             },
             {
@@ -304,7 +306,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 extraEvidence: {
                     subcategory: 'case-control',
                     tableName: <span>Curated Evidence (Case-control)</span>,
-                    oldTableName: <span>Curated Literature Evidence (Case-control) - Retired Format</span>
+                    oldTableName: <span>Curated Literature Evidence (Case-control) - Retired Format <ContextualHelp content={help}></ContextualHelp></span>
                 }
             },
             {
@@ -320,7 +322,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 extraEvidence: {
                     subcategory: 'segregation-data',
                     tableName: <span>Curated Evidence (Segregation data)</span>,
-                    oldTableName: <span>Curated Literature Evidence (Segregation data) - Retired Format</span>
+                    oldTableName: <span>Curated Literature Evidence (Segregation data) - Retired Format <ContextualHelp content={help}></ContextualHelp></span>
                 }
             },
             {
@@ -336,7 +338,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 extraEvidence: {
                     subcategory: 'de-novo',
                     tableName: <span>Curated Evidence (<i>de novo</i> occurrence)</span>,
-                    oldTableName: <span>Curated Literature Evidence (<i>de novo</i> occurrence) - Retired Format</span>
+                    oldTableName: <span>Curated Literature Evidence (<i>de novo</i> occurrence) - Retired Format <ContextualHelp content={help}></ContextualHelp></span>
                 }
             },
             {
@@ -352,7 +354,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 extraEvidence: {
                     subcategory: 'allele-data',
                     tableName: <span>Curated Evidence (Allele Data (<i>cis/trans</i>))</span>,
-                    oldTableName: <span>Curated Literature Evidence (Allele Data (<i>cis/trans</i>)) - Retired Format</span>
+                    oldTableName: <span>Curated Literature Evidence (Allele Data (<i>cis/trans</i>)) - Retired Format <ContextualHelp content={help}></ContextualHelp></span>
                 }
             },
             {
@@ -368,7 +370,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 extraEvidence: {
                     subcategory: 'alternate-mechanism',
                     tableName: <span>Curated Evidence (Alternate mechanism for disease)</span>,
-                    oldTableName: <span>Curated Literature Evidence (Alternate mechanism for disease) - Retired Format</span>
+                    oldTableName: <span>Curated Literature Evidence (Alternate mechanism for disease) - Retired Format <ContextualHelp content={help}></ContextualHelp></span>
                 }
             },
             {
@@ -384,7 +386,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
                 extraEvidence: {
                     subcategory: 'specificity-of-phenotype',
                     tableName: <span>Curated Evidence (Specificity of phenotype)</span>,
-                    oldTableName: <span>Curated Literature Evidence (Specificity of phenotype) - Retired Format</span>
+                    oldTableName: <span>Curated Literature Evidence (Specificity of phenotype) - Retired Format <ContextualHelp content={help}></ContextualHelp></span>
                 }
             }
         ];

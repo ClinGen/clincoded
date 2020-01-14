@@ -40,9 +40,9 @@ let MasterEvidenceTable = createReactClass({
     getEvidenceTypes() {
         let evidence_types = {};
         for(let row of this.props.evidence_arr) {
-            let evidence_type = row.source && row.source.metadata && row.source.metadata['_kind_key'] ? row.source.metadata['_kind_key'] : '';
+            let evidence_type = row.sourceInfo && row.sourceInfo.metadata && row.sourceInfo.metadata['_kind_key'] ? row.sourceInfo.metadata['_kind_key'] : '';
             if (!(evidence_type in evidence_types)) {
-                evidence_types[evidence_type] = this.props.evidence_arr.filter(row => row.source.metadata['_kind_key'] === evidence_type);
+                evidence_types[evidence_type] = this.props.evidence_arr.filter(row => row.sourceInfo.metadata['_kind_key'] === evidence_type);
             }
         }
         return evidence_types;
@@ -70,8 +70,8 @@ let MasterEvidenceTable = createReactClass({
             <EvidenceModalManager
                 data = {row}
                 allData = {this.props.evidence_arr}
-                criteriaList = {row.source['relevant_criteria']}
-                evidenceType = {row.source.metadata['_kind_key']}
+                criteriaList = {row.sourceInfo['relevant_criteria']}
+                evidenceType = {row.sourceInfo.metadata['_kind_key']}
                 subcategory = {row.subcategory}
                 evidenceCollectionDone = {this.props.evidenceCollectionDone}
                 isNew = {false}
@@ -144,16 +144,16 @@ let MasterEvidenceTable = createReactClass({
                 let rows = evidence_types[evidence_type];
                 let rowNum = 0;
                 rows.forEach(row => {
-                    if (row.source && row.source.metadata && row.source.data) {
+                    if (row.sourceInfo && row.sourceInfo.metadata && row.sourceInfo.data) {
                         let editButton = null;
                         let deleteButton = null;
                         if (this.canModify(row)) {
                             editButton = this.getEditButton(row);
                             deleteButton = this.getDeleteButton(row);
                         }
-                        if (row.source.metadata['_kind_key'] === 'PMID') {
+                        if (row.sourceInfo.metadata['_kind_key'] === 'PMID') {
                             // If pmid is not set at source metadata, check extra evidence's artilces array
-                            const pmid = row.source.metadata.pmid ? row.source.metadata.pmid : (row.articles.length > 0 ? row.articles[0].pmid : '');
+                            const pmid = row.sourceInfo.metadata.pmid ? row.sourceInfo.metadata.pmid : (row.articles.length > 0 ? row.articles[0].pmid : '');
                             let authorYear = '';
                             let evidence_detail = '';
                             if (row.articles && row.articles.length > 0) {
@@ -180,8 +180,8 @@ let MasterEvidenceTable = createReactClass({
                                     </div>
                             </th>);
                         } else {
-                            let identifier = extraEvidence.typeMapping[row.source.metadata['_kind_key']].fields.filter(o => o.identifier === true)[0];
-                            let evidence_detail = `${row.source.metadata[identifier.name]}`;
+                            let identifier = extraEvidence.typeMapping[row.sourceInfo.metadata['_kind_key']].fields.filter(o => o.identifier === true)[0];
+                            let evidence_detail = `${row.sourceInfo.metadata[identifier.name]}`;
                             second_row.push(<th key={`header_${row.uuid}.${evidence_detail}`} style={{borderBottom: 'none'}}>
                                 <div>
                                     <div className='evidence-detail'>{evidence_detail}</div>
@@ -261,10 +261,10 @@ let MasterEvidenceTable = createReactClass({
             if (evidence_types[evidence_type]) {
                 let rows = evidence_types[evidence_type];
                 rows.forEach(row => {
-                    if (row.source && row.source.data) {
+                    if (row.sourceInfo && row.sourceInfo.data) {
                         let rowNum = 0;
                         masterTable().forEach(masterRow => {
-                            let val = row.source.data[masterRow.key];
+                            let val = row.sourceInfo.data[masterRow.key];
                             let entry = '';
                             let key = masterRow.key;
                             // For text column, limit to 25 characters and show full text when mouseover 'more' text.
@@ -308,8 +308,8 @@ let MasterEvidenceTable = createReactClass({
     getSums() {
         let sums = {};
         this.props.evidence_arr.forEach(row => {
-            if (row.source && row.source.data) {
-                let data = row.source.data;
+            if (row.sourceInfo && row.sourceInfo.data) {
+                let data = row.sourceInfo.data;
                 Object.keys(data).forEach(name => {
                     if (name.startsWith('num_') && !name.endsWith('_comment')) {
                         let val = parseInt(data[name]);

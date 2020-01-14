@@ -66,3 +66,9 @@ def provisionalClassification_7_8(value, system):
     # https://github.com/ClinGen/clincoded/issues/1854
     # Add property for publishing affiliation
     return
+
+@upgrade_step('provisionalClassification', '8', '9')
+def provisionalClassification_8_9(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1796
+    # Add several properties for the secondary approvers
+    return

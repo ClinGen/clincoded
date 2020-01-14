@@ -690,11 +690,25 @@
     },
     {
         "affiliation_id": "10051",
-        "affiliation_fullname": "Von Willebrand"
+        "affiliation_fullname": "von Willebrand Disease",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50051",
+                "fullname": "von Willebrand Disease VCEP"
+            }
+        }
     },
     {
         "affiliation_id": "10052",
-        "affiliation_fullname": "Hemoglobinopathies"
+        "affiliation_fullname": "Hemoglobinopathy",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50052",
+                "fullname": "Hemoglobinopathy VCEP"
+            }
+        }
     },
     {
         "affiliation_id": "10053",
@@ -753,6 +767,35 @@
                 "id": "40061",
                 "fullname": "Limb Girdle Muscular Dystrophy GCEP"
             }
-        }
+        },
+        "approver": [
+            "Chris Weihl",
+            "Elizabeth Kearns",
+            "Courtney Thaxton",
+            "Shruthi Mohan",
+            "May Flowers"
+        ]
+    },
+    {
+        "affiliation_id": "10062",
+        "affiliation_fullname": "InSiGHT_Dev"
+    },
+    {
+        "affiliation_id": "10063",
+        "affiliation_fullname": "Charcot-Marie-Tooth",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40063",
+                "fullname": "Charcot-Marie-Tooth GCEP"
+            }
+        },
+        "approver": [
+            "Stephan Zuchner",
+            "Dana Bis-Brewer",
+            "Courtney Thaxton",
+            "Megan Mayers",
+            "May Flowers"
+        ]
     }
 ]
