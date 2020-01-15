@@ -984,7 +984,11 @@ async function queryManeTranscriptTitle(carId, carJson) {
     if (!maneTranscriptId) {
         // geneSet should be a set of size of one, we'll just query for this single gene
         const geneUrl = Array.from(geneSet)[0];
-        const genomicCarJson = await this.getRestData(geneUrl);
+        const [, geneUrlWithoutScheme] = geneUrl.split('://');
+        // use the same scheme as the webpage of time
+        const geneUrlRequested = `//${geneUrlWithoutScheme}`;
+        console.log(`Requesting genomic AR: ${geneUrlRequested}`);
+        const genomicCarJson = await this.getRestData(geneUrlRequested);
         maneTranscriptId = parseManeTranscriptIdFromGenomicCar(genomicCarJson);
     }
 
