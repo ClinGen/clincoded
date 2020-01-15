@@ -936,7 +936,7 @@ def track_data(request):
         resultJSON = request.json
 
     except Exception as e:
-        sys.stderr.write('********** Error sending data to Data Exchange - data not in expected format **********\n')
+        sys.stderr.write('**** Error sending data to Data Exchange - data not in expected format ****\n')
         return_object['message'] = 'Retrieved data not in expected format'
         return return_object
 
@@ -945,7 +945,7 @@ def track_data(request):
         message = json.dumps(resultJSON, separators=(',', ':'))
 
     except Exception as e:
-        sys.stderr.write('********** Error sending data to Data Exchange - failed to build complete message **********\n')
+        sys.stderr.write('**** Error sending data to Data Exchange - failed to build complete message ****\n')
         if e.args:
             return_object['message'] = e.args
         else:
@@ -1009,10 +1009,10 @@ def track_data(request):
         p.produce(kafka_topic, message, key, callback=delivery_callback)
         p.flush(kafka_timeout)
         if return_object['status'] == 'Error':
-            sys.stderr.write('********** Error sending data to Data Exchange - kafka sever error **********\n')
+            sys.stderr.write('**** Error sending data to Data Exchange - kafka sever error\n Data - %s \n ****\n')
         return return_object
 
     except Exception as e:
         return_object['message'] = 'Message delivery failed'
-        sys.stderr.write('********** Error sending data to Data Exchange - delivery failed **********\n')
+        sys.stderr.write('**** Error sending data to Data Exchange - delivery failed\n Data - %s \n ****\n')
         return return_object
