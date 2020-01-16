@@ -5,8 +5,9 @@ import moment from 'moment';
 import { external_url_map } from '../globals';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
 import { renderSimpleStatusLabel } from '../../libs/render_simple_status_label';
+import { getApproverNames, getContributorNames } from '../../libs/get_approver_names';
 import { getClassificationSavedDate } from '../../libs/get_saved_date';
-import { sopVersionByScoring } from '../../libs/sop';
+import { determineSOPVersion } from '../../libs/sop';
 
 class GeneDiseaseEvidenceSummaryHeader extends Component {
     constructor(props) {
@@ -22,6 +23,9 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
         const modeInheritanceAdjective = gdm && gdm.modeInheritanceAdjective ? gdm.modeInheritanceAdjective.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1] : null;
         const publishStatus = provisional.publishClassification || snapshotPublishDate ? true : false;
         const publishDate = provisional.publishDate ? provisional.publishDate : snapshotPublishDate;
+        const additionalApprover = provisional.additionalApprover ? provisional.additionalApprover : null;
+        const classificationContributors = provisional.classificationContributors ? provisional.classificationContributors.sort() : null;
+        const sopVersion = determineSOPVersion(provisional);
 
         return (
             <div className="evidence-summary panel-header">
@@ -42,6 +46,18 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                                     (provisional && provisional.submitted_by ? provisional.submitted_by.title : null)
                                 }
                             </dd>
+                            {additionalApprover && additionalApprover.length ? 
+                                <div>
+                                    <dt>Classification Approver:</dt>
+                                    <dd>{getApproverNames(additionalApprover)}</dd>
+                                </div>
+                            : null}
+                            {classificationContributors && classificationContributors.length ? 
+                                <div>
+                                    <dt>Classification Contributor(s):</dt>
+                                    <dd>{getContributorNames(classificationContributors).join(', ')}</dd>
+                                </div>
+                            : null}
                             <dt>Calculated classification:</dt>
                             <dd className="classificationSaved">{provisional ? provisional.autoClassification : null}</dd>
                             <dt>Modified classification:</dt>
@@ -55,7 +71,7 @@ class GeneDiseaseEvidenceSummaryHeader extends Component {
                             <dt>SOP:</dt>
                             <dd className="classificationSOP">
                                 <a href="https://www.clinicalgenome.org/curation-activities/gene-disease-validity/educational-and-training-materials/standard-operating-procedures/" target="_blank"
-                                    >Gene Clinical Validity Standard Operating Procedures (SOP), Version {sopVersionByScoring(provisional.classificationPoints)}</a>
+                                    >Gene Clinical Validity Standard Operating Procedures (SOP), Version {sopVersion}</a>
                             </dd>
                         </dl>
                         <dl className="inline-dl clearfix col-sm-6">

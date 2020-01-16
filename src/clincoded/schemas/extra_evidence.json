@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "4"
+            "default": "5"
         },
         "variant": {
             "title": "Variant",
@@ -65,7 +65,7 @@
             "description": "The affiliation this classification is associated with.",
             "type": "string"
         },
-        "source": {
+        "sourceInfo": {
             "title": "Sources",
             "description": "Additional evidence from a variety of sources (Pubmed, Clinical lab, Research lab, Clinic, Public Database, Registered Curator, Other)",
             "type": "object"

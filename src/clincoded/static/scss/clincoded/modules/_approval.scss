@@ -315,6 +315,14 @@
             }
         }
 
+        .contributor-form {
+            padding: 10px 10px 10px 0;
+        }
+
+        .approval-form {
+            padding: 10px;
+        }
+
         .classification-approver {
             .form-group {
                 margin: 0;
@@ -361,6 +369,28 @@
     margin-left: 20px;
     padding: 3px 15px;
     text-align: center;
+}
+
+.secondary-approvers-help {
+    margin: 5px;
+}
+
+.contributor-toggle-button {
+    display: flex;
+    align-items: center;
+}
+
+.text-info.contextual-help {
+    z-index: 0;
+}
+
+.sop-label {
+    width: 11%;
+}
+
+p.contributor-warning {
+    color: #8a6d3b;
+    margin-top: 5px;
 }
 
 /**
@@ -436,5 +466,9 @@
                 font-weight: 500;
             }
         }
+    }
+
+    .additional-comment {
+        margin-left: -65px;
     }
 }
