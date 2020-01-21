@@ -1009,10 +1009,10 @@ def track_data(request):
         p.produce(kafka_topic, message, key, callback=delivery_callback)
         p.flush(kafka_timeout)
         if return_object['status'] == 'Error':
-            sys.stderr.write('**** track-data: Error sending data to Data Exchange - kafka sever error\n Data - %s \n ****\n')
+            sys.stderr.write('**** track-data: Error sending data to Data Exchange - kafka sever error\n Data - %s \n ****\n' % message)
         return return_object
 
     except Exception as e:
         return_object['message'] = 'Message delivery failed'
-        sys.stderr.write('**** track-data: Error sending data to Data Exchange - delivery failed\n Data - %s \n ****\n')
+        sys.stderr.write('**** track-data: Error sending data to Data Exchange - delivery failed\n Data - %s \n ****\n' % message)
         return return_object
