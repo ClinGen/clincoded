@@ -105,7 +105,7 @@ Feature: Variant Curation Tabs
         When I fill in the css element field "input.form-control" with "224885"
         And I press "Retrieve from ClinVar"
         Then I should see an element with the css selector ".resource-metadata" within 30 seconds
-        Then I should see "NM_003331.4(TYK2):c.3318_3319insC"
+        Then I should see "ClinVar Variant ID"
         When I press the button "Save and View Evidence"
         And I wait for 5 seconds
         Then I should see "no assertion criteria provided"
