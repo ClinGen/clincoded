@@ -606,7 +606,7 @@ class VariantAddHistory extends Component {
 
         return (
             <div>
-                <span>Variant <strong><a href={"/variant-central/?variant=" + variant.uuid}>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}</a></strong> added</span>
+                <span>Variant <strong><a href={"/variant-central/?variant=" + variant.uuid}>{renderVariantTitle(variant)}</a></strong> added</span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
