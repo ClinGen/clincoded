@@ -35,7 +35,7 @@ function isUserAllowedToPublish(userAffiliation, resourceToPublish) {
 export function allowPublishGlobal(userAffiliation, resourceToPublish, modeOfInheritance = null, diseaseID = null) {
     if (isUserAllowedToPublish(userAffiliation, resourceToPublish)) {
         if (resourceToPublish === 'classification') {
-            const allowedModeOfInheritance = typeof modeOfInheritance === 'string' && /(Autosomal|X-linked|Undetermined)/.test(modeOfInheritance);
+            const allowedModeOfInheritance = typeof modeOfInheritance === 'string' && /(Autosomal|Semidominant|X-linked|Undetermined)/.test(modeOfInheritance);
             const allowedDiseaseID = typeof diseaseID === 'string' && diseaseID.indexOf('MONDO') > -1;
 
             return allowedModeOfInheritance && allowedDiseaseID;

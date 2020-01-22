@@ -632,7 +632,10 @@ function clinvarSubmitResource(func) {
                     if ((!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle'])
                         || (this.state.tempResource['carId'] !== result['carId'])
                         || (this.state.tempResource['dbSNPIds'] && this.state.tempResource['dbSNPIds'].length && (!result['dbSNPIds'] || (result['dbSNPIds'] && !result['dbSNPIds'].length)))
-                        || (this.state.tempResource['hgvsNames'] && Object.keys(this.state.tempResource['hgvsNames']).length && (!result['hgvsNames'] || (result['hgvsNames'] && !Object.keys(result['hgvsNames']).length)))
+                        || (this.state.tempResource['hgvsNames'] && Object.keys(this.state.tempResource['hgvsNames']).length &&
+                            ((!result['hgvsNames'] || (result['hgvsNames'] && !Object.keys(result['hgvsNames']).length))
+                            || (this.state.tempResource['hgvsNames']['GRCh37'] && !result['hgvsNames']['GRCh37'])
+                            || (this.state.tempResource['hgvsNames']['GRCh38'] && !result['hgvsNames']['GRCh38'])))
                         || (this.state.tempResource['variationType'] && !result['variationType'])
                         || (this.state.tempResource['molecularConsequenceList'] && Object.keys(this.state.tempResource['molecularConsequenceList']).length && (!result['molecularConsequenceList'] || !Object.keys(!result['molecularConsequenceList'].length)))
                         || (this.state.tempResource['otherNameList'] && this.state.tempResource['otherNameList'].length && (!result['otherNameList'] || (result['otherNameList'] && !result['otherNameList'].length)))
@@ -823,7 +826,7 @@ function clinvarAndCarRenderResourceResult() {
     return(
         <div className="resource-metadata">
             <span className="p-break">{this.state.tempResource.clinvarVariantTitle}</span>
-            {this.state.tempResource && this.state.tempResource.hgvsNames ?
+            {this.state.tempResource ?
                 <div className="row">
                     {this.state.tempResource.carId ?
                         <div className="row">
