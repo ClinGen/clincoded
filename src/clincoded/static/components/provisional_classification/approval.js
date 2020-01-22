@@ -5,7 +5,7 @@ import createReactClass from 'create-react-class';
 import moment from 'moment';
 import { RestMixin } from '../rest';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
-import { getAffiliationName, getAllAffliations, getAffiliationSubgroups, getAffiliationNameBySubgroupID } from '../../libs/get_affiliation_name';
+import { getAffiliationName, getAllAffliations, getAffiliationSubgroups } from '../../libs/get_affiliation_name';
 import { getAffiliationApprover } from '../../libs/get_affiliation_approver';
 import { getApproverNames, getContributorNames } from '../../libs/get_approver_names';
 import { sopVersions } from '../../libs/sop';

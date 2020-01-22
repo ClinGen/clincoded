@@ -20,7 +20,7 @@ import { getClassificationSavedDate } from '../../libs/get_saved_date';
 import { allowPublishGlobal } from '../../libs/allow_publish';
 import { isScoringForCurrentSOP } from '../../libs/sop';
 import { getAllGdmObjects } from '../../libs/get_all_gdm_objects';
-import { getAffiliationName, getAffiliationNameBySubgroupID } from '../../libs/get_affiliation_name.js';
+import { getAffiliationName } from '../../libs/get_affiliation_name.js';
 import { getApproverNames } from '../../libs/get_approver_names';
 import * as curator from '../curator';
 const CurationMixin = curator.CurationMixin;
@@ -144,7 +144,7 @@ const ProvisionalClassification = createReactClass({
                     reject(error);
                 });
             } else {
-                console.log('Post tracking data Error: Missing experted data');
+                console.log('Post tracking data Error: Missing expected data');
                 reject({'message': 'Missing expected data'});
             }
         });
@@ -260,7 +260,7 @@ const ProvisionalClassification = createReactClass({
                                 roles: ['approver']
                             });
                         }
-                        // Add curator approved this classification
+                        // Add curator who approved this classification
                         if (snapshot.resource.classificationApprover) {
                             contributors.push({   
                                 name: snapshot.resource.classificationApprover,

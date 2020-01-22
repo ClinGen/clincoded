@@ -77,7 +77,8 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
             showAlertMessage: false,
             alertType: null,
             alertClass: null,
-            alertMsg: null
+            alertMsg: null,
+            submitBusy: false // Flag to indicate that the submit button is in a 'busy' state
         };
     },
 
@@ -123,7 +124,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
      * Method to handle editing the publish form data
      */
     handleEditPublish() {
-        this.setState({isPublishPreview: false});
+        this.setState({ isPublishPreview: false });
     },
 
     /**
@@ -147,7 +148,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
      * Method to hide error alert
      */
     hideAlert() {
-        this.setState({showAlertMessage: false});
+        this.setState({ showAlertMessage: false });
     },
 
     /**
@@ -168,15 +169,18 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                         resolve(result);
                     } else {
                         console.log('Message delivery failure: %s', result.message);
+                        this.setState({ submitBusy: false });
                         this.showAlert(alertType, alertClass, alertMsg);
                         reject(result);
                     }
                 }).catch(error => {
                     console.log('Internal data retrieval error: %o', error);
+                    this.setState({ submitBusy: false });
                     this.showAlert(alertType, alertClass, alertMsg);
                     reject(error);
                 });
             } else {
+                this.setState({ submitBusy: false });
                 this.showAlert(alertType, alertClass, alertMsg);
                 reject(null);
             }
@@ -226,6 +230,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         e.preventDefault();
         e.stopPropagation();
 
+        this.setState({ submitBusy: true });
         if (this.state.selectedSnapshot && this.state.selectedSnapshot['@type'] && this.state.selectedSnapshot['@id']) {
             let associatedResourceSnapshots, resourceProperName, resourceName;
             const selectedResourceType = this.state.selectedResourceType;
@@ -437,6 +442,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         const publishEventLower = provisional.publishClassification ? 'unpublished' : 'published';
         const publicationEventLower = provisional.publishClassification ? 'unpublication' : 'publication';
         const selectedResourceType = this.state.selectedResourceType;
+        const submitBusy = this.state.submitBusy;
         let affiliationSubgroup;
 
         // Set variables based on the (parent) resource type
@@ -535,14 +541,15 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                         {this.state.isPublishPreview ?
                             <div className="button-group">
                                 <button type="button" className="btn btn-default btn-inline-spacer"
-                                    onClick={this.handleCancelPublish}>
+                                    onClick={this.handleCancelPublish} disabled={submitBusy}>
                                     Cancel {publishEvent}
                                 </button>
                                 <button type="button" className="btn btn-info btn-inline-spacer"
-                                    onClick={this.handleEditPublish}>
+                                    onClick={this.handleEditPublish} disabled={submitBusy}>
                                     Edit <i className="icon icon-pencil"></i>
                                 </button>
-                                <button type="submit" className="btn btn-primary btn-inline-spacer pull-right">
+                                <button type="submit" className="btn btn-primary btn-inline-spacer pull-right" disabled={submitBusy}>
+                                    {submitBusy ? <span className="submit-spinner"><i className="icon icon-spin icon-cog"></i></span> : null}
                                     {publishEvent} <i className="icon icon-check-square-o"></i>
                                 </button>
                                 <AlertMessage visible={this.state.showAlertMessage} type={this.state.alertType}

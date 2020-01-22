@@ -33,7 +33,8 @@ var CreateGeneDisease = createReactClass({
             diseaseUuid: null,
             diseaseError: null,
             adjectives: [],
-            adjectiveDisabled: true
+            adjectiveDisabled: true,
+            submitBusy: false  // Flag to indicate that the submit button is in a 'busy' state
         };
     },
 
@@ -86,7 +87,7 @@ var CreateGeneDisease = createReactClass({
                 valid = false;
             }
             if (!this.state.diseaseObj || (this.state.diseaseObj && !this.state.diseaseObj['term'])) {
-                this.setState({diseaseError: 'Disease is required!'});
+                this.setState({ diseaseError: 'Disease is required!' });
                 valid = false;
             }
         }
@@ -117,7 +118,7 @@ var CreateGeneDisease = createReactClass({
                     reject(error);
                 });
             } else {
-                console.log('Post tracking data Error: Missing experted GDM creation data');
+                console.log('Post tracking data Error: Missing expected GDM creation data');
                 reject({'message': 'Missing expected GDM creation data'});
             }
         });
@@ -191,6 +192,7 @@ var CreateGeneDisease = createReactClass({
              * FIXME: Need to delete orphanet reference
              */
             // var orphaId = this.getFormValue('orphanetid').match(/^ORPHA:?([0-9]{1,6})$/i)[1];
+            this.setState({ submitBusy: true });
             var geneId = this.getFormValue('hgncgene');
             var mode = this.getFormValue('modeInheritance');
             let adjective = this.getFormValue('moiAdjective');
@@ -202,7 +204,10 @@ var CreateGeneDisease = createReactClass({
             this.getRestDatas([
                 '/genes/' + geneId
             ], [
-                function() { this.setFormErrors('hgncgene', 'HGNC gene symbol not found'); }.bind(this)
+                function() { 
+                    this.setFormErrors('hgncgene', 'HGNC gene symbol not found');
+                    this.setState({ submitBusy: false });
+                }.bind(this)
             ]).then(response => {
                 // Save HGNC Id to be used for data tracking
                 hgncId = response[0]['hgncId'];
@@ -212,12 +217,12 @@ var CreateGeneDisease = createReactClass({
                         this.postRestData('/diseases/', diseaseObj).then(result => {
                             let newDisease = result['@graph'][0];
                             diseaseUuid = newDisease['uuid'];
-                            this.setState({diseaseUuid: diseaseUuid});
+                            this.setState({ diseaseUuid: diseaseUuid });
                         });
                     } else {
                         let _id = diseaseSearch['@graph'][0]['@id'];
                         diseaseUuid = _id.slice(10, -1);
-                        this.setState({diseaseUuid: diseaseUuid});
+                        this.setState({ diseaseUuid: diseaseUuid });
                     }
                 });
             }).then(data => {
@@ -264,7 +269,7 @@ var CreateGeneDisease = createReactClass({
 
                             // Post GDM creation data to Data Exchange
                             this.postGdmCreationData(uncData).then(response => {
-                                console.log('Successfully send GDM creation data to Data Exchange for GDM %s at %s', newGdm.uuid, newGdm.date_created);
+                                console.log('Successfully sent GDM creation data to Data Exchange for GDM %s at %s', newGdm.uuid, newGdm.date_created);
                             }).catch(error => {
                                 console.log('Error sending GDM creation data to Data Exchange for GDM %s at %s - Error: %o', newGdm.uuid, newGdm.date_created, error);
                             });
@@ -274,14 +279,17 @@ var CreateGeneDisease = createReactClass({
                         });
                     } else {
                         // Found matching GDM. See of the user wants to curate it.
-                        this.setState({gdm: gdmSearch['@graph'][0]});
+                        this.setState({
+                            gdm: gdmSearch['@graph'][0],
+                            submitBusy: false
+                        });
                         this.child.openModal();
                     }
                 });
             }).catch(e => {
                 // Some unexpected error happened
                 parseAndLogError.bind(undefined, 'fetchedRequest');
-            });
+                this.setState({ submitBusy: false });            });
         }
     },
 
@@ -298,14 +306,14 @@ var CreateGeneDisease = createReactClass({
      * Update the 'diseaseObj' state used to save data upon form submission
      */
     updateDiseaseObj(diseaseObj) {
-        this.setState({diseaseObj: diseaseObj});
+        this.setState({ diseaseObj: diseaseObj });
     },
 
     /**
      * Clear error msg on missing disease
      */
     clearErrorInParent() {
-        this.setState({diseaseError: null});
+        this.setState({ diseaseError: null });
     },
 
     render: function() {
@@ -315,6 +323,7 @@ var CreateGeneDisease = createReactClass({
         let adjectiveDisabled = this.state.adjectiveDisabled;
         const moiKeys = Object.keys(modesOfInheritance);
         let gdm = this.state.gdm;
+        const submitBusy = this.state.submitBusy;
 
         return (
             <div className="container">
@@ -352,7 +361,7 @@ var CreateGeneDisease = createReactClass({
                                 </Input>
                                 <div><p className="alert alert-warning">The above options (gene, disease, mode of inheritance, or adjective) can be altered for a Gene:Disease record up until a PMID has been added to the record. This includes
                                     adding an adjective to a Gene:Disease:Mode of inheritance record that has already been created or editing an adjective associated with a record.</p></div>
-                                <Input type="submit" inputClassName="btn-default pull-right" id="submit" />
+                                <Input type="submit" inputClassName="btn-default pull-right" submitBusy={submitBusy} id="submit" />
                             </div>
                         </Form>
                         {gdm && gdm.gene && gdm.disease && gdm.modeInheritance ?
