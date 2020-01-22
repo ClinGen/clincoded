@@ -881,7 +881,7 @@ function clinvarAndCarRenderResourceResult() {
     return(
         <div className="resource-metadata">
             <span className="p-break">{this.state.tempResource.clinvarVariantTitle}</span>
-            {this.state.tempResource && this.state.tempResource.hgvsNames ?
+            {this.state.tempResource ?
                 <div className="row">
                     {this.state.tempResource.carId ?
                         <div className="row">
