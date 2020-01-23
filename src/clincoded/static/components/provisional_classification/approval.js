@@ -271,11 +271,10 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         const uncData = this.props.setUNCData(provisional, 'approved', approvalDate, approvalSubmitter, contributors);
 
         // Post approval data to Data Exchange
-        const postedTime = provisional.approvalDate ? provisional.approvalDate : provisional.last_modified;
         this.props.postTrackData(uncData).then(response => {
-            console.log('Successfully sent approval data to Data Exchange for provisional %s at %s', provisional.uuid, postedTime);
+            console.log('Successfully sent approval data to Data Exchange for provisional %s at %s', provisional.uuid, moment(approvalDate).toISOString());
         }).catch(error => {
-            console.log('Error sending approval data to Data Exchange for provisional %s at %s - Error: %o', provisional.uuid, postedTime, error);
+            console.log('Error sending approval data to Data Exchange for provisional %s at %s - Error: %o', provisional.uuid, moment(approvalDate).toISOString(), error);
         });
     },
 

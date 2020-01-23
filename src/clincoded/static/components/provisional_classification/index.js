@@ -197,7 +197,7 @@ const ProvisionalClassification = createReactClass({
             uncData = {
                 report_id: this.state.gdm.uuid,
                 gene_validity_evidence_level: this.getGeneEvidenceData(provisional),
-                date: date,
+                date: moment(date).toISOString(),
                 status: status,
                 performed_by: {
                     name: submitter && submitter.title ? submitter.title : '',

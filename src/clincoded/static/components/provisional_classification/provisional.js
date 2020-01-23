@@ -117,11 +117,10 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         const uncData = this.props.setUNCData(provisional, 'provisionally_approved', provisionalDate, provisionalSubmitter, contributors);
 
         // Post provisional data to Data Exchange
-        const postedTime = provisional.provisionalDate ? provisional.provisionalDate : provisional.last_modified;
         this.props.postTrackData(uncData).then(response => {
-            console.log('Successfully sent provisionally approved data to Data Exchange for provisional %s at %s', provisional.uuid, postedTime);
+            console.log('Successfully sent provisionally approved data to Data Exchange for provisional %s at %s', provisional.uuid, moment(provisionalDate).toISOString());
         }).catch(error => {
-            console.log('Error sending provisionally approved data to Data Exchange for provisional %s at %s - Error: %o', provisional.uuid, postedTime, error);
+            console.log('Error sending provisionally approved data to Data Exchange for provisional %s at %s - Error: %o', provisional.uuid, moment(provisionalDate).toISOString(), error);
         });
     },
 

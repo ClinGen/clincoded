@@ -149,7 +149,7 @@ var CreateGeneDisease = createReactClass({
                 evidence_level: '',
                 gene_validity_sop: ''
             },
-            date: gdm.date_created,
+            date: moment(gdm.date_created).toISOString(),
             status: 'created',
             performed_by: {
                 name: submitterName,
@@ -269,9 +269,9 @@ var CreateGeneDisease = createReactClass({
 
                             // Post GDM creation data to Data Exchange
                             this.postGdmCreationData(uncData).then(response => {
-                                console.log('Successfully sent GDM creation data to Data Exchange for GDM %s at %s', newGdm.uuid, newGdm.date_created);
+                                console.log('Successfully sent GDM creation data to Data Exchange for GDM %s at %s', newGdm.uuid, moment(newGdm.date_created).toISOString());
                             }).catch(error => {
-                                console.log('Error sending GDM creation data to Data Exchange for GDM %s at %s - Error: %o', newGdm.uuid, newGdm.date_created, error);
+                                console.log('Error sending GDM creation data to Data Exchange for GDM %s at %s - Error: %o', newGdm.uuid, moment(newGdm.date_created).toISOString(), error);
                             });
                             // Navigate to Record Curation
                             var uuid = data['@graph'][0].uuid;

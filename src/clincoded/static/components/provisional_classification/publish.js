@@ -214,11 +214,10 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         let uncData = this.props.setUNCData(provisional, status, publishDate, publishSubmitter, contributors);
 
         // Post published/unpublished data to Data Exchange
-        const postedTime = provisional.publishDate ? provisional.publishDate : provisional.last_modified;
         this.props.postTrackData(uncData).then(response => {
-            console.log('Successfully sent %s data to Data Exchange for provisional %s at %s', status, provisional.uuid, postedTime);
+            console.log('Successfully sent %s data to Data Exchange for provisional %s at %s', status, provisional.uuid, moment(publishDate).toISOString());
         }).catch(error => {
-            console.log('Error sending %s data to Data Exchange for provisional %s at %s - Error: %o', status, provisional.uuid, postedTime, error);
+            console.log('Error sending %s data to Data Exchange for provisional %s at %s - Error: %o', status, provisional.uuid, moment(publishDate).toISOString(), error);
         });
     },
 
