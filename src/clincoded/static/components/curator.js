@@ -1843,6 +1843,14 @@ var flatten = module.exports.flatten = function(obj, type) {
                 flat = flattenProvisionalVariant(obj);
                 break;
 
+            case 'evaluation':
+                flat = flattenEvaluation(obj);
+                break;
+
+            case 'extra_evidence':
+                flat = flattenExtraEvidence(obj);
+                break;
+
             case 'evidenceScore':
                 flat = flattenEvidenceScore(obj);
                 break;
@@ -2260,6 +2268,51 @@ function flattenProvisionalVariant(provisional_variant) {
     return flat;
 }
 
+var evaluationSimpleProps = [
+    "functional", "segregation", "criteria", "criteriaStatus", "criteriaModifier", "explanation", "affiliation"
+];
+
+function flattenEvaluation(evaluation) {
+    var flat = cloneSimpleProps(evaluation, evaluationSimpleProps);
+
+    if (evaluation.variant) {
+        flat.variant = evaluation.variant['@id'];
+    }
+
+    if (evaluation.population) {
+        flat.population = evaluation.population['@id'];
+    }
+
+    if (evaluation.computational) {
+        flat.computational = evaluation.computational['@id'];
+    }
+
+    if (evaluation.disease) {
+        flat.disease = evaluation.disease['@id'];
+    }
+
+    return flat;
+}
+
+var extraEvidenceSimpleProps = [
+    "category", "subcategory", "evidenceCriteria", "evidenceDescription", "experimentalType", "affiliation", "sourceInfo", "date_created"
+];
+
+function flattenExtraEvidence(extra_evidence) {
+    var flat = cloneSimpleProps(extra_evidence, extraEvidenceSimpleProps);
+
+    if (extra_evidence.variant) {
+        flat.variant = extra_evidence.variant['@id'];
+    }
+
+    if (extra_evidence.articles && extra_evidence.articles.length) {
+        flat.articles = extra_evidence.articles.map(function(article) {
+            return article['@id'];
+        });
+    }
+
+    return flat;
+}
 
 var snapshotSimpleProps = [
     "uuid", "resourceId", "resourceType", "approvalStatus", "date_created", "resource"

@@ -124,6 +124,14 @@ export function getAllGdmObjects(gdm) {
             caseControls.forEach(caseControl => {
                 // Get case-control evidence
                 totalObjects.push(filteredObject(caseControl));
+                // Get case-control Case Cohort group
+                if (caseControl.caseCohort) {
+                    totalObjects.push(filteredObject(caseControl.caseCohort));
+                }
+                // Get case-control Control Cohort group
+                if (caseControl.controlCohort) {
+                    totalObjects.push(filteredObject(caseControl.controlCohort));
+                }
                 // loop through case-control scores
                 let caseControlScores = caseControl.scores && caseControl.scores.length ? caseControl.scores : [];
                 if (caseControlScores.length) {
