@@ -1909,6 +1909,10 @@ function flattenAnnotation(annotation) {
     var flat = cloneSimpleProps(annotation, annotationSimpleProps);
 
     flat.article = annotation.article['@id'];
+    
+    if (annotation.articleNotes) {
+        flat.articleNotes = annotation.articleNotes;
+    }
 
     // Flatten groups
     if (annotation.groups && annotation.groups.length) {

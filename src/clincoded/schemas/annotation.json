@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
+            "default": "4"
         },
         "article": {
             "title": "Article",
@@ -91,6 +91,47 @@
             "title": "Affiliation",
             "description": "The affiliation this annotation is associated with.",
             "type": "string"
+        },
+        "articleNotes": {
+            "title": "Article Notes",
+            "description": "Notes for PubMed",
+            "type": "object",
+            "properties": {
+                "nonscorable": {
+                    "title": "Non-scorable",
+                    "description": "Non-scorable Notes",
+                    "type": "object",
+                    "properties": {
+                        "checked": {
+                            "title": "Non-scorable Checked",
+                            "description": "Boolean for whether or not non-scorable is checked",
+                            "type": "boolean"
+                        },
+                        "text": {
+                            "title": "Non-scorable Text",
+                            "description": "Explanation for non-scorable evidence",
+                            "type": "string"
+                        }
+                    }
+                },
+                "other": {
+                    "title": "Other",
+                    "description": "Other Notes",
+                    "type": "object",
+                    "properties": {
+                        "checked": {
+                            "title": "Other Checked",
+                            "description": "Boolean for whether or not other is checked",
+                            "type": "boolean"
+                        },
+                        "text": {
+                            "title": "Other Text",
+                            "description": "Other comments on PubMed article",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "columns": {
