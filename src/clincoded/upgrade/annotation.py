@@ -12,3 +12,9 @@ def annotation_2_3(value, system):
     # https://github.com/ClinGen/clincoded/issues/1507
     # Add affiliation property and update schema version
     return
+
+@upgrade_step('annotation', '3', '4')
+def annotation_3_4(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1486
+    # Add articleNotes property and update schema version
+    return
