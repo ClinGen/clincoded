@@ -770,17 +770,14 @@ function carQueryResource() {
                     if (data_cv.clinvarVariantId) {
                         // found the result we want
                         data_cv.carId = id;
-                        // this.setState({queryResourceBusy: false, tempResource: data_cv, resourceFetched: true});
                         finalState.tempResource = data_cv;
                     } else {
-                        // something failed with the parsing of ClinVar data; roll back to CAR data
-                        // this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+                        // something failed with the parsing of ClinVar data; roll back to CAR data (just use initial value of `finalState`)
                     }
                 }
                 catch (e) {
                     // error handling for ClinVar query
                     this.setFormErrors('resourceId', 'Error querying ClinVar for additional data. Please check your input and try again.');
-                    // this.setState({queryResourceBusy: false, resourceFetched: false});
                     finalState.resourceFetched = false;
                 }
             } else if (data.carId) {
@@ -814,11 +811,9 @@ function carQueryResource() {
                             // Remove the 'tempAlleles' object at this point regardless
                             // whether the preceding evaluations are executed
                             if (data['tempAlleles']) delete data['tempAlleles'];
-                            // this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
                         } else {
                             // Fall back to CAR data without the canonical transcript title if there is no ensembl transcript
                             if (data['tempAlleles']) delete data['tempAlleles'];
-                            // this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
                         }
                     }
                     catch (err) {
@@ -826,17 +821,14 @@ function carQueryResource() {
                         console.warn('Error in querying Ensembl VEP data = %o', err);
                         // Fall back to CAR data
                         if (data['tempAlleles']) delete data['tempAlleles'];
-                        // this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
                     }
                 } else {
                     // Fall back to CAR data without the canonical transcript title if parsing fails
                     if (data['tempAlleles']) delete data['tempAlleles'];
-                    // this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
                 }
             } else {
                 // in case the above two fail (theoretically a 404 json response, but an error is thrown instead (see below))
                 this.setFormErrors('resourceId', 'CA ID not found');
-                // this.setState({queryResourceBusy: false, resourceFetched: false});
                 finalState.resourceFetched = false;
             }
 
