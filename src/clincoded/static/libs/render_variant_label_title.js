@@ -11,7 +11,6 @@ import { renderVariantTitleExplanation } from './render_variant_title_explanatio
   * @param {boolean} showInHeader - Whether it is rendered in GDM's variant curation header
  */
 export function renderVariantLabelAndTitle(variant, linkout, showInHeader) {
-    console.log('MANE label version! variant =', variant);
     let variantLabel;
     if (variant.clinvarVariantTitle) {
         variantLabel = linkout ? <LabelClinVarVariantTitle /> : 'ClinVar Preferred Title';

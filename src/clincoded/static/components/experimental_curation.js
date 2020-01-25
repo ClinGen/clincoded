@@ -1365,7 +1365,6 @@ var ExperimentalCuration = createReactClass({
     updateVariantId: function(data, fieldNum) {
         var newVariantInfo = _.clone(this.state.variantInfo);
         var addVariantDisabled;
-        console.log(`experimental curation updateVariantId. data =`, data);
         if (data) {
             // Enable/Disable Add Variant button as needed
             if (fieldNum < MAX_VARIANTS - 1) {

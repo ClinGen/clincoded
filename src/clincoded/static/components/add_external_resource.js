@@ -746,7 +746,6 @@ function carValidateForm() {
 function carQueryResource() {
     // for pinging and parsing data from CAR
     this.saveFormValue('resourceId', this.state.inputValue);
-    console.log('car query triggered');
     var error_msg;
     if (carValidateForm.call(this)) {
         var url = this.props.protocol + external_url_map['CARallele'];
@@ -759,9 +758,7 @@ function carQueryResource() {
                 resourceFetched: true
             }
 
-            console.log('\n\n\nCAR raw json', json);
             data = parseCAR(json);
-            console.log('\n\nparsedCar data = ', data);
             finalState.tempResource = data;
             
             if (data.clinvarVariantId) {
@@ -770,7 +767,6 @@ function carQueryResource() {
                 try {
                     const xml = await this.getRestDataXml(url + data.clinvarVariantId);
                     var data_cv = parseClinvar(xml);
-                    console.log('ClinVar parsed data =', data_cv);
                     if (data_cv.clinvarVariantId) {
                         // found the result we want
                         data_cv.carId = id;
@@ -789,7 +785,6 @@ function carQueryResource() {
                 }
             } else if (data.carId) {
                 // if the CAR result has no ClinVar variant ID, just use the CAR data set
-                console.log('car result has no ClinVar variant id');
                 let hgvs_notation = getHgvsNotation(data, 'GRCh38', true);
                 let request_params = '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&ExAC=1&MaxEntScan=1&GeneSplicer=1&Conservation=1&numbers=1&domains=1&canonical=1&merged=1';
                 if (hgvs_notation) {
@@ -847,7 +842,6 @@ function carQueryResource() {
 
             // If queried CAR successfully, always try to obtain MANE transcript info (best effort only)
             // Looking up MANE requires CAR since LDH only has id of transcript at this point, so have to join detail data from CAR
-            console.log('ready to query MANE, finalState =', finalState);
             if (finalState.resourceFetched) {
                 try {
                     const maneTranscriptTitle = await queryManeTranscriptTitle.call(this, id, json);
@@ -861,7 +855,6 @@ function carQueryResource() {
             }
 
             // update all the state once here to ensure state update occurs at the end
-            console.log('final data to save & submit is now', finalState.tempResource)
             this.setState(finalState);
         }).catch(e => {
             // error handling for CAR query
@@ -919,11 +912,9 @@ function carSubmitResource(func) {
             internal_uri = '/search/?type=variant&carId=' + this.state.tempResource.carId;
         }
         this.getRestData(internal_uri).then(check => {
-            console.log(`submit ${internal_uri}, search our db =`, check);
             if (check.total) {
                 // variation already exists in our db
                 this.getRestData(check['@graph'][0]['@id']).then(result => {
-                    console.log('checking consistency w/ our db', result);
                     // if no variant title in db, or db's variant title not matching the retrieved title,
                     // then update db and fetch result again
                     if (!result['clinvarVariantTitle'].length
@@ -931,25 +922,19 @@ function carSubmitResource(func) {
                         || result['carId'] !== this.state.tempResource['carId']
                         || result['maneTranscriptTitle'] !== this.state.tempResource['maneTranscriptTitle']) {
                         this.putRestData('/variants/' + result['uuid'], this.state.tempResource).then(result => {
-                            console.log('update our db, result =', result)
                             return this.getRestData(result['@graph'][0]['@id']).then(result => {
-                                console.log('updateParentForm', result);
                                 this.props.updateParentForm(result, this.props.fieldNum);
                             });
                         });
                     } else {
-                        console.log('no need to update our db, identical:');
-                        console.log('updateParentForm', result);
                         this.props.updateParentForm(result, this.props.fieldNum);
                     }
                 });
             } else {
                 // variation is new to our db
                 this.postRestData('/variants/', this.state.tempResource).then(result => {
-                    console.log('newly created in our db, result =', result);
                     // record the user adding a new variant entry
                     this.recordHistory('add', result['@graph'][0]).then(history => {
-                        console.log('updateParentForm', result['@graph'][0]);
                         this.props.updateParentForm(result['@graph'][0], this.props.fieldNum);
                     });
                 });
@@ -987,7 +972,6 @@ async function queryManeTranscriptTitle(carId, carJson) {
         const [, geneUrlWithoutScheme] = geneUrl.split('://');
         // use the same scheme as the webpage of time
         const geneUrlRequested = `//${geneUrlWithoutScheme}`;
-        console.log(`Requesting genomic AR: ${geneUrlRequested}`);
         const genomicCarJson = await this.getRestData(geneUrlRequested);
         maneTranscriptId = parseManeTranscriptIdFromGenomicCar(genomicCarJson);
     }

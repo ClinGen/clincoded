@@ -542,12 +542,9 @@ export const getTranscriptAllelesGeneUrlSet = (transcriptAlleles) => {
     let geneUrls = new Set();
     transcriptAlleles.forEach(transcript => {
         if (transcript.gene) {
-            console.log('adding gene to set', transcript.gene);
             geneUrls.add(transcript.gene);
         }
     })
-
-    console.log('just generated the set, ', geneUrls);
 
     return geneUrls;
 }

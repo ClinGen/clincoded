@@ -10,8 +10,6 @@ import React from 'react';
  * @param {boolean} stringOnly - Whether the output should be just string
  */
 export function renderVariantTitle(variant, stringOnly) {
-    console.log('MANE label version! variant =', variant);
-
     let variantTitle;
     if (variant) {
         if (variant.clinvarVariantId && variant.clinvarVariantTitle) {

@@ -1334,7 +1334,6 @@ var FamilyCuration = createReactClass({
                 'hgvsNames': data.hgvsNames ? data.hgvsNames : null,
                 'uuid': data.uuid
             };
-            console.log('update form variant', newVariantInfo[fieldNum]);
             variantCount += 1;  // We have one more variant to show
         } else {
             // Reset the form and display values

@@ -25,7 +25,6 @@ export const getManeTranscriptTitleFromCar = (maneTranscriptId, carJson) => {
         if (transcriptId === maneTranscriptId) {
             // Only return the transcript preferred title for now.
             // Can add more transcript info here if needed in the future.
-            console.log(`ready to generate perferred title...geneName=${transcript.geneSymbol}, hgvs=${hgvsValue}, protein change=${transcript.proteinEffect}`)
             return generateVariantPreferredTitle(transcript.geneSymbol, hgvsValue, transcript.proteinEffect);
         }
     }
@@ -78,8 +77,6 @@ export const parseManeTranscriptIdFromGenomicCar = (genomicCarJson) => {
             } = {}
         }
     } = genomicCarJson;
-
-    console.log('genomic AR', genomicCarJson);
 
     return id;
 }
