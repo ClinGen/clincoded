@@ -809,7 +809,7 @@ function carQueryResource() {
                                                 if (item.proteinEffect && item.proteinEffect.hgvs) {
                                                     proteinChange = item.proteinEffect.hgvs.split(':')[1];
                                                 }
-                                                data['canonicalTranscriptTitle'] = transcriptStart + '(' + item.geneSymbol + '):' + transcriptEnd + ' (' + proteinChange + ')';
+                                                data['canonicalTranscriptTitle'] = `${transcriptStart}(${item.geneSymbol}):${transcriptEnd}${proteinChange ? ` (${proteinChange})` : ''}`;
                                                 delete data['tempAlleles'];
                                             }
                                         }
