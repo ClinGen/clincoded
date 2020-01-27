@@ -14,7 +14,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
+            "default": "4"
         },
         "operationType": {
             "title": "Curator operation type",
@@ -32,6 +32,7 @@
             "type": "string",
             "linkTo": [
                 "article",
+                "annotation",
                 "assessment",
                 "experimental",
                 "family",
@@ -102,6 +103,35 @@
                             "description": "GDM that's the object of the PMID",
                             "type": "string",
                             "linkTo": "gdm"
+                        }
+                    }
+                },
+                "annotation": {
+                    "title": "Annotation History",
+                    "description": "History metadata for an annotation to a GDM",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "operation": {
+                            "title": "Operation",
+                            "description": "Operation specific to this meta type",
+                            "type": "string",
+                            "default": "edit",
+                            "enum": [
+                                "edit"
+                            ]
+                        },
+                        "gdm": {
+                            "title": "GDM",
+                            "description": "GDM that's the object of the PMID",
+                            "type": "string",
+                            "linkTo": "gdm"
+                        },
+                        "article": {
+                            "title": "Article",
+                            "description": "GDM article that the annotation is for",
+                            "type": "string",
+                            "linkTo": "article"
                         }
                     }
                 },
@@ -489,6 +519,14 @@
         },
         "meta.article.gdm": {
             "title": "GDM of PMID",
+            "type": "string"
+        },
+        "meta.annotation.gdm": {
+            "title": "GDM of Annotation",
+            "type": "string"
+        },
+        "meta.annotation.article": {
+            "title": "Annotation Article",
             "type": "string"
         },
         "meta.caseControl.gdm": {

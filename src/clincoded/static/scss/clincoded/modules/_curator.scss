@@ -3,6 +3,20 @@
 }
 
 .curr-pmid-overview {
+    .pubmed-notes-box {
+        border: 1px solid #1b75bc;
+        padding: 10px;
+    }
+    .flex-right {
+        display: flex;
+        justify-content: flex-end;
+    }
+    .no-padding {
+        padding: 0px;
+    }
+    .empty-text-placeholder {
+        color: grey;
+    }
 }
 
 .pmid-doi-btns {
