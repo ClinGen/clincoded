@@ -5,6 +5,7 @@ import createReactClass from 'create-react-class';
 import moment from 'moment';
 import { RestMixin } from '../rest';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
+import ModalComponent from '../../libs/bootstrap/modal';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import { formatDate, parseDate } from 'react-day-picker/moment';
@@ -66,12 +67,26 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
      */
     handlePreviewProvisional() {
         const provisionalComment = this.provisionalCommentInput.getValue();
+        const affiliation = this.props.provisional.affiliation ? this.props.provisional.affiliation : null;
+        const currentUserAffiliation = this.props.affiliation ? this.props.affiliation.affiliation_id : null;
+    
+        if (currentUserAffiliation !== affiliation) {
+            this.child.openModal();
+        }
         this.setState({
             provisionalSubmitter: this.props.session.user_properties.title,
             provisionalComment: provisionalComment.length ? provisionalComment : undefined
         }, () => {
             this.setState({isProvisionalPreview: true});
         });
+    },
+
+    handleAlertClick(confirm, e) {
+        if (confirm) {
+            window.location.href = '/dashboard/';
+        }
+        this.child.closeModal();
+        this.handleCancelProvisional();
     },
 
     /**
@@ -260,6 +275,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         const provisional = this.props.provisional;
         const classification = this.props.classification;
         const affiliation = provisional.affiliation ? provisional.affiliation : (this.props.affiliation ? this.props.affiliation : null);
+        const currentUserAffiliation = this.props.affiliation ? this.props.affiliation.affiliation_fullname : 'No Affiliation';
         const submitBusy = this.state.submitBusy;
 
         return (
@@ -388,6 +404,18 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                         }
                     </div>
                 </Form>
+                <ModalComponent modalTitle="Warning" modalClass="modal-default" modalWrapperClass="conflicting-affiliations"
+                    bootstrapBtnClass="btn btn-primary" actuatorClass="input-group-affiliation" onRef={ref => (this.child = ref)}>
+                    <div className="modal-body">
+                        <p className="alert alert-warning">You are currently curating an Interpretation under the wrong affiliation. You are logged in as <strong>{currentUserAffiliation}</strong> and 
+                            curating an interpretation for <strong>{provisional.affiliation ? getAffiliationName(provisional.affiliation) : 'No Affiliation'}</strong>. Either close this tab in your browser or redirect to the Dashboard below.
+                        </p>
+                    </div>
+                    <div className="modal-footer">
+                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleAlertClick.bind(null, false)} title="Cancel" />
+                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleAlertClick.bind(null, true)} title="Go to Dashboard" />
+                    </div>
+                </ModalComponent>
             </div>
         );
     }

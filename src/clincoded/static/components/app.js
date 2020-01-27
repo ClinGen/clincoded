@@ -202,6 +202,8 @@ var App = module.exports = createReactClass({
                             return <option key={i} value={JSON.stringify(affiliation)}>{affiliation.affiliation_fullname}</option>;
                         })}
                     </select>
+                    <p className="alert alert-warning">Please close any other VCI/GCI tabs you have open before you switch affiliations. 
+                    Keeping work open in other tabs when you switch affiliations can potentially lead to your curations being attributed to the wrong affiliation.</p>
                 </div>
             </AffiliationModal>
         );
