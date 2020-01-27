@@ -10,6 +10,7 @@ import { RestMixin } from './rest';
 import { Form, FormMixin, Input } from '../libs/bootstrap/form';
 import { PanelGroup, Panel } from '../libs/bootstrap/panel';
 import { parsePubmed } from '../libs/parse-pubmed';
+import { showErrorNotification } from '../libs/error_notification';
 import * as methods from './methods';
 import * as CaseControlEvalScore from './case_control/evaluation_score';
 import * as CuratorHistory from './curator_history';
@@ -1557,6 +1558,12 @@ var CaseControlViewer = createReactClass({
         window.location.href = '/curation-central/?gdm=' + tempGdm.uuid + '&pmid=' + tempPmid;
     },
 
+    handleScoreSubmitError: function(err) {
+        this.setState({ submitBusy: false });
+        showErrorNotification();
+        console.log('Case-control score submit error: ', err);
+    },
+
     scoreSubmit: function(e) {
         let caseControl = this.props.context;
         /*****************************************************/
@@ -1572,10 +1579,11 @@ var CaseControlViewer = createReactClass({
             // Update and create score object when the score object has the scoreStatus key/value pair
             if (this.state.userScoreObj.uuid) {
                 return this.putRestData('/evidencescore/' + this.state.userScoreObj.uuid, newUserScoreObj).then(modifiedScoreObj => {
-                    this.setState({submitBusy: false});
                     return Promise.resolve(modifiedScoreObj['@graph'][0]['@id']);
                 }).then(data => {
                     this.handlePageRedirect();
+                }).catch(err => {
+                    this.handleScoreSubmitError(err);
                 });
             } else {
                 return this.postRestData('/evidencescore/', newUserScoreObj).then(newScoreObject => {
@@ -1596,12 +1604,13 @@ var CaseControlViewer = createReactClass({
                         newCaseControl.scores.push(newScoreObjectUuid);
 
                         return this.putRestData('/casecontrol/' + caseControl.uuid, newCaseControl).then(updatedCaseControlObj => {
-                            this.setState({submitBusy: false});
                             return Promise.resolve(updatedCaseControlObj['@graph'][0]);
                         });
                     });
                 }).then(data => {
                     this.handlePageRedirect();
+                }).catch(err => {
+                    this.handleScoreSubmitError(err);
                 });
             }
         } else if (Object.keys(newUserScoreObj).length && !newUserScoreObj.hasOwnProperty('score')) {
@@ -1633,12 +1642,13 @@ var CaseControlViewer = createReactClass({
                             });
                         }
                         return this.putRestData('/casecontrol/' + caseControl.uuid, newCaseControl).then(updatedCaseControlObj => {
-                            this.setState({submitBusy: false});
                             return Promise.resolve(updatedCaseControlObj['@graph'][0]);
                         });
                     });
                 }).then(data => {
                     this.handlePageRedirect();
+                }).catch(err => {
+                    this.handleScoreSubmitError(err);
                 });
             }
         }
@@ -2118,7 +2128,7 @@ var CaseControlViewer = createReactClass({
                             </Panel>
                             <Panel title="Case-Control Score" panelClassName="case-control-evidence-score-viewer" open>
                                 {isEvidenceScored || (!isEvidenceScored && affiliation && affiliatedCaseControl) || (!isEvidenceScored && !affiliation && userCaseControl) ?
-                                    <ScoreCaseControl evidence={context} evidenceType="Case control" session={this.props.session}
+                                    <ScoreCaseControl evidence={context} evidenceType="Case control" session={this.props.session} submitBusy={this.state.submitBusy}
                                         handleUserScoreObj={this.handleUserScoreObj} scoreSubmit={this.scoreSubmit} affiliation={affiliation}
                                         isDisabled={this.state.scoreDisabled} />
                                     : null}

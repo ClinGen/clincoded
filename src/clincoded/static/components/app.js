@@ -3,6 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import url from 'url';
+import { ToastContainer } from 'react-toastify';
 import { content_views } from './globals';
 import { Auth0, HistoryAndTriggers } from './mixins';
 import { NavbarMixin, Nav, Navbar, NavItem } from '../libs/bootstrap/navigation';
@@ -270,6 +271,7 @@ var App = module.exports = createReactClass({
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="@@cssFile" />
                     <link rel="stylesheet" href="https://unpkg.com/react-day-picker/lib/style.css" />
+                    <link rel="stylesheet" href="https://unpkg.com/react-toastify@4.5.2/dist/ReactToastify.css" />
                     <script src="@@bundleJsFile"></script>
                 </head>
                 <body onClick={this.handleClick} onSubmit={this.handleSubmit} className={this.state.demoWarning ? "demo-background" : ""}>
@@ -277,6 +279,7 @@ var App = module.exports = createReactClass({
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>
                     <div>
+                        <ToastContainer />
                         <Header session={this.state.session} href={this.props.href} affiliation={affiliation} />
                         {this.state.demoWarning ?
                             <Notice noticeType='demo' noticeMessage={<span><strong>Note:</strong> This is a demo version of the site. Data entered will be deleted upon release of updated versions, which occurs roughly once per month. Please contact us with any questions at <a href="mailto:clingen-helpdesk@lists.stanford.edu" style={{color: '#FFFFFF'}}>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a></span>} />

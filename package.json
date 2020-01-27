@@ -59,6 +59,7 @@
     "react-day-picker": "^7.0.7",
     "react-dom": "^15.4.0",
     "react-select": "^2.0.0",
+    "react-toastify": "^4.5.2",
     "scriptjs": "^2.5.7",
     "shivie8": "^1.0.0",
     "source-map-support": "^0.4.6",
