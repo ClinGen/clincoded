@@ -206,6 +206,42 @@ var CurationCentral = createReactClass({
         }).catch(parseAndLogError.bind(undefined, 'putRequest'));
     },
 
+    handleDeletePmid: function(e, currAnnotation) {
+        e.preventDefault(); e.stopPropagation();
+        const { currGdm } = this.state;
+        const annotationToDelete = curator.flatten(currAnnotation);
+        annotationToDelete.status = 'deleted';
+        this.putRestData('/evidence/' + currAnnotation.uuid, annotationToDelete).then(() => {
+            this.getRestData('/gdm/' + currGdm.uuid, null, true).then(freshGdm => {
+                const gdmObj = curator.flatten(freshGdm);
+                if (gdmObj.annotations) {
+                    const newAnnotations = gdmObj.annotations.filter(annotation => annotation !== currAnnotation['@id']);
+                    gdmObj.annotations = newAnnotations;
+                }
+                return this.putRestData('/gdm/' + currGdm.uuid, gdmObj).then(data => {
+                    return data['@graph'][0];
+                }).then(updatedGdm => {
+                    const meta = {
+                        article:{
+                            gdm: updatedGdm['@id']
+                        }
+                    };
+                    this.recordHistory('delete', currAnnotation.article, meta).catch(err => {
+                        console.log('Record delete article history error', err);
+                    });
+                    const pmid = _.property(['annotations', 0, 'article', 'pmid'])(updatedGdm);
+                    return this.getGdm(updatedGdm.uuid, pmid);
+                }).catch(err => {
+                    console.log('Update gdm error', err);
+                });
+            }).catch(err => {
+                console.log('Fetch gdm error', err);
+            });
+        }).catch(err => {
+            console.log('Annotation status change error', err);
+        });
+    },
+
     // Submit handler for the PubMed notes form. Saves article notes and refetches gdm
     handleSaveNotes: function(e, annotation) {
         e.preventDefault(); e.stopPropagation();
@@ -305,6 +341,16 @@ var CurationCentral = createReactClass({
 
         let affiliation = this.props.affiliation;
         let sortedSnapshotList = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
+        const shouldShowDeletePmidButton = () => {
+            const { articleNotes } = annotation;
+            const nonscorableChecked = _.property(['nonscorable', 'checked'])(articleNotes);
+            const nonscorableText = _.property(['nonscorable', 'text'])(articleNotes);
+            const otherChecked = _.property(['other', 'checked'])(articleNotes);
+            const otherText = _.property(['other', 'text'])(articleNotes);
+            const articleNotesIsEmpty = (!nonscorableChecked && !nonscorableText && !otherChecked && !otherText);
+            return articleNotesIsEmpty && _.isEmpty(annotation.groups) && _.isEmpty(annotation.families) && _.isEmpty(annotation.individuals) && _.isEmpty(annotation.experimentalData) &&
+                _.isEmpty(annotation.caseControlStudies);
+        };
 
         return (
             <div>
@@ -321,7 +367,15 @@ var CurationCentral = createReactClass({
                             {currArticle ?
                                 <div className="curr-pmid-overview">
                                     <PmidSummary article={currArticle} displayJournal />
-                                    <PmidDoiButtons pmid={currArticle.pmid} />
+                                    <div className="pmid-button-group">
+                                        <PmidDoiButtons pmid={currArticle.pmid} />
+                                        {
+                                            shouldShowDeletePmidButton() &&
+                                                <a className="btn btn-danger delete-button" onClick={(e) => this.handleDeletePmid(e, annotation)}>
+                                                    <span>Delete PMID<i className="icon icon-trash-o"></i></span>
+                                                </a>
+                                        }
+                                    </div>
                                     <BetaNote annotation={annotation} session={session} />
                                     <PubMedNotesBox
                                         updateMsg={updateMsg}
@@ -447,12 +501,20 @@ class PmidGdmAddHistory extends Component {
 
 history_views.register(PmidGdmAddHistory, 'article', 'add');
 
-// Display a history item for deleting a PMID from a GDM
-class PmidGdmDeleteHistory extends Component {
-    render() {
-        return <div>PMIDGDMDELETE</div>;
-    }
-}
+const PmidGdmDeleteHistory = ({ history }) => {
+    const article = history.primary;
+    const gdm = history.meta.article.gdm;
+
+    return (
+        <div>
+            <span>PMID:{article.pmid}</span>
+            <span> deleted from </span>
+            <a href={'/curation-central/?gdm=' + gdm.uuid}><strong>{gdm.gene.symbol}-{gdm.disease.term}-</strong></a>
+            <i>{gdm.modeInheritance.indexOf('(') > -1 ? gdm.modeInheritance.substring(0, gdm.modeInheritance.indexOf('(') - 1) : gdm.modeInheritance}</i>
+            <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
+        </div>
+    );
+};
 
 history_views.register(PmidGdmDeleteHistory, 'article', 'delete');
 
@@ -469,6 +531,6 @@ const AnnotationModifyHistory = ({ history }) => {
             <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
         </div>
     );
-}
+};
 
 history_views.register(AnnotationModifyHistory, 'annotation', 'modify');
