@@ -8,7 +8,7 @@ import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
 import ModalComponent from '../../libs/bootstrap/modal';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
-import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
+import { formatDate, parseDate } from 'react-day-picker/moment';
 import * as CuratorHistory from '../curator_history';
 import * as curator from '../curator';
 const CurationMixin = curator.CurationMixin;
@@ -26,7 +26,10 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         affiliation: PropTypes.object, // User's affiliation
         updateSnapshotList: PropTypes.func,
         updateProvisionalObj: PropTypes.func,
-        approveProvisional: PropTypes.func
+        approveProvisional: PropTypes.func,
+        postTrackData: PropTypes.func,
+        getContributors: PropTypes.func,
+        setUNCData: PropTypes.func
     },
 
     getInitialState() {
@@ -106,6 +109,37 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
     },
 
     /**
+     * Method to send GDM provisional data to Data Exchange
+     * @param {object} provisional - provisional classification object
+     */
+    sendToDataExchange(provisional) {
+        const provisionalSubmitter = this.props.session && this.props.session.user_properties ? this.props.session.user_properties : null;
+        // Get all contributors
+        const contributors = this.props.getContributors();
+
+        // Add current provisional approver to contributors list
+        if (provisionalSubmitter) {
+            contributors.push({   
+                name: provisionalSubmitter.title ? provisionalSubmitter.title : '',
+                id: provisionalSubmitter.uuid ? provisionalSubmitter.uuid : '',
+                email: provisionalSubmitter.email ? provisionalSubmitter.email : '',
+                roles: ['provisional approver']
+            });
+        }
+    
+        // Create data object to be sent to Data Exchange
+        const provisionalDate = provisional.provisionalDate ? provisional.provisionalDate : '';
+        const uncData = this.props.setUNCData(provisional, 'provisionally_approved', provisionalDate, provisionalSubmitter, contributors);
+
+        // Post provisional data to Data Exchange
+        this.props.postTrackData(uncData).then(response => {
+            console.log('Successfully sent provisionally approved data to Data Exchange for provisional %s at %s', provisional.uuid, moment(provisionalDate).toISOString());
+        }).catch(error => {
+            console.log('Error sending provisionally approved data to Data Exchange for provisional %s at %s - Error: %o', provisional.uuid, moment(provisionalDate).toISOString(), error);
+        });
+    },
+
+    /**
      * Method to handle submitting provisional form
      */
     submitForm(e) {
@@ -144,6 +178,9 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
             }).then(result => {
                 // get a fresh copy of the gdm object
                 this.getRestData('/gdm/' + this.props.gdm.uuid).then(newGdm => {
+                    // Send provisional data to Data Exchange
+                    this.sendToDataExchange(result);
+
                     let parentSnapshot = {gdm: newGdm};
                     let newSnapshot = {
                         resourceId: result.uuid,

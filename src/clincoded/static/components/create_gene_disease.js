@@ -12,8 +12,8 @@ import { parseAndLogError } from './mixins';
 import * as CuratorHistory from './curator_history';
 import ModalComponent from '../libs/bootstrap/modal';
 import { GdmDisease } from './disease';
+import { getAffiliationName } from '../libs/get_affiliation_name';
 
-var fetched = require('./fetched');
 var modesOfInheritance = require('./mapping/modes_of_inheritance.json');
 
 var CreateGeneDisease = createReactClass({
@@ -33,7 +33,8 @@ var CreateGeneDisease = createReactClass({
             diseaseUuid: null,
             diseaseError: null,
             adjectives: [],
-            adjectiveDisabled: true
+            adjectiveDisabled: true,
+            submitBusy: false  // Flag to indicate that the submit button is in a 'busy' state
         };
     },
 
@@ -86,7 +87,7 @@ var CreateGeneDisease = createReactClass({
                 valid = false;
             }
             if (!this.state.diseaseObj || (this.state.diseaseObj && !this.state.diseaseObj['term'])) {
-                this.setState({diseaseError: 'Disease is required!'});
+                this.setState({ diseaseError: 'Disease is required!' });
                 valid = false;
             }
         }
@@ -95,6 +96,79 @@ var CreateGeneDisease = createReactClass({
 
     editGdm: function() {
         this.context.navigate('/curation-central/?gdm=' + this.state.gdm.uuid);
+    },
+
+    /**
+     * Method to post GDM creation data to /track-data which sends data to Data Exchange for UNC tracking system
+     * @param {object} data - data object
+     */
+    postGdmCreationData: function(data) {
+        return new Promise((resolve, reject) => {
+            if (data) {
+                this.postRestData('/track-data', data).then(result => {
+                    if (result.status === 'Success') {
+                        console.log('Post tracking data succeeded: %o', result);
+                        resolve(result);
+                    } else {
+                        console.log('Post tracking data failed with Error - %o ', result);
+                        reject(result);
+                    }
+                }).catch(error => {
+                    console.log('Post tracking data internal data retrieval error: %o', error);
+                    reject(error);
+                });
+            } else {
+                console.log('Post tracking data Error: Missing expected GDM creation data');
+                reject({'message': 'Missing expected GDM creation data'});
+            }
+        });
+    },
+
+    /**
+     * Method to create necessary data object to be sent to Data Exchange for UNC tracking
+     * @param {object} gdm - GDM object
+     * @param {string} hgncId - HGNC Id
+     */
+    setUNCData: function(gdm, hgncId) {
+        const diseaseObj = this.state.diseaseObj
+        const submitter = this.props.session && this.props.session.user_properties ? this.props.session.user_properties : null;
+        const submitterName = submitter && submitter.title ? submitter.title : '';
+        const submitterUuid = submitter && submitter.uuid ? submitter.uuid : '';
+        const submitterEmail = submitter && submitter.email ? submitter.email : '';
+        const start = gdm.modeInheritance ? gdm.modeInheritance.indexOf('(') : -1;
+        const end = gdm.modeInheritance ? gdm.modeInheritance.indexOf(')') : -1;
+        const hpoNumber = (start > -1 && end > -1) ? gdm.modeInheritance.substring(start + 1, end) : gdm.modeInheritance ? gdm.modeInheritance : '';
+        return {
+            report_id: gdm.uuid,
+            gene_validity_evidence_level: {
+                genetic_condition: {
+                    mode_of_inheritance: hpoNumber,
+                    condition: diseaseObj.diseaseId ? diseaseObj.diseaseId.replace('_', ':') : '',
+                    gene: hgncId
+                },
+                evidence_level: '',
+                gene_validity_sop: ''
+            },
+            date: moment(gdm.date_created).toISOString(),
+            status: 'created',
+            performed_by: {
+                name: submitterName,
+                id: submitterUuid,
+                email: submitterEmail,
+                on_behalf_of: {
+                    id: gdm.affiliation ? gdm.affiliation : '',
+                    name: gdm.affiliation ? getAffiliationName(gdm.affiliation, 'gcep') : ''
+                }
+            },
+            contributors: [
+                {
+                    name: submitterName,
+                    id: submitterUuid,
+                    email: submitterEmail,
+                    roles: ["creator"]
+                }
+            ]
+        };
     },
 
     // When the form is submitted...
@@ -118,30 +192,37 @@ var CreateGeneDisease = createReactClass({
              * FIXME: Need to delete orphanet reference
              */
             // var orphaId = this.getFormValue('orphanetid').match(/^ORPHA:?([0-9]{1,6})$/i)[1];
+            this.setState({ submitBusy: true });
             var geneId = this.getFormValue('hgncgene');
             var mode = this.getFormValue('modeInheritance');
             let adjective = this.getFormValue('moiAdjective');
-            let diseaseObj = this.state.diseaseObj;
+            const diseaseObj = this.state.diseaseObj;
+            let hgncId = '';
 
             // Get the disease and gene objects corresponding to the given Orphanet and Gene IDs in parallel.
             // If either error out, set the form error fields
             this.getRestDatas([
                 '/genes/' + geneId
             ], [
-                function() { this.setFormErrors('hgncgene', 'HGNC gene symbol not found'); }.bind(this)
+                function() { 
+                    this.setFormErrors('hgncgene', 'HGNC gene symbol not found');
+                    this.setState({ submitBusy: false });
+                }.bind(this)
             ]).then(response => {
+                // Save HGNC Id to be used for data tracking
+                hgncId = response[0]['hgncId'];
                 return this.getRestData('/search?type=disease&diseaseId=' + diseaseObj.diseaseId).then(diseaseSearch => {
                     let diseaseUuid;
                     if (diseaseSearch.total === 0) {
                         this.postRestData('/diseases/', diseaseObj).then(result => {
                             let newDisease = result['@graph'][0];
                             diseaseUuid = newDisease['uuid'];
-                            this.setState({diseaseUuid: diseaseUuid});
+                            this.setState({ diseaseUuid: diseaseUuid });
                         });
                     } else {
                         let _id = diseaseSearch['@graph'][0]['@id'];
                         diseaseUuid = _id.slice(10, -1);
-                        this.setState({diseaseUuid: diseaseUuid});
+                        this.setState({ diseaseUuid: diseaseUuid });
                     }
                 });
             }).then(data => {
@@ -183,20 +264,32 @@ var CreateGeneDisease = createReactClass({
                             };
                             this.recordHistory('add', newGdm, meta);
 
+                            // Gather GDM creation data to be sent to Data Exchange
+                            let uncData = this.setUNCData(newGdm, hgncId);
+
+                            // Post GDM creation data to Data Exchange
+                            this.postGdmCreationData(uncData).then(response => {
+                                console.log('Successfully sent GDM creation data to Data Exchange for GDM %s at %s', newGdm.uuid, moment(newGdm.date_created).toISOString());
+                            }).catch(error => {
+                                console.log('Error sending GDM creation data to Data Exchange for GDM %s at %s - Error: %o', newGdm.uuid, moment(newGdm.date_created).toISOString(), error);
+                            });
                             // Navigate to Record Curation
                             var uuid = data['@graph'][0].uuid;
                             this.context.navigate('/curation-central/?gdm=' + uuid);
                         });
                     } else {
                         // Found matching GDM. See of the user wants to curate it.
-                        this.setState({gdm: gdmSearch['@graph'][0]});
+                        this.setState({
+                            gdm: gdmSearch['@graph'][0],
+                            submitBusy: false
+                        });
                         this.child.openModal();
                     }
                 });
             }).catch(e => {
                 // Some unexpected error happened
                 parseAndLogError.bind(undefined, 'fetchedRequest');
-            });
+                this.setState({ submitBusy: false });            });
         }
     },
 
@@ -213,14 +306,14 @@ var CreateGeneDisease = createReactClass({
      * Update the 'diseaseObj' state used to save data upon form submission
      */
     updateDiseaseObj(diseaseObj) {
-        this.setState({diseaseObj: diseaseObj});
+        this.setState({ diseaseObj: diseaseObj });
     },
 
     /**
      * Clear error msg on missing disease
      */
     clearErrorInParent() {
-        this.setState({diseaseError: null});
+        this.setState({ diseaseError: null });
     },
 
     render: function() {
@@ -230,6 +323,7 @@ var CreateGeneDisease = createReactClass({
         let adjectiveDisabled = this.state.adjectiveDisabled;
         const moiKeys = Object.keys(modesOfInheritance);
         let gdm = this.state.gdm;
+        const submitBusy = this.state.submitBusy;
 
         return (
             <div className="container">
@@ -267,7 +361,7 @@ var CreateGeneDisease = createReactClass({
                                 </Input>
                                 <div><p className="alert alert-warning">The above options (gene, disease, mode of inheritance, or adjective) can be altered for a Gene:Disease record up until a PMID has been added to the record. This includes
                                     adding an adjective to a Gene:Disease:Mode of inheritance record that has already been created or editing an adjective associated with a record.</p></div>
-                                <Input type="submit" inputClassName="btn-default pull-right" id="submit" />
+                                <Input type="submit" inputClassName="btn-default pull-right" submitBusy={submitBusy} id="submit" />
                             </div>
                         </Form>
                         {gdm && gdm.gene && gdm.disease && gdm.modeInheritance ?

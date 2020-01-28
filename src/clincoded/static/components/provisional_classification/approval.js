@@ -12,7 +12,7 @@ import { getApproverNames, getContributorNames } from '../../libs/get_approver_n
 import { sopVersions } from '../../libs/sop';
 import Select from 'react-select';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
-import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
+import { formatDate, parseDate } from 'react-day-picker/moment';
 import * as CuratorHistory from '../curator_history';
 import * as curator from '../curator';
 const CurationMixin = curator.CurationMixin;
@@ -30,6 +30,9 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         affiliation: PropTypes.object, // User's affiliation
         updateSnapshotList: PropTypes.func,
         updateProvisionalObj: PropTypes.func,
+        postTrackData: PropTypes.func,
+        getContributors: PropTypes.func,
+        getGeneEvidenceData: PropTypes.func,
         snapshots: PropTypes.array
     },
 
@@ -235,6 +238,61 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
     },
 
     /**
+     * Method to send GDM approval data to Data Exchange
+     * @param {object} provisional - provisional classification object
+     */
+    sendToDataExchange(provisional) {
+        const approvalSubmitter = this.props.session && this.props.session.user_properties ? this.props.session.user_properties : null;
+        // Get all contributors
+        const contributors = this.props.getContributors();
+
+        // Add this approval submitter to contributors list
+        if (approvalSubmitter) {
+            contributors.push({   
+                name: approvalSubmitter.title ? approvalSubmitter.title : '',
+                id: approvalSubmitter.uuid ? approvalSubmitter.uuid : '',
+                email: approvalSubmitter.email ? approvalSubmitter.email : '',
+                roles: ['approver']
+            });
+        }
+        // Add curator who approved this classification to contributors list
+        if (provisional.classificationApprover) {
+            contributors.push({   
+                name: provisional.classificationApprover,
+                roles: ['secondary approver']
+            });
+        }
+        // Add secondary approver (affiliation) to contributors list
+        if (provisional.additionalApprover) {
+            contributors.push({
+                name: getApproverNames(provisional.additionalApprover),
+                roles: ['secondary approver']
+            });
+        }
+        // Add secondary contributors (affiliations) to contributors list
+        if (provisional.classificationContributors) {
+            provisional.classificationContributors.forEach(contributorId => {
+                contributors.push({
+                    id: contributorId,
+                    name: getAffiliationName(contributorId),
+                    roles: ['secondary approver']
+                });
+            });
+        }
+
+        // Create data object to be sent to Data Exchange
+        const approvalDate = provisional.approvalDate ? provisional.approvalDate : '';
+        const uncData = this.props.setUNCData(provisional, 'approved', approvalDate, approvalSubmitter, contributors);
+
+        // Post approval data to Data Exchange
+        this.props.postTrackData(uncData).then(response => {
+            console.log('Successfully sent approval data to Data Exchange for provisional %s at %s', provisional.uuid, moment(approvalDate).toISOString());
+        }).catch(error => {
+            console.log('Error sending approval data to Data Exchange for provisional %s at %s - Error: %o', provisional.uuid, moment(approvalDate).toISOString(), error);
+        });
+    },
+
+    /**
      * Method to handle submitting classification approval form
      */
     submitForm(e) {
@@ -288,6 +346,9 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             }).then(result => {
                 // get a fresh copy of the gdm object
                 this.getRestData('/gdm/' + this.props.gdm.uuid).then(newGdm => {
+                    // Send approval data to Data Exchange
+                    this.sendToDataExchange(result);
+
                     let parentSnapshot = { gdm: newGdm };
                     let newSnapshot = {
                         resourceId: result.uuid,
