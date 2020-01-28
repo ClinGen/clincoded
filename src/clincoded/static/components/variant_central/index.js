@@ -337,6 +337,11 @@ var VariantCurationHub = createReactClass({
         }
     },
 
+    /**
+     * Fetches linked data relevant to this variant using CA ID
+     * Note: Support for ClinVar ID not yet implemented in LDH
+     * @param {object} variant object containing variant information
+     */
     fetchLdhData: function(variant) {
         if (variant) {
             const { carId, clinvarVariantId } = variant;
@@ -357,6 +362,11 @@ var VariantCurationHub = createReactClass({
         }
     },
 
+    /**
+     * Queries the FDRepo and PubMed for additional data necessary to display functional data
+     * Transforms AlleleFunctionalImpactStatements into the desired shape to be consumed
+     * @param {object} ldhData raw linked data object that has been fetched from the LDH
+     */
     fetchFunctionalData: function(ldhData) {
         // Returns the AFIS records as an object with the pubmedId as the key
         const getAfisObject = (afisRecords) => {
@@ -365,6 +375,8 @@ var VariantCurationHub = createReactClass({
                 const pubmedId = _.property(['entContent', 'Experiment', 'Source', 'entId'])(record);
                 const effects = _.property(['entContent', 'Effect'])(record) || [];
                 if (effects.length && effects.length > 1) {
+                    // Sort is necessary because effects are not sorted in LDH
+                    // Materials should be sorted too, but support for that was not added to the LDH 
                     effects.sort((a, b) => {
                         if (a.number < b.number) {
                             return -1;
@@ -378,6 +390,7 @@ var VariantCurationHub = createReactClass({
                 if (pubmedId) {
                     if (afisObject[pubmedId] && afisObject[pubmedId].statements) {
                         afisObject[pubmedId].statements.push(record);
+                        // Sort is necessary because experiments are not sorted in LDH
                         afisObject[pubmedId].statements.sort((a, b) => {
                             const experimentA = _.property(['entContent', 'Experiment', 'Number'])(a);
                             const experimentB = _.property(['entContent', 'Experiment', 'Number'])(b);
@@ -402,19 +415,15 @@ var VariantCurationHub = createReactClass({
         // Fetches pubmed data for each source article
         const getPubmedArticles = (afisObject) => {
             const pubmedUrls = [];
-            const pubmedIds = [];
             const pubmedIdKeys = Object.keys(afisObject);
             if (pubmedIdKeys && pubmedIdKeys.length > 0) {
-                pubmedIdKeys.forEach(id => {
-                    pubmedIds.push(id);
-                });
-                const searchStr = '/search/?type=article&' + pubmedIds.map(pmid => 'pmid=' + pmid).join('&');
+                const searchStr = '/search/?type=article&' + pubmedIdKeys.map(pmid => 'pmid=' + pmid).join('&');
                 return this.getRestData(searchStr).then(articles => {
-                    if (articles['@graph'] && (articles['@graph'].length === pubmedIds.length)) {
+                    if (articles['@graph'] && (articles['@graph'].length === pubmedIdKeys.length)) {
                         return articles['@graph'];
                     }
-                    const foundArticles = articles['@graph'] ? articles['@graph'] : [];
-                    const missingPmids = _.difference(pubmedIds, articles['@graph'].map(article => article.pmid));
+                    const foundArticles = articles['@graph'] || [];
+                    const missingPmids = _.difference(pubmedIdKeys, foundArticles.map(article => article.pmid));
                     missingPmids.forEach(id => {
                         pubmedUrls.push(external_url_map['PubMedSearch'] + id);
                     });
@@ -424,7 +433,7 @@ var VariantCurationHub = createReactClass({
                             if (data.pmid) {
                                 foundArticles.push(data);
                             } else {
-                                throw { statusText: 'Missing PMID articles' };
+                                throw 'Missing PMID articles';
                             }
                         });
                         return foundArticles;
@@ -446,8 +455,11 @@ var VariantCurationHub = createReactClass({
                 afisObject[article.pmid].pubmedSource = article;
                 const lastRecord = (articleIdx === articles.length - 1);
                 if (lastRecord) {
+                    // Use JSON parse and stringify to make a deep copy of @ext_ldhData to avoid state mutation
                     const ldhData = JSON.parse(JSON.stringify(this.state.ext_ldhData));
-                    ldhData.ld.AlleleFunctionalImpactStatement = afisObject;
+                    if (ldhData && ldhData.ld && ldhData.ld.AlleleFunctionalImpactStatement) {
+                        ldhData.ld.AlleleFunctionalImpactStatement = afisObject;
+                    }
                     this.setState({ ext_ldhData: ldhData }, () => {
                         this.setState({ loading_ldhFuncData: false });
                     });

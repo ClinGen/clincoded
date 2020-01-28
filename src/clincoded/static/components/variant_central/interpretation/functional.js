@@ -7,6 +7,7 @@ import moment from 'moment';
 import { RestMixin } from '../../rest';
 import { Form, FormMixin, Input } from '../../../libs/bootstrap/form';
 import { PanelGroup, Panel } from '../../../libs/bootstrap/panel';
+import { external_url_map } from '../../globals';
 import { CompleteSection } from './shared/complete_section';
 import { scrollElementIntoView } from '../../../libs/helpers/scroll_into_view';
 import FunctionalDataTable from './functional/functional_data_table';
@@ -68,7 +69,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
     },
 
     compareFunctionalData: function(newFuncData, savedEvals) {
-        // Returns true if @newData is different from @oldData based on the unique @rev, otherwise returns false
+        // Returns true if @newAfis is different from @oldAfis based on the unique @rev, otherwise returns false
         const isDiffAfisVersion = (newAfis, oldAfis) => {
             if (_.isEmpty(oldAfis) || _.isEmpty(newAfis)) {
                 return true;
@@ -81,7 +82,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
                     return true;
                 }
                 return newStatements.some((statement, index) => {
-                    if (statement.rev !== oldStatements[index].rev) {
+                    if (oldStatements[index] && oldStatements[index].rev !== statement.rev) {
                         return true;
                     }
                 });
@@ -89,8 +90,8 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         };
         savedEvals.some(evaluation => {
             if (['BS3', 'PS3'].indexOf(evaluation.criteria) > -1) {
-                const funcDataObjDiffFlag = isDiffAfisVersion(newFuncData, evaluation.functional.functionalData);
-                this.setState({funcDataObjDiffFlag});
+                const funcDataObjDiffFlag = isDiffAfisVersion(newFuncData, evaluation.functional && evaluation.functional.functionalData);
+                this.setState({ funcDataObjDiffFlag });
                 return true;
             }
         });
@@ -138,7 +139,7 @@ var CurationInterpretationFunctional = module.exports.CurationInterpretationFunc
         if (ontologyId.includes('EFO> ')) {
             ontologyId = ontologyId.substring(5);
         }
-        return `https://www.ebi.ac.uk/ols/ontologies/${ontologyId}/terms?iri=${encodeURIComponent(newIri)}`;
+        return `${external_url_map['OLSSearch']}${ontologyId}/terms?iri=${encodeURIComponent(newIri)}`;
     },
 
     handleTabSelect: function(selectedFunctionalTab) {

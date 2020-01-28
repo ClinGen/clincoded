@@ -21,7 +21,7 @@ def get_ldh_data(request):
         return http_error(HTTPBadRequest(), request)
     try:
         ldh_url = 'https://ldh.clinicalgenome.org/ldh/Variant/id/' + variant_id
-        ldh_data = requests.get(ldh_url)
+        ldh_data = requests.get(ldh_url, timeout=10)
         ldh_data.raise_for_status()
         ldh_data = ldh_data.json()
         return ldh_data['data']
@@ -41,7 +41,7 @@ def get_allele_frequency_impact_statements(request):
         return http_error(HTTPBadRequest(), request)
     try:
         afis_url = 'https://ldh.clinicalgenome.org/fdr/AlleleFunctionalImpactStatement/id/' + afis_id
-        afis_record = requests.get(afis_url)
+        afis_record = requests.get(afis_url, timeout=10)
         afis_record = afis_record.json()
         return afis_record['data']
     except Exception as e:

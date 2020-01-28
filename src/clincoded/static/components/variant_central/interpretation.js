@@ -191,6 +191,10 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         var completedSections = this.state.interpretation && this.state.interpretation.completed_sections ? this.state.interpretation.completed_sections : [];
         var populationTabChecked = false;
         let functionalData = _.property(['ld', 'AlleleFunctionalImpactStatement'])(this.state.ext_ldhData);
+
+        // The processing of the AlleleFunctionalImpactStatements into the desired object shape takes time, so this conidition
+        // prevents unprocessed data from being displayed until the processing has finished.
+        // @functionalData is set to an empty object to comply with the prop types in FunctionalDataTable in functional_data_table.js
         if (Array.isArray(functionalData)) {
             functionalData = {};
         }
