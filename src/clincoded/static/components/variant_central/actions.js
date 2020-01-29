@@ -158,7 +158,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = createReact
                         <h2><span>Evidence View</span></h2>
                         <div className="btn-group">
                             {!hasExistingInterpretation ?
-                                <ModalComponent modalTitle="PHI Disclaimer" modalClass="modal-warning" modalWrapperClass="phi-disclaimer-modal" bootstrapBtnClass="btn btn-primary pull-right"
+                                <ModalComponent modalTitle="Submission Policy Agreement" modalClass="modal-warning" modalWrapperClass="phi-disclaimer-modal" bootstrapBtnClass="btn btn-primary pull-right"
                                     actuatorClass="" actuatorTitle={<span>Interpretation <i className="icon icon-plus-circle"></i></span>} onRef={ref => (this.child = ref)}>
                                     <div className="modal-body">
                                         <p>
@@ -166,7 +166,7 @@ var VariantCurationActions = module.exports.VariantCurationActions = createReact
                                         </p>
                                         <ol>
                                             <li>Any data entered into the VCI may be made publicly accessible, either through the VCI directly or by subsequent transfer to other public resources (ClinVar, ClinGen Evidence Repository, etc.);</li>
-                                            <li>All unpublished patient-specific data entered into the VCI, which is not explicitly consented for public sharing, should be the minimum necessary to inform the clinical significance of genetic variants; and</li>
+                                            <li>All unpublished patient-specific data entered into the VCI, which is not explicitly consented for public sharing, should be the <strong>minimum necessary</strong> to inform the clinical significance of genetic variants; and</li>
                                             <li>Data entered into the VCI should not include <a href="https://www.hipaajournal.com/considered-phi-hipaa/" target="_blank">protected health information (PHI)</a> or equivalent identifiable information as defined by regulations in your country or region;</li>
                                         </ol>
                                         <p>Do you agree to these terms?</p>
