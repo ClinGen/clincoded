@@ -29,13 +29,13 @@ Feature: Select Variant
         Then I should see "criteria provided, multiple submitters, no conflicts"
         When I press the button "Interpretation "
         And I wait for 1 seconds
-        Then I should see "PHI Disclaimer"
+        Then I should see "Submission Policy Agreement"
         When I press the button "Disagree"
         And I wait for 1 seconds
         Then I should see "criteria provided, multiple submitters, no conflicts"
         When I press the button "Interpretation "
         And I wait for 1 seconds
-        Then I should see "PHI Disclaimer"
+        Then I should see "Submission Policy Agreement"
         When I press the button "Agree"
         And I wait for 1 seconds
         Then I should see "Variant Interpretation Record"
