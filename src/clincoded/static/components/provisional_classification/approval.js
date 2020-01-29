@@ -182,7 +182,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
      */
     handlePreviewApproval() {
         const affiliationId = this.props.affiliation ? this.props.affiliation.affiliation_id : null;
-        const provisionalAffiliation = this.props.provisional.affiliation ? this.props.provisional.affiliation : null;
+        const provisionalAffiliation = this.props.provisional && this.props.provisional.affiliation ? this.props.provisional.affiliation : null;
         let approver = this.approverInput ? this.approverInput.getValue() : (affiliationId ? getAffiliationName(affiliationId) : this.props.session.user_properties.title);
         let formErr = false;
 
