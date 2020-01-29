@@ -1,0 +1,712 @@
+[
+    {
+        "uuid": "adf43b86-1452-4620-aad7-0625c6db8f0f",
+        "variant": "e518427c-c288-4d5c-bd17-dcd13848b682",
+        "functionalData": {
+            "1301956": {
+                "pubmedSource": {
+                    "pmid": "1301956",
+                    "authors": [
+                        "Hobbs HH",
+                        "Brown MS",
+                        "Goldstein JL"
+                    ],
+                    "journal": "Human mutation",
+                    "date": "1992;1(6):445-66.",
+                    "abstract": "The low density lipoprotein (LDL) receptor is a cell surface transmembrane protein that mediates the uptake and lysosomal degradation of plasma LDL, thereby providing cholesterol to cells. Mutations disrupting the function of this receptor produce autosomal dominant familial hypercholesterolemia (FH). Affected individuals have elevated plasma levels of LDL, which causes premature coronary atherosclerosis. To date, 71 mutations in the LDL receptor gene have been characterized at a molecular level. In this report, we describe 79 additional mutations and review the insights that all 150 mutations have provided into the structure/function relationship of the receptor protein and the clinical manifestations of FH.",
+                    "title": "Molecular genetics of the LDL receptor gene in familial hypercholesterolemia."
+                },
+                "statements": [
+                    {
+                        "entId": "36819532",
+                        "entIri": "https://ldh.genome.network/fdr/AlleleFunctionalImpactStatement/id/36819532",
+                        "entType": "AlleleFunctionalImpactStatement",
+                        "modifier": "sailakss",
+                        "ldhId": "36819532",
+                        "modified": "2019-10-03T14:06:56.033Z",
+                        "entContent": {
+                            "QC": {
+                                "ExperimentalRepeats": "Not reported",
+                                "StatisticalAnalysis": {
+                                    "value": "No"
+                                },
+                                "NormalControl": "fibroblasts from wild-type individual",
+                                "ValidationControl": {
+                                    "value": "No"
+                                }
+                            },
+                            "Experiment": {
+                                "Source": {
+                                    "entId": "1301956",
+                                    "type": "PMID"
+                                },
+                                "Number": "Experiment1"
+                            },
+                            "comments": "Effect value range: 15-30%",
+                            "Effect": [
+                                {
+                                    "code": "GO:0005041",
+                                    "label": "low-density lipoprotein particle receptor activity",
+                                    "iri": "http://purl.obolibrary.org/obo/GO:0005041",
+                                    "number": "Effect1",
+                                    "value": "30%"
+                                }
+                            ],
+                            "Notes": "Method/Effect: only \"LDLR activity\" was recorded as part of this brief mutational update/review publication, however, the authors indicate the whole LDLR cycle was still tested (receptor biosynthesis, LDL binding and uptake, and receptor transport; pg 447) with the reference Goldstein et al. 1983; PMID: 6321901). Genetic analysis in patient cells: all 18 exons of LDLR were amplified by PCR, fragments ran on gel; aberrantly migrating PCR fragments were then analyzed by SSCP and directly sequenced."
+                        },
+                        "fdr": {
+                            "entId": "36819532",
+                            "entIri": "https://ldh.genome.network/fdr/AlleleFunctionalImpactStatement/id/36819532",
+                            "entType": "AlleleFunctionalImpactStatement",
+                            "modifier": "sailakss",
+                            "ldhId": "36819532",
+                            "ld": {
+                                "Affiliation": [
+                                    {
+                                        "entId": "Familial Hypercholesterolemia VCEP",
+                                        "entIri": "https://clinicalgenome.org/affiliation/50004",
+                                        "entType": "Affiliation",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819410",
+                                        "modified": "2019-10-03T14:06:54.018Z",
+                                        "entContent": {
+                                            "code": "50004"
+                                        },
+                                        "rev": "_ZXFv5CG--A"
+                                    }
+                                ],
+                                "Source": [
+                                    {
+                                        "entId": "1301956",
+                                        "entIri": "https://www.ncbi.nlm.nih.gov/pubmed/1301956",
+                                        "entType": "Source",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819454",
+                                        "modified": "2019-10-03T14:06:55.658Z",
+                                        "entContent": {
+                                            "type": "PMID"
+                                        },
+                                        "rev": "_ZXFv6oq--_"
+                                    }
+                                ],
+                                "Genotype": [
+                                    {
+                                        "entId": "homozygous",
+                                        "entIri": "http://purl.obolibrary.org/obo/GENO_0000136",
+                                        "entType": "Genotype",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819449",
+                                        "modified": "2019-10-03T14:06:55.624Z",
+                                        "entContent": {
+                                            "code": "GENO:0000136"
+                                        },
+                                        "rev": "_ZXFv6mi--A"
+                                    }
+                                ],
+                                "Material": [
+                                    {
+                                        "entId": "low-density lipoprotein",
+                                        "entIri": "http://purl.obolibrary.org/obo/CHEBI_39026",
+                                        "entType": "Material",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819416",
+                                        "modified": "2019-10-03T14:06:54.815Z",
+                                        "entContent": {
+                                            "code": "CHEBI:39026"
+                                        },
+                                        "rev": "_ZXFv50---_"
+                                    },
+                                    {
+                                        "entId": "primary cultured human fibroblast cell",
+                                        "entIri": "http://purl.obolibrary.org/obo/CLO_0037302",
+                                        "entType": "Material",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819432",
+                                        "modified": "2019-10-03T14:06:54.874Z",
+                                        "entContent": {
+                                            "code": "CLO:0037302"
+                                        },
+                                        "rev": "_ZXFv53m--A"
+                                    }
+                                ],
+                                "LdSet": [
+                                    {
+                                        "entId": "36819456",
+                                        "entIri": "https://ldh.genome.network/fdr/LdSet/id/36819456",
+                                        "entType": "LdSet",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819456",
+                                        "modified": "2019-10-03T14:06:55.666Z",
+                                        "entContent": {
+                                            "entities": {
+                                                "Material": [
+                                                    {
+                                                        "ldhId": "36819432"
+                                                    }
+                                                ],
+                                                "Genotype": [
+                                                    {
+                                                        "ldhId": "36819449"
+                                                    }
+                                                ]
+                                            },
+                                            "relation": {
+                                                "value": "Yes",
+                                                "name": "PatientSourced"
+                                            }
+                                        },
+                                        "rev": "_ZXFv6pK--_"
+                                    },
+                                    {
+                                        "entId": "36819457",
+                                        "entIri": "https://ldh.genome.network/fdr/LdSet/id/36819457",
+                                        "entType": "LdSet",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819457",
+                                        "modified": "2019-10-03T14:06:55.666Z",
+                                        "entContent": {
+                                            "entities": {
+                                                "Material": [
+                                                    {
+                                                        "ldhId": "36819416"
+                                                    }
+                                                ]
+                                            },
+                                            "relation": {
+                                                "value": "No",
+                                                "name": "PatientSourced"
+                                            }
+                                        },
+                                        "rev": "_ZXFv6pG--A"
+                                    }
+                                ],
+                                "Method": [
+                                    {
+                                        "entId": "radiolabeled",
+                                        "entIri": "http://www.bioassayontology.org/bao#BAO_0000036",
+                                        "entType": "Method",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819435",
+                                        "modified": "2019-10-03T14:06:54.882Z",
+                                        "entContent": {
+                                            "code": "BAO:0000036"
+                                        },
+                                        "rev": "_ZXFv54G--A"
+                                    }
+                                ],
+                                "GeneticCondition": [
+                                    {
+                                        "entId": "familial hypercholesterolemia",
+                                        "entIri": "http://purl.obolibrary.org/obo/MONDO_0005445",
+                                        "entType": "GeneticCondition",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819412",
+                                        "modified": "2019-10-03T14:06:54.800Z",
+                                        "entContent": {
+                                            "code": "MONDO:0005445"
+                                        },
+                                        "rev": "_ZXFv5zC--_"
+                                    }
+                                ]
+                            },
+                            "modified": "2019-10-03T14:06:56.033Z",
+                            "ldFor": {
+                                "Variant": [
+                                    {
+                                        "entId": "CA023687",
+                                        "entIri": "https://reg.genome.network/allele/CA023687",
+                                        "entAliases": [
+                                            {
+                                                "id": "161266",
+                                                "iri": "https://www.ncbi.nlm.nih.gov/clinvar/variation/161266/",
+                                                "label": "ClinVar"
+                                            }
+                                        ],
+                                        "modifier": "sailakss",
+                                        "ldhId": "36823234",
+                                        "entType": "Variant",
+                                        "modified": "2019-10-03T14:07:13.864Z",
+                                        "entContent": {
+                                            "RefSeq": "NM_000527.4",
+                                            "NucleotideChange": "c.301G>A (p.E101K)"
+                                        },
+                                        "rev": "_ZXFwMay--I"
+                                    }
+                                ]
+                            },
+                            "entContent": {
+                                "QC": {
+                                    "ExperimentalRepeats": "Not reported",
+                                    "StatisticalAnalysis": {
+                                        "value": "No"
+                                    },
+                                    "NormalControl": "fibroblasts from wild-type individual",
+                                    "ValidationControl": {
+                                        "value": "No"
+                                    }
+                                },
+                                "Experiment": {
+                                    "Source": {
+                                        "entId": "1301956",
+                                        "type": "PMID"
+                                    },
+                                    "Number": "Experiment1"
+                                },
+                                "comments": "Effect value range: 15-30%",
+                                "Effect": [
+                                    {
+                                        "code": "GO:0005041",
+                                        "label": "low-density lipoprotein particle receptor activity",
+                                        "iri": "http://purl.obolibrary.org/obo/GO:0005041",
+                                        "number": "Effect1",
+                                        "value": "30%"
+                                    }
+                                ],
+                                "Notes": "Method/Effect: only \"LDLR activity\" was recorded as part of this brief mutational update/review publication, however, the authors indicate the whole LDLR cycle was still tested (receptor biosynthesis, LDL binding and uptake, and receptor transport; pg 447) with the reference Goldstein et al. 1983; PMID: 6321901). Genetic analysis in patient cells: all 18 exons of LDLR were amplified by PCR, fragments ran on gel; aberrantly migrating PCR fragments were then analyzed by SSCP and directly sequenced."
+                            },
+                            "rev": "_ZXFv7Am--B"
+                        },
+                        "rev": "_ZXFv7Am--B"
+                    }
+                ]
+            },
+            "1352322": {
+                "pubmedSource": {
+                    "pmid": "1352322",
+                    "authors": [
+                        "Webb JC",
+                        "Sun XM",
+                        "Patel DD",
+                        "McCarthy SN",
+                        "Knight BL",
+                        "Soutar AK"
+                    ],
+                    "journal": "Journal of lipid research",
+                    "date": "1992 May;33(5):689-98.",
+                    "abstract": "Two new point mutations have been detected in the low density lipoprotein (LDL) receptor gene of a patient with a clinical diagnosis of homozygous familial hypercholesterolemia (FH). The patient is a compound heterozygote, in whom the mutant allele inherited from his English father has a single base substitution of A for G in exon 3, changing the codon for residue 80 in the mature protein from glutamic acid to lysine. The mutant allele inherited from his mother, who is of Irish origin, has a single base pair deletion in the codon for residue 743 in exon 15 that causes a frameshift and introduces a new stop codon in the adjacent position. The glu80 to lys mutation results in a transport-defective phenotype and a mature protein that migrates abnormally slowly on nonreduced SDS-PAGE, but normally under reducing conditions; this was confirmed by site-directed mutagenesis and expression in vitro. The deletion in exon 15 results in a null phenotype in which the putative truncated receptor protein cannot be detected in cultured skin fibroblasts and the amount of mRNA derived from the allele is reduced. The glu80 to lys mutation was found in a further five unrelated individuals in a sample of 200 FH patients from the London area and in 11 from a sample of 77 FH patients from Manchester. Haplotype analysis suggested that all the patients had inherited this allele from a common ancestor. The deletion in exon 15 was not found in the London sample, nor in any unrelated individuals in the Manchester sample.",
+                    "title": "Characterization of two new point mutations in the low density lipoprotein receptor genes of an English patient with homozygous familial hypercholesterolemia."
+                },
+                "statements": [
+                    {
+                        "entId": "36819542",
+                        "entIri": "https://ldh.genome.network/fdr/AlleleFunctionalImpactStatement/id/36819542",
+                        "entType": "AlleleFunctionalImpactStatement",
+                        "modifier": "sailakss",
+                        "ldhId": "36819542",
+                        "modified": "2019-10-03T14:06:56.083Z",
+                        "entContent": {
+                            "QC": {
+                                "ExperimentalRepeats": "Not reported",
+                                "StatisticalAnalysis": {
+                                    "value": "No"
+                                },
+                                "NormalControl": "COS cells with wild-type LDLR vector",
+                                "ValidationControl": {
+                                    "value": "No"
+                                }
+                            },
+                            "Experiment": {
+                                "Source": {
+                                    "entId": "1352322",
+                                    "type": "PMID"
+                                },
+                                "Number": "Experiment1"
+                            },
+                            "comments": "Processing of the receptor precursor to the mature form was qualitatively \"abnormal\" (not quantified)",
+                            "Effect": [
+                                {
+                                    "code": "GO:0045713",
+                                    "label": "low-density lipoprotein particle receptor biosynthetic process",
+                                    "iri": "http://purl.obolibrary.org/obo/GO:0045713",
+                                    "number": "Effect1",
+                                    "value": "Abnormal"
+                                }
+                            ],
+                            "Notes": "This p.E101K variant was found in a further five unrelated individuals in a sample of 200 FH patients from the London area and in 11 from a sample of 77 FH patients from Manchester."
+                        },
+                        "fdr": {
+                            "entId": "36819542",
+                            "entIri": "https://ldh.genome.network/fdr/AlleleFunctionalImpactStatement/id/36819542",
+                            "entType": "AlleleFunctionalImpactStatement",
+                            "modifier": "sailakss",
+                            "ldhId": "36819542",
+                            "ld": {
+                                "Affiliation": [
+                                    {
+                                        "entId": "Familial Hypercholesterolemia VCEP",
+                                        "entIri": "https://clinicalgenome.org/affiliation/50004",
+                                        "entType": "Affiliation",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819410",
+                                        "modified": "2019-10-03T14:06:54.018Z",
+                                        "entContent": {
+                                            "code": "50004"
+                                        },
+                                        "rev": "_ZXFv5CG--A"
+                                    }
+                                ],
+                                "Source": [
+                                    {
+                                        "entId": "1352322",
+                                        "entIri": "https://www.ncbi.nlm.nih.gov/pubmed/1352322",
+                                        "entType": "Source",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819548",
+                                        "modified": "2019-10-03T14:06:56.116Z",
+                                        "entContent": {
+                                            "type": "PMID"
+                                        },
+                                        "rev": "_ZXFv7FS--_"
+                                    }
+                                ],
+                                "Method": [
+                                    {
+                                        "entId": "western blot",
+                                        "entIri": "http://www.bioassayontology.org/bao#BAO_0002424",
+                                        "entType": "Method",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819517",
+                                        "modified": "2019-10-03T14:06:55.964Z",
+                                        "entContent": {
+                                            "code": "BAO:0002424"
+                                        },
+                                        "rev": "_ZXFv67y--A"
+                                    }
+                                ],
+                                "LdSet": [
+                                    {
+                                        "entId": "36819550",
+                                        "entIri": "https://ldh.genome.network/fdr/LdSet/id/36819550",
+                                        "entType": "LdSet",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819550",
+                                        "modified": "2019-10-03T14:06:56.123Z",
+                                        "entContent": {
+                                            "entities": {
+                                                "Material": [
+                                                    {
+                                                        "ldhId": "36819545"
+                                                    }
+                                                ]
+                                            },
+                                            "relation": {
+                                                "value": "No",
+                                                "name": "PatientSourced"
+                                            }
+                                        },
+                                        "rev": "_ZXFv7Fu--_"
+                                    }
+                                ],
+                                "Material": [
+                                    {
+                                        "entId": "COS cell",
+                                        "entIri": "http://purl.obolibrary.org/obo/BTO_0004055",
+                                        "entType": "Material",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819545",
+                                        "modified": "2019-10-03T14:06:56.105Z",
+                                        "entContent": {
+                                            "code": "BTO:0004055"
+                                        },
+                                        "rev": "_ZXFv7Ei--A"
+                                    }
+                                ],
+                                "GeneticCondition": [
+                                    {
+                                        "entId": "familial hypercholesterolemia",
+                                        "entIri": "http://purl.obolibrary.org/obo/MONDO_0005445",
+                                        "entType": "GeneticCondition",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819412",
+                                        "modified": "2019-10-03T14:06:54.800Z",
+                                        "entContent": {
+                                            "code": "MONDO:0005445"
+                                        },
+                                        "rev": "_ZXFv5zC--_"
+                                    }
+                                ]
+                            },
+                            "modified": "2019-10-03T14:06:56.083Z",
+                            "ldFor": {
+                                "Variant": [
+                                    {
+                                        "entId": "CA023687",
+                                        "entIri": "https://reg.genome.network/allele/CA023687",
+                                        "entAliases": [
+                                            {
+                                                "id": "161266",
+                                                "iri": "https://www.ncbi.nlm.nih.gov/clinvar/variation/161266/",
+                                                "label": "ClinVar"
+                                            }
+                                        ],
+                                        "modifier": "sailakss",
+                                        "ldhId": "36823234",
+                                        "entType": "Variant",
+                                        "modified": "2019-10-03T14:07:13.864Z",
+                                        "entContent": {
+                                            "RefSeq": "NM_000527.4",
+                                            "NucleotideChange": "c.301G>A (p.E101K)"
+                                        },
+                                        "rev": "_ZXFwMay--I"
+                                    }
+                                ]
+                            },
+                            "entContent": {
+                                "QC": {
+                                    "ExperimentalRepeats": "Not reported",
+                                    "StatisticalAnalysis": {
+                                        "value": "No"
+                                    },
+                                    "NormalControl": "COS cells with wild-type LDLR vector",
+                                    "ValidationControl": {
+                                        "value": "No"
+                                    }
+                                },
+                                "Experiment": {
+                                    "Source": {
+                                        "entId": "1352322",
+                                        "type": "PMID"
+                                    },
+                                    "Number": "Experiment1"
+                                },
+                                "comments": "Processing of the receptor precursor to the mature form was qualitatively \"abnormal\" (not quantified)",
+                                "Effect": [
+                                    {
+                                        "code": "GO:0045713",
+                                        "label": "low-density lipoprotein particle receptor biosynthetic process",
+                                        "iri": "http://purl.obolibrary.org/obo/GO:0045713",
+                                        "number": "Effect1",
+                                        "value": "Abnormal"
+                                    }
+                                ],
+                                "Notes": "This p.E101K variant was found in a further five unrelated individuals in a sample of 200 FH patients from the London area and in 11 from a sample of 77 FH patients from Manchester."
+                            },
+                            "rev": "_ZXFv7Dm--B"
+                        },
+                        "rev": "_ZXFv7Dm--B"
+                    },
+                    {
+                        "entId": "36819552",
+                        "entIri": "https://ldh.genome.network/fdr/AlleleFunctionalImpactStatement/id/36819552",
+                        "entType": "AlleleFunctionalImpactStatement",
+                        "modifier": "sailakss",
+                        "ldhId": "36819552",
+                        "modified": "2019-10-03T14:06:56.128Z",
+                        "entContent": {
+                            "QC": {
+                                "ExperimentalRepeats": "Not reported",
+                                "StatisticalAnalysis": {
+                                    "value": "No"
+                                },
+                                "NormalControl": "fibroblasts from wild-type individual",
+                                "ValidationControl": {
+                                    "value": "No"
+                                }
+                            },
+                            "Experiment": {
+                                "Source": {
+                                    "entId": "1352322",
+                                    "type": "PMID"
+                                },
+                                "Number": "Experiment2"
+                            },
+                            "comments": "Processing of the receptor precursor to the mature form was qualitatively \"abnormal\" (not quantified)",
+                            "Effect": [
+                                {
+                                    "code": "GO:0045713",
+                                    "label": "low-density lipoprotein particle receptor biosynthetic process",
+                                    "iri": "http://purl.obolibrary.org/obo/GO:0045713",
+                                    "number": "Effect1",
+                                    "value": "Abnormal"
+                                }
+                            ],
+                            "Notes": "This p.E101K variant was found in a further five unrelated individuals in a sample of 200 FH patients from the London area and in 11 from a sample of 77 FH patients from Manchester."
+                        },
+                        "fdr": {
+                            "entId": "36819552",
+                            "entIri": "https://ldh.genome.network/fdr/AlleleFunctionalImpactStatement/id/36819552",
+                            "entType": "AlleleFunctionalImpactStatement",
+                            "modifier": "sailakss",
+                            "ldhId": "36819552",
+                            "ld": {
+                                "Affiliation": [
+                                    {
+                                        "entId": "Familial Hypercholesterolemia VCEP",
+                                        "entIri": "https://clinicalgenome.org/affiliation/50004",
+                                        "entType": "Affiliation",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819410",
+                                        "modified": "2019-10-03T14:06:54.018Z",
+                                        "entContent": {
+                                            "code": "50004"
+                                        },
+                                        "rev": "_ZXFv5CG--A"
+                                    }
+                                ],
+                                "Source": [
+                                    {
+                                        "entId": "1352322",
+                                        "entIri": "https://www.ncbi.nlm.nih.gov/pubmed/1352322",
+                                        "entType": "Source",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819548",
+                                        "modified": "2019-10-03T14:06:56.116Z",
+                                        "entContent": {
+                                            "type": "PMID"
+                                        },
+                                        "rev": "_ZXFv7FS--_"
+                                    }
+                                ],
+                                "Genotype": [
+                                    {
+                                        "entId": "heterozygous",
+                                        "entIri": "http://purl.obolibrary.org/obo/GENO_0000135",
+                                        "entType": "Genotype",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819414",
+                                        "modified": "2019-10-03T14:06:54.807Z",
+                                        "entContent": {
+                                            "code": "GENO:0000135"
+                                        },
+                                        "rev": "_ZXFv5za--A"
+                                    }
+                                ],
+                                "Material": [
+                                    {
+                                        "entId": "primary cultured human fibroblast cell",
+                                        "entIri": "http://purl.obolibrary.org/obo/CLO_0037302",
+                                        "entType": "Material",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819432",
+                                        "modified": "2019-10-03T14:06:54.874Z",
+                                        "entContent": {
+                                            "code": "CLO:0037302"
+                                        },
+                                        "rev": "_ZXFv53m--A"
+                                    }
+                                ],
+                                "LdSet": [
+                                    {
+                                        "entId": "36819479",
+                                        "entIri": "https://ldh.genome.network/fdr/LdSet/id/36819479",
+                                        "entType": "LdSet",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819479",
+                                        "modified": "2019-10-03T14:06:55.768Z",
+                                        "entContent": {
+                                            "entities": {
+                                                "Material": [
+                                                    {
+                                                        "ldhId": "36819432"
+                                                    }
+                                                ],
+                                                "Genotype": [
+                                                    {
+                                                        "ldhId": "36819414"
+                                                    }
+                                                ]
+                                            },
+                                            "relation": {
+                                                "value": "Yes",
+                                                "name": "PatientSourced"
+                                            }
+                                        },
+                                        "rev": "_ZXFv6vi--A"
+                                    }
+                                ],
+                                "Method": [
+                                    {
+                                        "entId": "western blot",
+                                        "entIri": "http://www.bioassayontology.org/bao#BAO_0002424",
+                                        "entType": "Method",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819517",
+                                        "modified": "2019-10-03T14:06:55.964Z",
+                                        "entContent": {
+                                            "code": "BAO:0002424"
+                                        },
+                                        "rev": "_ZXFv67y--A"
+                                    }
+                                ],
+                                "GeneticCondition": [
+                                    {
+                                        "entId": "familial hypercholesterolemia",
+                                        "entIri": "http://purl.obolibrary.org/obo/MONDO_0005445",
+                                        "entType": "GeneticCondition",
+                                        "modifier": "sailakss",
+                                        "ldhId": "36819412",
+                                        "modified": "2019-10-03T14:06:54.800Z",
+                                        "entContent": {
+                                            "code": "MONDO:0005445"
+                                        },
+                                        "rev": "_ZXFv5zC--_"
+                                    }
+                                ]
+                            },
+                            "modified": "2019-10-03T14:06:56.128Z",
+                            "ldFor": {
+                                "Variant": [
+                                    {
+                                        "entId": "CA023687",
+                                        "entIri": "https://reg.genome.network/allele/CA023687",
+                                        "entAliases": [
+                                            {
+                                                "id": "161266",
+                                                "iri": "https://www.ncbi.nlm.nih.gov/clinvar/variation/161266/",
+                                                "label": "ClinVar"
+                                            }
+                                        ],
+                                        "modifier": "sailakss",
+                                        "ldhId": "36823234",
+                                        "entType": "Variant",
+                                        "modified": "2019-10-03T14:07:13.864Z",
+                                        "entContent": {
+                                            "RefSeq": "NM_000527.4",
+                                            "NucleotideChange": "c.301G>A (p.E101K)"
+                                        },
+                                        "rev": "_ZXFwMay--I"
+                                    }
+                                ]
+                            },
+                            "entContent": {
+                                "QC": {
+                                    "ExperimentalRepeats": "Not reported",
+                                    "StatisticalAnalysis": {
+                                        "value": "No"
+                                    },
+                                    "NormalControl": "fibroblasts from wild-type individual",
+                                    "ValidationControl": {
+                                        "value": "No"
+                                    }
+                                },
+                                "Experiment": {
+                                    "Source": {
+                                        "entId": "1352322",
+                                        "type": "PMID"
+                                    },
+                                    "Number": "Experiment2"
+                                },
+                                "comments": "Processing of the receptor precursor to the mature form was qualitatively \"abnormal\" (not quantified)",
+                                "Effect": [
+                                    {
+                                        "code": "GO:0045713",
+                                        "label": "low-density lipoprotein particle receptor biosynthetic process",
+                                        "iri": "http://purl.obolibrary.org/obo/GO:0045713",
+                                        "number": "Effect1",
+                                        "value": "Abnormal"
+                                    }
+                                ],
+                                "Notes": "This p.E101K variant was found in a further five unrelated individuals in a sample of 200 FH patients from the London area and in 11 from a sample of 77 FH patients from Manchester."
+                            },
+                            "rev": "_ZXFv7Ge--B"
+                        },
+                        "rev": "_ZXFv7Ge--B"
+                    }
+                ]
+            }
+        },
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2019-06-26T18:29:32.820618+00:00",
+        "last_modified": "2019-06-26T18:29:32.917492+00:00"
+    }
+]

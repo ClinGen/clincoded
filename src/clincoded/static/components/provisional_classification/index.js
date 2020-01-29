@@ -5,7 +5,7 @@ import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
 import url from 'url';
-import { curator_page, history_views, userMatch, queryKeyValue, editQueryValue, addQueryKey } from '../globals';
+import { curator_page, queryKeyValue, editQueryValue, addQueryKey } from '../globals';
 import { RestMixin } from '../rest';
 import { PanelGroup, Panel } from '../../libs/bootstrap/panel';
 import { ContextualHelp } from '../../libs/bootstrap/contextual_help';
@@ -19,7 +19,9 @@ import { sortListByDate } from '../../libs/helpers/sort';
 import { getClassificationSavedDate } from '../../libs/get_saved_date';
 import { allowPublishGlobal } from '../../libs/allow_publish';
 import { isScoringForCurrentSOP } from '../../libs/sop';
-import * as methods from '../methods';
+import { getAllGdmObjects } from '../../libs/get_all_gdm_objects';
+import { getAffiliationName } from '../../libs/get_affiliation_name.js';
+import { getApproverNames } from '../../libs/get_approver_names';
 import * as curator from '../curator';
 const CurationMixin = curator.CurationMixin;
 const RecordHeader = curator.RecordHeader;
@@ -120,6 +122,228 @@ const ProvisionalClassification = createReactClass({
                 this.setState({classificationSnapshots: classificationSnapshots});
             }
         });
+    },
+
+    /**
+     * Method to post data to /track-data which sends data to Data Exchange for UNC tracking system
+     * @param {object} data - data object
+     */
+    postTrackData(data) {
+        return new Promise((resolve, reject) => {
+            if (data) {
+                this.postRestData('/track-data', data).then(result => {
+                    if (result.status === 'Success') {
+                        console.log('Post tracking data succeeded: %o', result);
+                        resolve(result);
+                    } else {
+                        console.log('Post tracking data failed: %o', result);
+                        reject(result);
+                    }
+                }).catch(error => {
+                    console.log('Post tracking data internal data retrieval error: %o', error);
+                    reject(error);
+                });
+            } else {
+                console.log('Post tracking data Error: Missing expected data');
+                reject({'message': 'Missing expected data'});
+            }
+        });
+    },
+
+    /**
+     * Method to get current GDM data that is used for UNC tracking
+     */
+    getGDMData() {
+        const gdm = this.state.gdm;
+        let gdmData = {};
+        if (gdm && gdm.gene && gdm.disease && gdm.modeInheritance) {
+            const start = gdm.modeInheritance.indexOf('(');
+            const end = gdm.modeInheritance.indexOf(')');
+            const hpoNumber = start > -1 && end > -1 ? gdm.modeInheritance.substring(start + 1, end) : gdm.modeInheritance;
+
+            gdmData = {
+                mode_of_inheritance: hpoNumber,
+                condition: gdm.disease.diseaseId ? gdm.disease.diseaseId.replace('_', ':') : '',
+                gene: gdm.gene.hgncId ? gdm.gene.hgncId : ''
+            };
+        }
+        return gdmData;
+    },
+
+    /**
+     * Method to get given provisional's gene_validity_evidence_level data that is used for UNC tracking
+     * @param {object} provisional - provisional data object
+     */
+    getGeneEvidenceData(provisional) {
+        return {
+            genetic_condition: this.getGDMData(),
+            evidence_level: provisional.alteredClassification && provisional.alteredClassification !== 'No Modification' ? provisional.alteredClassification : provisional.autoClassification,
+            gene_validity_sop: provisional.sopVersion ? 'cg:gene_validity_sop_' + provisional.sopVersion : ''
+        };
+    },
+
+    /**
+     * Method to create necessary data object that needs to be sent to Data Exchange for UNC tracking
+     * @param {object} provisional - provisional classification object
+     * @param {string} status - current classification status
+     * @param {string} date - datetime current action performed
+     * @param {object} submitter - current classification action submitter
+     * @param {array} contributors - classification contributor list
+     */
+    setUNCData(provisional, status, date, submitter, contributors) {
+        let uncData = {};
+
+        if (this.state.gdm && this.state.gdm.uuid) {
+            uncData = {
+                report_id: this.state.gdm.uuid,
+                gene_validity_evidence_level: this.getGeneEvidenceData(provisional),
+                date: moment(date).toISOString(),
+                status: status,
+                performed_by: {
+                    name: submitter && submitter.title ? submitter.title : '',
+                    id: submitter && submitter.uuid ? submitter.uuid : '',
+                    email: submitter && submitter.email ? submitter.email : '',
+                    on_behalf_of: {
+                        id: this.props.affiliation && this.props.affiliation.affiliation_id ? this.props.affiliation.affiliation_id : '',
+                        name: this.props.affiliation && this.props.affiliation.affiliation_fullname ? this.props.affiliation.affiliation_fullname : ''
+                    }
+                },
+                contributors: contributors
+            }
+        }
+
+        return uncData;
+    },
+
+    /**
+     * Method to get list of user who has performed an action in current provisional classification.
+     * But skip the publish/unpublish user in the snapshot with given snapshot id.
+     * @param {string} publishSnapshotId - snapshot id
+     */
+    getActionContributors(publishSnapshotId) {
+        let contributors = [];
+
+        // Add GDM creator
+        if (this.state.gdm) {
+            const gdm = this.state.gdm;
+            if (gdm.submitted_by) {
+                contributors.push({
+                    name: gdm.submitted_by.title ? gdm.submitted_by.title : '',
+                    id: gdm.submitted_by.uuid ? gdm.submitted_by.uuid : '',
+                    email: gdm.submitted_by.email ? gdm.submitted_by.email : '',
+                    roles: ['creator']
+                });
+            }
+        }
+
+        // Get current classification snapshots
+        let snapshots = this.state.classificationSnapshots.length ? sortListByDate(this.state.classificationSnapshots, 'date_created') : [];
+
+        // Loop through classification snapshots to get users who performed previous actions
+        if (snapshots.length) {
+            snapshots.forEach(snapshot => {
+                if (snapshot.resource && snapshot.approvalStatus) {
+                    // Snapshot when classification was provisionally approved
+                    if (snapshot.approvalStatus === 'Provisioned') {
+                        if (snapshot.resource.provisionalSubmitter) {
+                            contributors.push({
+                                name: snapshot.resource.provisionalSubmitter,
+                                roles: ['provisional approver']
+                            });
+                        }
+                    } else if (snapshot.approvalStatus === 'Approved') {
+                        // Snapshot when classification was approved
+                        // Add approver
+                        if (snapshot.resource.approvalSubmitter) {
+                            contributors.push({
+                                name: snapshot.resource.approvalSubmitter,
+                                roles: ['approver']
+                            });
+                        }
+                        // Add curator who approved this classification
+                        if (snapshot.resource.classificationApprover) {
+                            contributors.push({   
+                                name: snapshot.resource.classificationApprover,
+                                roles: ['secondary approver']
+                            });
+                        }
+                        // Add secondary approver (affiliation)
+                        if (snapshot.resource.additionalApprover) {
+                            contributors.push({
+                                id: snapshot.resource.additionalApprover,
+                                name: getApproverNames(snapshot.resource.additionalApprover),
+                                roles: ['secondary approver']
+                            });
+                        }
+                        // Add secondary contributors (affiliations)
+                        if (snapshot.resource.classificationContributors) {
+                            snapshot.resource.classificationContributors.forEach(contributorId => {
+                                contributors.push({
+                                    id: contributorId,
+                                    name: getAffiliationName(contributorId),
+                                    roles: ['secondary approver']
+                                });
+                            });
+                        }
+                        // Get the publisher/unpublisher data if it's not to be skipped
+                        if (snapshot.resource.publishDate) {
+                            if (publishSnapshotId === null || publishSnapshotId !== snapshot['@id']) {
+                                contributors.push({
+                                    name: snapshot.resource.publishSubmitter,
+                                    roles: snapshot.resource.publishClassification ? ['publisher'] : ['unpublisher']
+                                });
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        return contributors;
+    },
+
+    /**
+     * Method to get the list of user who has made contribution to current provisional classification.
+     * But skip the publish/unpublish user in the snapshot with given snapshot id.
+     * @param {string} publishSnapshotId - snapshot id
+     */
+    getContributors(publishSnapshotId=null) {
+        let contributors = [];
+
+        if (this.state.gdm) {
+            const gdm = this.state.gdm;
+            const gdmSubmitter = gdm.submitted_by && gdm.submitted_by.uuid ? gdm.submitted_by.uuid : '';
+
+            // Get the list of evidences from current GDM
+            const allObjects = getAllGdmObjects(gdm);
+            // Remove objects created by the same user who created the GDM
+            const filteredObjects = allObjects.filter(obj => {
+                return gdmSubmitter.indexOf(obj.submitted_by.uuid) < 0;
+            });
+            // Extract the submitted_by values from the filtered objects array into a new array
+            const submitters = filteredObjects.map(object => {
+                return object.submitted_by;
+            });
+            // Remove duplicated submitters
+            const uniqueUsers = _.uniq(submitters, function(submitter) {
+                return submitter.uuid;
+            });
+            // Add submitters to contributors list
+            // No role is set in this case
+            contributors = uniqueUsers.map(user => {
+                return {
+                    name: user.title ? user.title : '',
+                    id: user.uuid ? user.uuid : '',
+                    email: user.email ? user.email : '',
+                    roles: []
+                }
+            });
+            // Add users who have action role to contributors list
+            const actionSubmitters = this.getActionContributors(publishSnapshotId);
+            contributors.push(...actionSubmitters);
+        }
+
+        return contributors;       
     },
 
     /**
@@ -543,6 +767,9 @@ const ProvisionalClassification = createReactClass({
                                                     affiliation={affiliation}
                                                     updateSnapshotList={this.updateSnapshotList}
                                                     updateProvisionalObj={this.updateProvisionalObj}
+                                                    postTrackData={this.postTrackData}
+                                                    getContributors={this.getContributors}
+                                                    setUNCData={this.setUNCData}
                                                 />
                                             </Panel>
                                         </PanelGroup>
@@ -570,6 +797,9 @@ const ProvisionalClassification = createReactClass({
                                                     affiliation={affiliation}
                                                     updateSnapshotList={this.updateSnapshotList}
                                                     updateProvisionalObj={this.updateProvisionalObj}
+                                                    postTrackData={this.postTrackData}
+                                                    getContributors={this.getContributors}
+                                                    setUNCData={this.setUNCData}
                                                     snapshots={sortedSnapshotList}
                                                 />
                                             </Panel>
@@ -604,6 +834,9 @@ const ProvisionalClassification = createReactClass({
                                                     selectedSnapshotUUID={snapshotUUID}
                                                     updateSnapshotList={this.updateSnapshotList}
                                                     updateProvisionalObj={this.updateProvisionalObj}
+                                                    postTrackData={this.postTrackData}
+                                                    getContributors={this.getContributors}
+                                                    setUNCData={this.setUNCData}
                                                     clearPublishState={this.clearPublishState}
                                                 />
                                             </Panel>

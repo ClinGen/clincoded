@@ -193,6 +193,7 @@ module.exports.external_url_map = {
     'GO': 'http://www.ebi.ac.uk/ols/ontologies/go',
     'GOSearch': 'http://www.ebi.ac.uk/ols/ontologies/go/terms?iri=http://purl.obolibrary.org/obo/',
     'OLS': 'http://www.ebi.ac.uk/ols/index',
+    'OLSSearch': 'https://www.ebi.ac.uk/ols/ontologies/',
     'CL': 'http://www.ebi.ac.uk/ols/ontologies/cl',
     'CLSearch': 'http://www.ebi.ac.uk/ols/ontologies/cl/terms?iri=http://purl.obolibrary.org/obo/',
     'EFO': 'http://www.ebi.ac.uk/ols/ontologies/efo',

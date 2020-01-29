@@ -44,6 +44,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         ext_clinvarInterpretationSummary: PropTypes.object,
         ext_ensemblGeneId: PropTypes.string,
         ext_geneSynonyms: PropTypes.array,
+        ext_ldhData: PropTypes.object,
         ext_singleNucleotide: PropTypes.bool,
         ext_gnomadExac: PropTypes.bool,
         loading_clinvarEutils: PropTypes.bool,
@@ -54,6 +55,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         loading_pageData: PropTypes.bool,
         loading_myVariantInfo: PropTypes.bool,
         loading_myGeneInfo: PropTypes.bool,
+        loading_ldhData: PropTypes.bool,
+        loading_ldhFuncData: PropTypes.bool,
+        error_ldhFuncData: PropTypes.object,
         setCalculatedPathogenicity: PropTypes.func,
         selectedTab: PropTypes.string,
         selectedSubtab: PropTypes.string,
@@ -76,6 +80,7 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             ext_clinVarSCV: this.props.ext_clinVarSCV,
             ext_clinvarInterpretationSummary: this.props.ext_clinvarInterpretationSummary,
             ext_ensemblGeneId: this.props.ext_ensemblGeneId,
+            ext_ldhData: this.props.ext_ldhData,
             ext_geneSynonyms: this.props.ext_geneSynonyms,
             ext_singleNucleotide: this.props.ext_singleNucleotide,
             ext_gnomadExac: this.props.ext_gnomadExac,
@@ -87,6 +92,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             loading_pageData: this.props.loading_pageData,
             loading_myVariantInfo: this.props.loading_myVariantInfo,
             loading_myGeneInfo: this.props.loading_myGeneInfo,
+            loading_ldhData: this.props.loading_ldhData,
+            loading_ldhFuncData: this.props.loading_ldhFuncData,
+            error_ldhFuncData: this.props.error_ldhFuncData,
             //remember current tab/subtab so user will land on that tab when interpretation starts
             selectedTab: (this.props.href_url.href ? (queryKeyValue('tab', this.props.href_url.href) ? (validTabs.indexOf(queryKeyValue('tab', this.props.href_url.href)) > -1 ? queryKeyValue('tab', this.props.href_url.href) : 'basic-info') : 'basic-info')  : 'basic-info'),
             selectedSubtab: (this.props.href_url.href ? (queryKeyValue('subtab', this.props.href_url.href) ? (validSubtabs.indexOf(queryKeyValue('subtab', this.props.href_url.href)) > -1 ? queryKeyValue('subtab', this.props.href_url.href) : 'missense') : 'missense')  : 'missense'),
@@ -129,6 +137,9 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         if (nextProps.ext_ensemblGeneId) {
             this.setState({ext_ensemblGeneId: nextProps.ext_ensemblGeneId});
         }
+        if (nextProps.ext_ldhData) {
+            this.setState({ext_ldhData: nextProps.ext_ldhData});
+        }
         if (nextProps.ext_geneSynonyms) {
             this.setState({ext_geneSynonyms: nextProps.ext_geneSynonyms});
         }
@@ -151,7 +162,10 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
             loading_ensemblHgvsVEP: nextProps.loading_ensemblHgvsVEP,
             loading_clinvarEutils: nextProps.loading_clinvarEutils,
             loading_clinvarEsearch: nextProps.loading_clinvarEsearch,
-            loading_clinvarSCV: nextProps.loading_clinvarSCV
+            loading_clinvarSCV: nextProps.loading_clinvarSCV,
+            loading_ldhData: nextProps.loading_ldhData,
+            loading_ldhFuncData: nextProps.loading_ldhFuncData,
+            error_ldhFuncData: nextProps.error_ldhFuncData,
         });
     },
 
@@ -176,6 +190,14 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
         var interpretation = this.state.interpretation;
         var completedSections = this.state.interpretation && this.state.interpretation.completed_sections ? this.state.interpretation.completed_sections : [];
         var populationTabChecked = false;
+        let functionalData = _.property(['ld', 'AlleleFunctionalImpactStatement'])(this.state.ext_ldhData);
+
+        // The processing of the AlleleFunctionalImpactStatements into the desired object shape takes time, so this conidition
+        // prevents unprocessed data from being displayed until the processing has finished.
+        // @functionalData is set to an empty object to comply with the prop types in FunctionalDataTable in functional_data_table.js
+        if (Array.isArray(functionalData)) {
+            functionalData = {};
+        }
 
         // The ordering of TabPanels are corresponding to that of tabs
         // Adding or deleting a tab also requires its corresponding TabPanel to be added/deleted
@@ -242,8 +264,12 @@ var VariantCurationInterpretation = module.exports.VariantCurationInterpretation
                     : null}
                     {this.state.selectedTab == 'experimental' ?
                     <div role="tabpanel" className="tab-panel">
-                        <CurationInterpretationFunctional data={variant} data={variant} href_url={this.props.href_url} session={this.props.session}
-                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj} affiliation={this.props.affiliation}
+                        <CurationInterpretationFunctional data={variant} href_url={this.props.href_url} session={this.props.session}
+                            interpretation={interpretation} updateInterpretationObj={this.props.updateInterpretationObj}
+                            functionalData={functionalData}
+                            loading_ldhFuncData={this.state.loading_ldhFuncData}
+                            error_ldhFuncData={this.state.error_ldhFuncData}
+                            affiliation={this.props.affiliation}
                             selectedCriteria={this.state.selectedCriteria} />
                     </div>
                     : null}
