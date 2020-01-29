@@ -47,5 +47,6 @@ require('./gene_disease_summary');
 require('./provisional_classification');
 require('./variant_interpretation_summary');
 require('./admin');
+require('./terms_of_use');
 
 module.exports = require('./app');
