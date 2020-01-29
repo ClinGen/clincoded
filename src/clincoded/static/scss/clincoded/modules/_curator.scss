@@ -1855,6 +1855,46 @@
                 }
             }
 
+            .functional {
+                .functional-impact-panel {
+                    .dynamic-tabs {
+                        display: flex;
+                        justify-content: space-around;
+
+                        .tab-label {
+                            @extend .tab-label;
+                            flex: 1;
+                            height: 100%;
+                        }
+                    }
+
+                    .functional-tabs-wrapper {
+                        padding: 10px;
+                    }
+
+                    .experiment-table {
+                        background-color: #e3e3e3;
+                        max-height: 730px;
+                        overflow-y: scroll;
+
+                        .experiment {
+                            margin-bottom: 15px;
+                            .experiment-label {
+                                text-decoration: underline;
+                            }
+                        }
+                    }
+
+                    .experiment-table[aria-selected=false] {
+                        display: none;
+                    }
+
+                    .notes {
+                        margin-bottom: 15px;
+                    }
+                }
+            }
+
             .gene-specific .datasource-constraint-scores .table thead td,
             .gene-specific .datasource-constraint-scores .table tbody td {
                 width: 16.665%;

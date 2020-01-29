@@ -17,6 +17,13 @@ export function getAllInterpretationObjects(interpretation) {
             totalObjects.push(filteredObject(population));
         });
 
+        // loop through functional
+        let functional = evaluation.functional && evaluation.functional.length ? evaluation.functional : [];
+        functional.forEach(functional => {
+            // Get functional
+            totalObjects.push(filteredObject(functional));
+        });
+
         // loop through computational
         let computationals = evaluation.computational && evaluation.computational.length ? evaluation.computational : [];
         computationals.forEach(computational => {
