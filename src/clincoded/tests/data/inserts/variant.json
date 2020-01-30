@@ -365,5 +365,45 @@
         "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
         "date_created": "2016-02-02T22:47:10.000000+00:00",
         "last_modified": "2015-02-02T22:59:10.000000+00:00"
+    },
+    {
+        "uuid": "e518427c-c288-4d5c-bd17-dcd13848b682",
+        "clinvarVariantId": "161266",
+        "dbSNPIds": ["144172724"],
+        "clinVarRCVs": [],
+        "clinvarVariantTitle": "NM_000527.4(LDLR):c.301G>A (p.Glu101Lys)",
+        "carId": "CA023687",
+        "hgvsNames": {
+            "GRCh37": "NC_000019.9:g.11213450G>A",
+            "GRCh38": "NC_000019.10:g.11102774G>A",
+            "others": [
+                "NG_009060.1:g.18394G>A",
+                "NM_000527.4:c.301G>A",
+                "NM_001195799.1:c.190+2429G>A",
+                "NP_000518.1:p.Glu101Lys",
+                "P01130:p.Glu101Lys",
+                "LRG_274p1:p.Glu101Lys",
+                "LRG_274:g.18394G>A",
+                "LRG_274t1:c.301G>A",
+                "NP_000518.1:p.E101K"
+            ]
+        },
+        "variationType": "single nucleotide variant",
+        "molecularConsequenceList": [
+            {
+                "hgvsName": "NM_000527.4:c.301G>A",
+                "term": "missense variant",
+                "soId": "SO:0001583"
+            },
+            {
+                "hgvsName": "NM_001195799.1:c.190+2429G>A",
+                "soId": "SO:0001627",
+                "term": "intron variant"
+            }
+        ],
+        "otherDescription": "",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2019-06-26T20:32:13.493831+00:00",
+        "last_modified": "2019-06-26T20:32:13.493817+00:00"
     }
 ]

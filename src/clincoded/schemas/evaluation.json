@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
+            "default": "4"
         },
         "variant": {
             "title": "Variant",
@@ -38,7 +38,7 @@
             "title": "Functional",
             "description": "Functional data used as evidence to evaluate the criteria.",
             "type": "string",
-            "comment": "will link to object functional later."
+            "linkTo": "functional"
         },
         "segregation": {
             "title": "Segregation",

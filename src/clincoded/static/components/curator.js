@@ -2283,6 +2283,10 @@ function flattenEvaluation(evaluation) {
         flat.population = evaluation.population['@id'];
     }
 
+    if (evaluation.functional) {
+        flat.functional = evaluation.functional['@id'];
+    }
+
     if (evaluation.computational) {
         flat.computational = evaluation.computational['@id'];
     }
