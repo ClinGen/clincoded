@@ -158,12 +158,19 @@ var VariantCurationActions = module.exports.VariantCurationActions = createReact
                         <h2><span>Evidence View</span></h2>
                         <div className="btn-group">
                             {!hasExistingInterpretation ?
-                                <ModalComponent modalTitle="PHI Disclaimer" modalClass="modal-warning" modalWrapperClass="phi-disclaimer-modal" bootstrapBtnClass="btn btn-primary pull-right"
+                                <ModalComponent modalTitle="Submission Policy Agreement" modalClass="modal-warning" modalWrapperClass="phi-disclaimer-modal" bootstrapBtnClass="btn btn-primary pull-right"
                                     actuatorClass="" actuatorTitle={<span>Interpretation <i className="icon icon-plus-circle"></i></span>} onRef={ref => (this.child = ref)}>
-                                    <div className="modal-body">Users should not enter unique or sensitive information that is likely to identify an individual. Users
-                                        should not publish data found in this interface without permission from the individual(s) who entered the data. For publication
-                                        of aggregate information, please contact ClinGen at <a href="mailto:clingen@clinicalgenome.org">clingen@clinicalgenome.org</a>.
-                                        <br /><br />Do you agree to these terms?</div>
+                                    <div className="modal-body">
+                                        <p>
+                                            Users planning to submit evidence to the ClinGen curation interface(s) acknowledge and agree to the following:
+                                        </p>
+                                        <ol>
+                                            <li>Any data entered into the VCI may be made publicly accessible, either through the VCI directly or by subsequent transfer to other public resources (ClinVar, ClinGen Evidence Repository, etc.);</li>
+                                            <li>All unpublished patient-specific data entered into the VCI, which is not explicitly consented for public sharing, should be the <strong>minimum necessary</strong> to inform the clinical significance of genetic variants; and</li>
+                                            <li>Data entered into the VCI should not include <a href="https://www.hipaajournal.com/considered-phi-hipaa/" target="_blank">protected health information (PHI)</a> or equivalent identifiable information as defined by regulations in your country or region;</li>
+                                        </ol>
+                                        <p>Do you agree to these terms?</p>
+                                    </div>
                                     <div className="modal-footer">
                                         <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={(e) => this.handlePHIDisclaimerResponse(e, 'Agree')} title="Agree" />
                                         <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={(e) => this.handlePHIDisclaimerResponse(e, 'Disagree')} title="Disagree" />
