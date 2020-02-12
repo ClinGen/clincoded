@@ -210,13 +210,19 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     renderRefSeqEnsemblTranscripts: function(item, key, source) {
         // Only if nucleotide transcripts exist
         if (item.hgvsc && item.source === source) {
+            const isCanonical = item.canonical && item.canonical === 1;
+            const isMANE = item.transcript_id === "ENST00000531234";
+            console.log('item:', item);
             return (
-                <tr key={key} className={(item.canonical && item.canonical === 1) ? 'primary-transcript' : null}>
+                <tr key={key} className={isCanonical || isMANE ? "marked-transcript" : null}>
                     <td className="hgvs-term"><span className="title-ellipsis">{item.hgvsc}</span></td>
                     <td>{(item.exon) ? item.exon : '--'}</td>
                     <td>{(item.hgvsp) ? item.hgvsp : '--'}</td>
                     <td className="clearfix">
                         {(item.consequence_terms) ? this.handleSOTerms(item.consequence_terms) : '--'}
+                         {isCanonical && <span className="label label-primary" data-toggle="tooltip" data-placement="top" data-tooltip="Canonical transcript">C</span>}
+
+                         {isMANE && <span className="label label-warning" data-toggle="tooltip" data-placement="top" data-tooltip="MANE Preferred">MANE</span>}
                     </td>
                 </tr>
             );
@@ -530,6 +536,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         const clinVarInterpretationSummary = this.state.clinVarInterpretationSummary;
         const self = this;
 
+        console.log('variant', variant);
+        console.log('ensembl_data', ensembl_data);
+
         let links_38 = null;
         let links_37 = null;
         if (GRCh38) {
@@ -691,11 +700,24 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <h3 className="panel-title">RefSeq Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a>
-                            {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length && transcriptsWithHgvsc.length ?
+                        <h3 className="panel-title">RefSeq Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a> 
+                            
+
+                            {/* {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length && transcriptsWithHgvsc.length ?
                                 <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
-                                : null}
+                                : null} */}
+                            
+                            {/* <span className="help-note  pull-right">
+                                <span className="label label-warning" data-toggle="tooltip" data-placement="top" data-tooltip="MANE Preferred">MANE</span>
+                            </span> */}
+                                
                         </h3>
+                        
+                        
+                            {/* <span className="pull-right">
+                                <span className="badge">MANE</span>
+                                 MANE transcript
+                            </span> */}
                     </div>
                     <div className="panel-content-wrapper">
                         {this.state.loading_ensemblHgvsVEP ? showActivityIndicator('Retrieving data... ') : null}
@@ -726,9 +748,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                 <div className="panel panel-info">
                     <div className="panel-heading">
                         <h3 className="panel-title">Ensembl Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a>
-                            {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length && transcriptsWithHgvsc.length ?
+                            {/* {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length && transcriptsWithHgvsc.length ?
                                 <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
-                                : null}
+                                : null} */}
                         </h3>
                     </div>
                     <div className="panel-content-wrapper">

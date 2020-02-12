@@ -367,6 +367,34 @@
         "last_modified": "2015-02-02T22:59:10.000000+00:00"
     },
     {
+        "uuid": "3db2b0d3-61f4-4a05-8ac8-682b7cfb1ed0",
+        "carId": "CA501078",
+        "dbSNPIds": ["647756"],
+        "hgvsNames": {
+            "GRCh38": "NC_000011.10:g.107665032G>A",
+            "GRCh37": "NC_000011.9:g.107535758G>A",
+            "NCBI36": "NC_000011.8:g.107040968G>A",
+            "others": [
+                "NM_001130037.1:c.816G>A",
+                "NM_001308018.1:c.822G>A",
+                "NM_018712.3:c.840G>A",
+                "XM_017017994.2:c.798G>A",
+                "XM_017017995.2:c.798G>A",
+                "NM_018712.4:c.840G>A",
+                "ENST00000265840.11:c.840G>A",
+                "ENST00000443271.2:c.816G>A",
+                "ENST00000531234.5:c.822G>A"
+            ]
+        },
+        "canonicalTranscriptTitle": "XM_017017994.2(ELMOD1):c.798G>A (p.Leu266=)",
+        "maneTranscriptTitle": "NM_018712.4(ELMOD1):c.840G>A (p.Leu280=)",
+        "variationType": "Indel",
+        "otherDescription": "",
+        "submitted_by": "e49d01a5-51f7-4a32-ba0e-b2a71684e4aa",
+        "date_created": "2016-02-02T22:47:10.000000+00:00",
+        "last_modified": "2015-02-02T22:59:10.000000+00:00"
+    },
+    {
         "uuid": "e518427c-c288-4d5c-bd17-dcd13848b682",
         "clinvarVariantId": "161266",
         "dbSNPIds": ["144172724"],

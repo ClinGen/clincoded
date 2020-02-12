@@ -1714,13 +1714,18 @@
                 margin: 0 4px;
             }
 
-            .basic-info .table .primary-transcript td:last-child:after {
-                content: "\f069";
-                font-family: 'FontAwesome';
-                color: #31708f;
-                float: right;
-                position: relative;
-                right: 0;
+            // .basic-info .table .primary-transcript td:last-child:after {
+            //     content: "<span class=\"label label-info\">CA</span>";
+            //     // content: "\f069";
+            //     font-family: 'FontAwesome';
+            //     color: #31708f;
+            //     float: right;
+            //     position: relative;
+            //     right: 0;
+            // }
+            .basic-info .table .marked-transcript td:last-child {
+                // allow tooltips in table cell to show in entirety
+                overflow: inherit;
             }
 
             .population .table tfoot .count:first-child td {
@@ -2136,7 +2141,7 @@
             margin-left: 20px;
         }
 
-        .help-note span {
+        .help-note span:not(.label) {
             font-style: italic;
         }
 

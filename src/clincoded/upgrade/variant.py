@@ -121,3 +121,9 @@ def variant_4_5(value, system):
     # https://github.com/ClinGen/clincoded/issues/1514
     # Add legacy names for variants
     return
+
+@upgrade_step('variant', '5', '6')
+def variant_5_6(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1868
+    # Add mane transcript title property and update schema version
+    return

@@ -14,6 +14,8 @@ export function renderVariantTitle(variant, stringOnly) {
     if (variant) {
         if (variant.clinvarVariantId && variant.clinvarVariantTitle) {
             variantTitle = variant.clinvarVariantTitle;
+        } else if (variant.maneTranscriptTitle) {
+            variantTitle = variant.maneTranscriptTitle;
         } else if (variant.carId && variant.canonicalTranscriptTitle) {
             variantTitle = variant.canonicalTranscriptTitle;
         } else if (variant.hgvsNames && Object.keys(variant.hgvsNames).length && !variantTitle) {
