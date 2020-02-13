@@ -741,11 +741,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <h3 className="panel-title">Ensembl Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a>
-                            {/* {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length && transcriptsWithHgvsc.length ?
-                                <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
-                                : null} */}
-                        </h3>
+                        <h3 className="panel-title">Ensembl Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a></h3>
                     </div>
                     <div className="panel-content-wrapper">
                         {this.state.loading_ensemblHgvsVEP ? showActivityIndicator('Retrieving data... ') : null}
