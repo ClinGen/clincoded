@@ -677,11 +677,11 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     <div className="panel-content-wrapper">
                         {this.state.loading_clinvarEutils ? showActivityIndicator('Retrieving data... ') : null}
                         {(primary_transcript && primary_transcript.nucleotide) && ensembl_data.length ?
-                            <table className="table">
+                            <table className="table clinvar-primary-transcript">
                                 <thead>
                                     <tr>
                                         <th>Nucleotide Change</th>
-                                        <th>Exon</th>
+                                        <th className="exon-column">Exon</th>
                                         <th>Protein Change</th>
                                         <th>Molecular Consequence</th>
                                     </tr>
@@ -691,7 +691,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                         <td className="hgvs-term">
                                             <span className="title-ellipsis">{primary_transcript.nucleotide}</span>
                                         </td>
-                                        <td>
+                                        <td className="exon-column">
                                             {primary_transcript.exon}
                                         </td>
                                         <td>
@@ -716,7 +716,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     <div className="panel-content-wrapper">
                         {this.state.loading_ensemblHgvsVEP ? showActivityIndicator('Retrieving data... ') : null}
                         {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length && transcriptsWithHgvsc.length ?
-                            <table className="table">
+                            <table className="table refseq-transcript">
                                 <thead>
                                     <tr>
                                         <th>Nucleotide Change</th>
@@ -746,7 +746,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     <div className="panel-content-wrapper">
                         {this.state.loading_ensemblHgvsVEP ? showActivityIndicator('Retrieving data... ') : null}
                         {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length && transcriptsWithHgvsc.length ?
-                            <table className="table">
+                            <table className="table ensembl-transcript">
                                 <thead>
                                     <tr>
                                         <th>Nucleotide Change</th>

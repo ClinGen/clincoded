@@ -1563,15 +1563,26 @@
 
             .basic-info .table th,
             .basic-info .table td {
+                /* default table accomodates 5 columns but customize this below for different column number */
+                width: 20%;                
+                word-break: break-all;
+
+                .title-ellipsis {
+                    max-width: 250px;
+                }
+            }
+
+            .basic-info .table.clinvar-primary-transcript th,
+            .basic-info .table.clinvar-primary-transcript td,
+            .basic-info .table.refseq-transcript th,
+            .basic-info .table.refseq-transcript td,
+            .basic-info .table.ensembl-transcript th,
+            .basic-info .table.ensembl-transcript td {
                 /* sum up with .exon-column's width to a total of 100% */
                 width: 29%;
 
                 &.exon-column {
                     width: 13%;
-                }
-
-                .title-ellipsis {
-                    max-width: 250px;
                 }
             }
 
@@ -1720,11 +1731,6 @@
             }
 
             .basic-info .table .marked-transcript td {
-                // allow tooltips in table cell to show in entirety
-                &:last-child {
-                    overflow: inherit;
-                }
-
                 & .label {
                     margin-left: .5em;
                 }
