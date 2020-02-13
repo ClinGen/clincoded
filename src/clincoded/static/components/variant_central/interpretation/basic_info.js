@@ -15,6 +15,7 @@ import { getAffiliationName } from '../../../libs/get_affiliation_name';
 import { renderInterpretationStatus } from '../../../libs/render_interpretation_status';
 import { renderInProgressStatus } from '../../../libs/render_in_progress_status';
 import { renderStatusExplanation } from '../../../libs/render_status_explanation';
+import { parseVariantPreferredTitle } from '../../../libs/parse-resources';
 
 const SO_terms = require('./mapping/SO_term.json');
 
@@ -207,22 +208,28 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     },
 
     //Render RefSeq or Ensembl transcripts table rows
-    renderRefSeqEnsemblTranscripts: function(item, key, source) {
+    renderRefSeqEnsemblTranscripts: function(item, key, source, maneTranscriptRefSeq) {
         // Only if nucleotide transcripts exist
         if (item.hgvsc && item.source === source) {
-            const isCanonical = item.canonical && item.canonical === 1;
-            const isMANE = item.transcript_id === "ENST00000531234";
-            console.log('item:', item);
+            const isCanonicalTranscript = item.canonical && item.canonical === 1;
+            
+            // only enable MANE transcript label in RefSeq Transcripts section
+            const isMANETranscript = (source == "RefSeq") && (item.hgvsc === maneTranscriptRefSeq);
+
             return (
-                <tr key={key} className={isCanonical || isMANE ? "marked-transcript" : null}>
-                    <td className="hgvs-term"><span className="title-ellipsis">{item.hgvsc}</span></td>
-                    <td>{(item.exon) ? item.exon : '--'}</td>
+                <tr key={key} className={isCanonicalTranscript || isMANETranscript ? "marked-transcript" : null}>
+                    <td className="hgvs-term">
+                        <span className="title-ellipsis">{item.hgvsc}</span>
+                        {/* show label for canonical transcript */}
+                        {isCanonicalTranscript && <span className="label label-primary" data-toggle="tooltip" data-placement="top" data-tooltip="Canonical Transcript">C</span>}
+
+                        {/* show label for MANE transcript */}
+                        {isMANETranscript && <span className="label label-warning" data-toggle="tooltip" data-placement="top" data-tooltip="MANE Preferred">MANE</span>}
+                    </td>
+                    <td className="exon-column">{(item.exon) ? item.exon : '--'}</td>
                     <td>{(item.hgvsp) ? item.hgvsp : '--'}</td>
                     <td className="clearfix">
                         {(item.consequence_terms) ? this.handleSOTerms(item.consequence_terms) : '--'}
-                         {isCanonical && <span className="label label-primary" data-toggle="tooltip" data-placement="top" data-tooltip="Canonical transcript">C</span>}
-
-                         {isMANE && <span className="label label-warning" data-toggle="tooltip" data-placement="top" data-tooltip="MANE Preferred">MANE</span>}
                     </td>
                 </tr>
             );
@@ -536,8 +543,12 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         const clinVarInterpretationSummary = this.state.clinVarInterpretationSummary;
         const self = this;
 
-        console.log('variant', variant);
-        console.log('ensembl_data', ensembl_data);
+        // generate RefSeq for MANE transcript so that it can be used to label MANE transcript in RefSeq transcript section
+        let maneTranscriptRefSeq = "";
+        if (variant && variant.maneTranscriptTitle) {
+            const {transcriptId, aminoAcidChange} = parseVariantPreferredTitle(variant.maneTranscriptTitle);
+            maneTranscriptRefSeq = `${transcriptId}:${aminoAcidChange}`;
+        }
 
         let links_38 = null;
         let links_37 = null;
@@ -700,24 +711,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <h3 className="panel-title">RefSeq Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a> 
-                            
-
-                            {/* {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length && transcriptsWithHgvsc.length ?
-                                <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
-                                : null} */}
-                            
-                            {/* <span className="help-note  pull-right">
-                                <span className="label label-warning" data-toggle="tooltip" data-placement="top" data-tooltip="MANE Preferred">MANE</span>
-                            </span> */}
-                                
-                        </h3>
-                        
-                        
-                            {/* <span className="pull-right">
-                                <span className="badge">MANE</span>
-                                 MANE transcript
-                            </span> */}
+                        <h3 className="panel-title">RefSeq Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a></h3>
                     </div>
                     <div className="panel-content-wrapper">
                         {this.state.loading_ensemblHgvsVEP ? showActivityIndicator('Retrieving data... ') : null}
@@ -726,14 +720,14 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                 <thead>
                                     <tr>
                                         <th>Nucleotide Change</th>
-                                        <th>Exon</th>
+                                        <th className="exon-column">Exon</th>
                                         <th>Protein Change</th>
                                         <th>Molecular Consequence</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {ensembl_data.map(function(item, i) {
-                                        return (self.renderRefSeqEnsemblTranscripts(item, i, 'RefSeq'));
+                                        return (self.renderRefSeqEnsemblTranscripts(item, i, 'RefSeq', maneTranscriptRefSeq));
                                     })}
                                 </tbody>
                             </table>
@@ -760,7 +754,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                 <thead>
                                     <tr>
                                         <th>Nucleotide Change</th>
-                                        <th>Exon</th>
+                                        <th className="exon-column">Exon</th>
                                         <th>Protein Change</th>
                                         <th>Molecular Consequence</th>
                                     </tr>

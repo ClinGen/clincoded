@@ -534,6 +534,50 @@ export const generateVariantPreferredTitle = (geneName, hgvs, proteinEffect) => 
 
 
 /**
+ * Method to parse components from a variant preferred title
+ * 
+ * Take variant preferred title `NM_002496.4(NDUFS8):c.64C>T (p.Pro22Ser)` as an example, we should parse components as below:
+ * 
+ * (required) transcript id: NM_002496.4
+ * (optional) gene name: NDUFS8
+ * (required) amino acid change: c.64C>T
+ * (optional) amino acid change name: p.Pro22Ser
+ * 
+ * When an optional component above is missing, we give an empty string.
+ * When a required component is missing, we throw an error.
+ * 
+ * @param {string} variantPreferredTitle a qualified variant preferred title of the form `<transcript id>(<gene name>):<amino acid change> (<amino acid change name>)`. Note that gene name and amino acid change name are optional.
+ * @returns {object} an object containing transcript id (i.e. refseq, or hgvs), gene name, amino acid change, and amino acid change name (i.e. protein effect name)
+ */
+export const parseVariantPreferredTitle = (variantPreferredTitle) => {
+    const [transcriptIdAndGeneNamePart, aminoAcidChangePart] = variantPreferredTitle.split(':');
+
+    if (!(transcriptIdAndGeneNamePart && aminoAcidChangePart)) {
+        throw `Cannot parse variantPreferredTitle: ${variantPreferredTitle}`;
+    }
+
+    // parse transcript id and gene name
+    const [transcriptId, geneName] = transcriptIdAndGeneNamePart.split(/[()]/);
+    if (!transcriptId) {
+        throw `Cannot parse variantPreferredTitle, missing transcript id: ${variantPreferredTitle}`;
+    }
+
+    // parse amino acid change and its protein effect name
+    const [aminoAcidChange, aminoAcidChangeName] = aminoAcidChangePart.replace(' ', '').split(/[()]/);
+    if (!aminoAcidChange) {
+        throw `Cannot parse variantPreferredTitle, missing amino acid change: ${variantPreferredTitle}`;
+    }
+
+    return {
+        transcriptId,
+        geneName: geneName || "",
+        aminoAcidChange,
+        aminoAcidChangeName: aminoAcidChangeName || ""
+    };
+}
+
+
+/**
  * Method to extract the unique, non-duplicated set of gene urls in genomic CAR from an array of transcripts for a variant in CAR (Clingen Allele Registry).
  * @param {Array} transcriptAlleles - Transcripts associated with a variant from CAR.
  * @returns {Set<string>} A set of genomic CAR gene urls.
