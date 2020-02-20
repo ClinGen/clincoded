@@ -2,6 +2,7 @@
 import React from 'react';
 import moment from 'moment';
 import { sortListByDate } from './helpers/sort';
+import { renderProvisionalLink } from "./render_provisional_status";
 
 /**
  * Method to render the 'NEW PROVISIONAL' status of a given GDM's classification
@@ -58,27 +59,5 @@ export function renderNewProvisionalStatus(snapshots, resourceType, gdm, context
         }
     } else {
         return null;
-    }
-}
-
-/**
- * Method to render linkout to the evidence summary of a given approved classification or interpretation
- * @param {object} snapshot - The approved classification or interpretation snapshot
- * @param {string} resourceType - A string value of either 'classification' or 'interpretation'
- * @param {object} gdm - The GDM object
- */
-function renderProvisionalLink(snapshot, resourceType, gdm) {
-    if (resourceType === 'classification') {
-        return (
-            <span className="classification-link-item">
-                <a href={'/provisional-classification/?gdm=' + gdm.uuid + '&approval=yes'} title="View/Approve Current Provisional"><i className="icon icon-link"></i></a>
-            </span>
-        );
-    } else if (resourceType === 'interpretation') {
-        return (
-            <span className="classification-link-item">
-                <a href={'/variant-interpretation-summary/?snapshot=' + snapshot.uuid} title="View Current Provisional" target="_blank"><i className="icon icon-link"></i></a>
-            </span>
-        );
     }
 }

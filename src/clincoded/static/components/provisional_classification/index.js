@@ -45,9 +45,12 @@ const ProvisionalClassification = createReactClass({
             isUnpublishActive = queryKeyValue('unpublish', window.location.href);
         }
 
+        console.log('getInitialState: provisionalUuid', queryKeyValue('provisionalUuid', this.props.href));
+
         return {
             user: null, // login user uuid
             gdm: null, // current gdm object, must be null initially.
+            provisionalUuid: queryKeyValue('provisionalUuid', this.props.href), // for retrieving the correct provision (classification)
             provisional: {}, // login user's existing provisional object, must be null initially.
             classificationStatus: 'In progress',
             classificationSnapshots: [],
@@ -165,16 +168,32 @@ const ProvisionalClassification = createReactClass({
 
             // search for provisional owned by affiliation or login user
             console.log('provisionalClassifications', stateObj.gdm.provisionalClassifications);
+            console.log('session:\n', this.props.session)
             if (stateObj.gdm.provisionalClassifications && stateObj.gdm.provisionalClassifications.length > 0) {
-                for (let provisionalClassification of stateObj.gdm.provisionalClassifications) {
-                    let curatorAffiliation = this.props.affiliation;
-                    let affiliation = provisionalClassification.affiliation ? provisionalClassification.affiliation : null;
-                    let creator = provisionalClassification.submitted_by;
-                    if ((affiliation && curatorAffiliation) || (!affiliation && !curatorAffiliation && creator.uuid === stateObj.user)) {
-                        stateObj.provisional = provisionalClassification;
-                        stateObj.classificationStatus = stateObj.provisional.hasOwnProperty('classificationStatus') ? stateObj.provisional.classificationStatus : 'In progress';
-                        // TODO: do we want to break; here? Should we just get the latest provisional classification?
-                    }
+                console.log('gdm has classifications');
+                // for (let provisionalClassification of stateObj.gdm.provisionalClassifications) {
+                //     let curatorAffiliation = this.props.affiliation;
+                //     let affiliation = provisionalClassification.affiliation ? provisionalClassification.affiliation : null;
+                //     let creator = provisionalClassification.submitted_by;
+                    
+                //     if ((affiliation && curatorAffiliation && affiliation === curatorAffiliation.affiliation_id) || (!affiliation && !curatorAffiliation && creator.uuid === stateObj.user))
+                //     // if ((affiliation && curatorAffiliation) || (!affiliation && !curatorAffiliation && creator.uuid === stateObj.user)) 
+                //     {
+                //         stateObj.provisional = provisionalClassification;
+                //         stateObj.classificationStatus = stateObj.provisional.hasOwnProperty('classificationStatus') ? stateObj.provisional.classificationStatus : 'In progress';
+                //         // TODO: do we want to break; here? Should we just get the latest provisional classification?
+                //     }
+
+                //     // show provisional classfication content for anyone logged in
+                //     // stateObj.provisional = provisionalClassification;
+                //     // stateObj.classificationStatus = stateObj.provisional.hasOwnProperty('classificationStatus') ? stateObj.provisional.classificationStatus : 'In progress';
+                // }
+
+                const provisional = stateObj.gdm.provisionalClassifications.find(provisional => provisional.uuid === this.state.provisionalUuid);
+                console.log('provisional find(): ', provisional);
+                if (provisional) {
+                    stateObj.provisional = provisional;
+                    stateObj.classificationStatus = provisional.classificationStatus || 'In progress';
                 }
             }
             stateObj.previousUrl = url;

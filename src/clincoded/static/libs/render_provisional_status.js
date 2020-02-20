@@ -2,6 +2,7 @@
 import React from 'react';
 import moment from 'moment';
 import { sortListByDate } from './helpers/sort';
+import { getQueryUrl } from "../../static/components/globals";
 
 /**
  * Method to render the provisional status of a given GDM's classification
@@ -12,7 +13,8 @@ import { sortListByDate } from './helpers/sort';
  * @param {boolean} showLink - Whether to render link to view/approve provisional (gdm) or view provisional summary (interpretation)
  * @param {boolean} stringOnly - Whether return status text or status labels/tags (default returns labels/tags)
  */
-export function renderProvisionalStatus(snapshots, resourceType, gdm, context, showLink, stringOnly=false) {
+export function renderProvisionalStatus(snapshots, resourceType, gdm, context, showLink, stringOnly=false, provisionalUuid) {
+    console.log('renderProvisionalStatus: provisionalUuid', provisionalUuid);
     const sortedSnapshots = snapshots && snapshots.length ? sortListByDate(snapshots, 'date_created') : [];
     // Get any snapshots that had been provisioned
     const provisionedSnapshots = sortedSnapshots.filter(snapshot => {
@@ -38,7 +40,7 @@ export function renderProvisionalStatus(snapshots, resourceType, gdm, context, s
                         data-tooltip={'Provisioned on ' + moment(provisionedSnapshots[0].date_created).format("YYYY MMM DD, h:mm a")}>
                         PROVISIONAL
                     </span>
-                    {showProvisionalLink ? renderProvisionalLink(provisionedSnapshots[0], resourceType, gdm) : null}
+                    {showProvisionalLink ? renderProvisionalLink(provisionedSnapshots[0], resourceType, gdm, provisionalUuid) : null}
                 </span>
             );
         }
@@ -52,12 +54,22 @@ export function renderProvisionalStatus(snapshots, resourceType, gdm, context, s
  * @param {object} snapshot - The approved classification or interpretation snapshot
  * @param {string} resourceType - A string value of either 'classification' or 'interpretation'
  * @param {object} gdm - The GDM object
+ * @param {string} provisionalUuid - Uuid of classification, used for the GCI provisional classification page to display the correct classification among classifications associated with GDM
  */
-function renderProvisionalLink(snapshot, resourceType, gdm) {
+export function renderProvisionalLink(snapshot, resourceType, gdm, provisionalUuid) {
     if (resourceType === 'classification') {
+        console.log('passed in provisionalUuid', provisionalUuid);
+        const href = getQueryUrl('/provisional-classification/', [
+            { key: 'gdm', value: gdm.uuid },
+            { key: 'provisionalUuid', value: provisionalUuid },
+            { key: 'approval', value: 'yes' }
+        ], false)
+
+        console.log('href', href);
+
         return (
             <span className="classification-link-item">
-                <a href={'/provisional-classification/?gdm=' + gdm.uuid + '&approval=yes'} title="View/Approve Current Provisional"><i className="icon icon-link"></i></a>
+                <a href={href} title="View/Approve Current Provisional"><i className="icon icon-link"></i></a>
             </span>
         );
     } else if (resourceType === 'interpretation') {
