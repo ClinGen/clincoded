@@ -400,12 +400,12 @@ var NavbarUser = createReactClass({
     render: function() {
         var session = this.props.session;
         const allowToCreateGDM = isUserAllowedToCreateGdm(session, this.props.affiliation);
-
         var demoLoginEnabled = true;
         if (/curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname) || /production.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
             // check if production or curation URL. Disable demo login if true
             demoLoginEnabled = false;
         }
+
         return (
             <Nav navbarStyles='navbar-user' styles='navbar-right nav-user'>
                 {this.props.portal.navUser.map(menu => {

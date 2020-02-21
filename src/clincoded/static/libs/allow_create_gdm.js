@@ -1,9 +1,9 @@
 'use strict';
 
 /**
- * Check if Create New Gene Curation link should be enabled.
+ * Check if Create New Gene Curation is allowed for logged in user.
  * Only user curating as part of an affiliation that has a GCEP should be able to create new GDMs.
- * Or Demo user on test site
+ * Or Demo user on test sites.
  * @param {object} session - User session object
  * @param {object} affiliation - User logged in affiliation data object
 */
