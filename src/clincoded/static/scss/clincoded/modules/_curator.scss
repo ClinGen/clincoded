@@ -3,6 +3,20 @@
 }
 
 .curr-pmid-overview {
+    .pubmed-notes-box {
+        border: 1px solid #1b75bc;
+        padding: 10px;
+    }
+    .flex-right {
+        display: flex;
+        justify-content: flex-end;
+    }
+    .no-padding {
+        padding: 0px;
+    }
+    .empty-text-placeholder {
+        color: grey;
+    }
 }
 
 .pmid-doi-btns {
@@ -1315,6 +1329,13 @@
     word-wrap: break-word;
 }
 
+.word-break-all {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    -ms-word-break: break-all;
+    word-break: break-word;
+}
+
 .p-break {
     display: block;
     width: 95%;
@@ -1831,6 +1852,46 @@
                 .panel-body a {
                     display: inline-block;
                     margin-right: 20px;
+                }
+            }
+
+            .functional {
+                .functional-impact-panel {
+                    .dynamic-tabs {
+                        display: flex;
+                        justify-content: space-around;
+
+                        .tab-label {
+                            @extend .tab-label;
+                            flex: 1;
+                            height: 100%;
+                        }
+                    }
+
+                    .functional-tabs-wrapper {
+                        padding: 10px;
+                    }
+
+                    .experiment-table {
+                        background-color: #e3e3e3;
+                        max-height: 730px;
+                        overflow-y: scroll;
+
+                        .experiment {
+                            margin-bottom: 15px;
+                            .experiment-label {
+                                text-decoration: underline;
+                            }
+                        }
+                    }
+
+                    .experiment-table[aria-selected=false] {
+                        display: none;
+                    }
+
+                    .notes {
+                        margin-bottom: 15px;
+                    }
                 }
             }
 

@@ -2194,7 +2194,7 @@ class CaseControlDeleteHistory extends Component {
             <div>
                 <span>Case-Control {caseControl.label} deleted</span>
                 <span>{collateralObjects ? ' along with any associated Case Cohort and Control Cohort' : ''}</span>
-                <span>; {moment(history.last_modified).format("YYYY MMM DD, h:mm a")}</span>
+                <span>; {moment(caseControl.last_modified).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
     }

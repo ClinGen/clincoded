@@ -5,10 +5,14 @@ import createReactClass from 'create-react-class';
 import moment from 'moment';
 import { RestMixin } from '../rest';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
-import { getAffiliationName } from '../../libs/get_affiliation_name';
+import { getAffiliationName, getAllAffliations, getAffiliationSubgroups } from '../../libs/get_affiliation_name';
 import { getAffiliationApprover } from '../../libs/get_affiliation_approver';
+import ModalComponent from '../../libs/bootstrap/modal';
+import { getApproverNames, getContributorNames } from '../../libs/get_approver_names';
+import { sopVersions } from '../../libs/sop';
+import Select from 'react-select';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
-import MomentLocaleUtils, { formatDate, parseDate } from 'react-day-picker/moment';
+import { formatDate, parseDate } from 'react-day-picker/moment';
 import * as CuratorHistory from '../curator_history';
 import * as curator from '../curator';
 const CurationMixin = curator.CurationMixin;
@@ -26,11 +30,21 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         affiliation: PropTypes.object, // User's affiliation
         updateSnapshotList: PropTypes.func,
         updateProvisionalObj: PropTypes.func,
+        postTrackData: PropTypes.func,
+        getContributors: PropTypes.func,
+        getGeneEvidenceData: PropTypes.func,
         snapshots: PropTypes.array
     },
 
     getInitialState() {
         return {
+            affiliationsList: [],
+            approversList: [],
+            classificationContributors: this.props.provisional && this.props.provisional.classificationContributors ? this.props.provisional.classificationContributors : [],
+            additionalApprover: this.props.provisional && this.props.provisional.additionalApprover ? this.props.provisional.additionalApprover : '',
+            retainSelectedApprover: this.props.provisional && this.props.provisional.retainSelectedApprover ? this.props.provisional.retainSelectedApprover : [],
+            retainSelectedContributor: this.props.provisional && this.props.provisional.retainSelectedContributor ? this.props.provisional.retainSelectedContributor : [],
+            contributorComment: this.props.provisional && this.props.provisional.contributorComment ? this.props.provisional.contributorComment : '',
             approvalReviewDate: this.props.provisional && this.props.provisional.approvalReviewDate ? this.props.provisional.approvalReviewDate : undefined,
             approvalDate: this.props.provisional && this.props.provisional.approvalDate ? this.props.provisional.approvalDate : undefined,
             approvalComment: this.props.provisional && this.props.provisional.approvalComment ? this.props.provisional.approvalComment : undefined,
@@ -39,12 +53,53 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             affiliationApprovers: undefined,
             isApprovalPreview: this.props.provisional && this.props.provisional.classificationStatus === 'Approved' ? true : false,
             isApprovalEdit: false,
+            showAttributionForm: false,
+            sopVersion: this.props.provisional && this.props.provisional.sopVersion ? this.props.provisional.sopVersion : '',
             submitBusy: false // Flag to indicate that the submit button is in a 'busy' state
         };
     },
 
     componentDidMount() {
         this.getAffiliationApprovers();
+        this.parseAffiliationsList();
+        this.parseApproversList();
+    },
+
+    // Method to get full affiliations list and reformat obj so it's compatible w/ react-select
+    parseAffiliationsList() {
+        const affiliationsList = getAllAffliations();
+        if (affiliationsList) {
+            const parsedAffiliations = affiliationsList.map(affiliation => {
+                return {
+                    value: affiliation.id,
+                    label: `${affiliation.fullName} (${affiliation.id})`
+                };
+            });
+            this.setState({ affiliationsList: parsedAffiliations });
+        }
+    },
+
+    // Method to get affiliation subgroups and pass to react-select
+    parseApproversList() {
+        const parsedApprovers = [];
+        const approverList = getAffiliationSubgroups();
+        if (approverList) {
+            approverList.forEach(approver => {
+                if (approver.gcep) {
+                    parsedApprovers.push({
+                        value: approver.gcep.id,
+                        label: approver.gcep.fullname
+                    });
+                }
+                if (approver.vcep) {
+                    parsedApprovers.push({
+                        value: approver.vcep.id,
+                        label: approver.vcep.fullname
+                    });
+                }
+            });
+            this.setState({ approversList: parsedApprovers });
+        }
     },
 
     componentWillReceiveProps(nextProps) {
@@ -55,7 +110,11 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                     approvalReviewDate: nextProps.provisional.approvalReviewDate,
                     approvalComment: nextProps.provisional.approvalComment,
                     approvalSubmitter: nextProps.provisional.approvalSubmitter,
-                    classificationApprover: nextProps.provisional.classificationApprover
+                    classificationApprover: nextProps.provisional.classificationApprover,
+                    classificationContributors: nextProps.provisional.classificationContributors,
+                    additionalApprover: nextProps.provisional.additionalApprover,
+                    contributorComment: nextProps.provisional.contributorComment,
+                    sopVersion: nextProps.provisional.sopVersion
                 });
             }
         }
@@ -69,43 +128,81 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             let affiliationId = provisionalAffiliation ? provisionalAffiliation : userAffiliation;
             let approvers = getAffiliationApprover(affiliationId);
             if (approvers.length > 0) {
-                this.setState({affiliationApprovers: approvers.sort()}, () => {
+                this.setState({ affiliationApprovers: approvers.sort() }, () => {
                     if (provisional && provisional.classificationApprover) {
-                        this.setState({classificationApprover: provisional.classificationApprover}, () => {
+                        this.setState({ classificationApprover: provisional.classificationApprover }, () => {
                             this.approverInput.setValue(this.state.classificationApprover && this.state.affiliationApprovers ? this.state.classificationApprover : 'none');
                         });
                     }
                 });
             } else {
                 if (provisional && provisional.classificationApprover) {
-                    this.setState({classificationApprover: provisional.classificationApprover});
+                    this.setState({ classificationApprover: provisional.classificationApprover });
                 } else {
-                    this.setState({classificationApprover: getAffiliationName(affiliationId)});
+                    this.setState({ classificationApprover: getAffiliationName(affiliationId) });
                 }
             }
         }
     },
 
     handleReviewDateChange(approvalReviewDate) {
-        this.setState({approvalReviewDate});
+        this.setState({ approvalReviewDate });
+    },
+
+    openAttributionForm(e) {
+        e.preventDefault();
+        this.setState({ showAttributionForm: true });
+    },
+
+    // Only saves affiliation IDs from react-select
+    handleContributorSelect(selectedContributor) {
+        const contributors = [];
+        selectedContributor.forEach(contributor => {
+            contributors.push(contributor.value);
+        });
+        this.setState({ classificationContributors: contributors, retainSelectedContributor: selectedContributor });
+    },
+
+    // Only saves affiliation subgroup IDs from react-select
+    handleApproverSelect(selectedApprover) {
+        let approver = selectedApprover.value;
+        this.setState({ additionalApprover: approver, retainSelectedApprover: selectedApprover });
+    },
+
+    handleAlertClick(confirm, e) {
+        if (confirm) {
+            window.location.href = '/dashboard/';
+        }
+        this.child.closeModal();
+        this.handleCancelApproval();
     },
 
     /**
-     * Method to handle previewing classificaiton approval form
+     * Method to handle previewing classification approval form
      */
     handlePreviewApproval() {
-        const affiliation = this.props.affiliation;
-        let approver = this.approverInput ? this.approverInput.getValue() : (affiliation ? getAffiliationName(affiliation.affiliation_id) : this.props.session.user_properties.title);
+        const affiliationId = this.props.affiliation ? this.props.affiliation.affiliation_id : null;
+        const provisionalAffiliation = this.props.provisional && this.props.provisional.affiliation ? this.props.provisional.affiliation : null;
+        let approver = this.approverInput ? this.approverInput.getValue() : (affiliationId ? getAffiliationName(affiliationId) : this.props.session.user_properties.title);
         let formErr = false;
 
+        // Trigger alert modal if affiliations do not match 
+        if (affiliationId !== provisionalAffiliation) {
+            this.child.openModal();
+        }
+
         if (approver && approver !== 'none') {
-            const approvalComment = this.approvalCommentInput.getValue();
+            const contributorComment = this.contributorCommentInput ? this.contributorCommentInput.getValue() : '';
+            const approvalComment = this.approvalCommentInput ? this.approvalCommentInput.getValue() : '';
+            const sopVersion = this.sopVersionInput ? this.sopVersionInput.getValue() : '';
             this.setState({
                 approvalSubmitter: this.props.session.user_properties.title,
                 approvalComment: approvalComment.length ? approvalComment : undefined,
+                contributorComment: contributorComment.length ? contributorComment : null,
+                sopVersion: sopVersion ? sopVersion : '',
                 classificationApprover: approver
             }, () => {
-                this.setState({isApprovalPreview: true});
+                this.setState({ isApprovalPreview: true });
                 formErr = false;
             });
         } else {
@@ -124,19 +221,80 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
             approvalReviewDate: this.props.provisional && this.props.provisional.approvalReviewDate ? this.props.provisional.approvalReviewDate : undefined,
             approvalComment: this.props.provisional && this.props.provisional.approvalComment ? this.props.provisional.approvalComment : undefined,
             classificationApprover: this.props.provisional && this.props.provisional.classificationApprover ? this.props.provisional.classificationApprover : undefined,
+            retainSelectedApprover: this.props.provisional && this.props.provisional.retainSelectedApprover ? this.props.provisional.retainSelectedApprover : null,
+            retainSelectedContributor: this.props.provisional && this.props.provisional.retainSelectedContributor ? this.props.provisional.retainSelectedContributor : null,
+            classificationContributors: this.props.provisional && this.props.provisional.classificationContributors ? this.props.provisional.classificationContributors : null,
+            additionalApprover: this.props.provisional && this.props.provisional.additionalApprover ? this.props.provisional.additionalApprover : null,
+            contributorComment: this.props.provisional && this.props.provisional.contributorComment ? this.props.provisional.contributorComment : null,
+            sopVersion: this.props.provisional && this.props.provisional.sopVersion ? this.props.provisional.sopVersion : null,
             isApprovalPreview: false
         });
     },
 
     /**
-     * Method to handle editing classificaiton approval form
+     * Method to handle editing classification approval form
      */
     handleEditApproval() {
-        this.setState({isApprovalPreview: false});
+        this.setState({ isApprovalPreview: false });
     },
 
     /**
-     * Method to handle submitting classificaiton approval form
+     * Method to send GDM approval data to Data Exchange
+     * @param {object} provisional - provisional classification object
+     */
+    sendToDataExchange(provisional) {
+        const approvalSubmitter = this.props.session && this.props.session.user_properties ? this.props.session.user_properties : null;
+        // Get all contributors
+        const contributors = this.props.getContributors();
+
+        // Add this approval submitter to contributors list
+        if (approvalSubmitter) {
+            contributors.push({   
+                name: approvalSubmitter.title ? approvalSubmitter.title : '',
+                id: approvalSubmitter.uuid ? approvalSubmitter.uuid : '',
+                email: approvalSubmitter.email ? approvalSubmitter.email : '',
+                roles: ['approver']
+            });
+        }
+        // Add curator who approved this classification to contributors list
+        if (provisional.classificationApprover) {
+            contributors.push({   
+                name: provisional.classificationApprover,
+                roles: ['secondary approver']
+            });
+        }
+        // Add secondary approver (affiliation) to contributors list
+        if (provisional.additionalApprover) {
+            contributors.push({
+                name: getApproverNames(provisional.additionalApprover),
+                roles: ['secondary approver']
+            });
+        }
+        // Add secondary contributors (affiliations) to contributors list
+        if (provisional.classificationContributors) {
+            provisional.classificationContributors.forEach(contributorId => {
+                contributors.push({
+                    id: contributorId,
+                    name: getAffiliationName(contributorId),
+                    roles: ['secondary approver']
+                });
+            });
+        }
+
+        // Create data object to be sent to Data Exchange
+        const approvalDate = provisional.approvalDate ? provisional.approvalDate : '';
+        const uncData = this.props.setUNCData(provisional, 'approved', approvalDate, approvalSubmitter, contributors);
+
+        // Post approval data to Data Exchange
+        this.props.postTrackData(uncData).then(response => {
+            console.log('Successfully sent approval data to Data Exchange for provisional %s at %s', provisional.uuid, moment(approvalDate).toISOString());
+        }).catch(error => {
+            console.log('Error sending approval data to Data Exchange for provisional %s at %s - Error: %o', provisional.uuid, moment(approvalDate).toISOString(), error);
+        });
+    },
+
+    /**
+     * Method to handle submitting classification approval form
      */
     submitForm(e) {
         e.preventDefault();
@@ -145,9 +303,21 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         newProvisional.classificationStatus = 'Approved';
         newProvisional.approvedClassification = true;
         newProvisional.approvalSubmitter = this.state.approvalSubmitter;
-        newProvisional.classificationApprover = this.state.classificationApprover;
         newProvisional.approvalDate = moment().toISOString();
         newProvisional.approvalReviewDate = this.state.approvalReviewDate;
+        newProvisional.classificationApprover = this.state.classificationApprover;
+        if (this.props.gdm) {
+            newProvisional.additionalApprover = this.state.additionalApprover;
+            newProvisional.classificationContributors = this.state.classificationContributors;
+            newProvisional.sopVersion = this.state.sopVersion;
+        }
+        if (this.state.contributorComment && this.state.contributorComment.length) {
+            newProvisional.contributorComment = this.state.contributorComment;
+        } else {
+            if (newProvisional.contributorComment) {
+                delete newProvisional['contributorComment'];
+            }
+        }
         if (this.state.approvalComment && this.state.approvalComment.length) {
             newProvisional.approvalComment = this.state.approvalComment;
         } else {
@@ -158,7 +328,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
 
         let provisionalSnapshots = this.props.snapshots && this.props.snapshots.length ? this.props.snapshots.filter(snapshot => snapshot.approvalStatus === 'Provisioned') : [];
         // Prevent users from incurring multiple submissions
-        this.setState({submitBusy: true});
+        this.setState({ submitBusy: true });
         if (this.props.gdm && Object.keys(this.props.gdm).length) {
             // Update existing provisional data object
             return this.putRestData('/provisional/' + this.props.provisional.uuid, newProvisional).then(data => {
@@ -175,9 +345,20 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                 // this.recordHistory('modify', provisionalClassification, meta);
                 return Promise.resolve(provisionalClassification);
             }).then(result => {
+                let previousSnapshots;
+
+                // To avoid provisional/snapshot data nesting, remove old snapshots from provisional that will be added to the new snapshot
+                if (result && result.associatedClassificationSnapshots) {
+                    previousSnapshots = result.associatedClassificationSnapshots;
+                    delete result['associatedClassificationSnapshots'];
+                }
+
                 // get a fresh copy of the gdm object
                 this.getRestData('/gdm/' + this.props.gdm.uuid).then(newGdm => {
-                    let parentSnapshot = {gdm: newGdm};
+                    // Send approval data to Data Exchange
+                    this.sendToDataExchange(result);
+
+                    let parentSnapshot = { gdm: newGdm };
                     let newSnapshot = {
                         resourceId: result.uuid,
                         resourceType: 'classification',
@@ -191,6 +372,11 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         this.props.updateSnapshotList(approvalSnapshot['@id'], true);
                         return Promise.resolve(approvalSnapshot);
                     }).then(snapshot => {
+                        // Return old snapshots to provisional before adding latest snapshot
+                        if (previousSnapshots) {
+                            result.associatedClassificationSnapshots = previousSnapshots;
+                        }
+
                         let newClassification = curator.flatten(result);
                         let newSnapshot = curator.flatten(snapshot);
                         if ('associatedClassificationSnapshots' in newClassification) {
@@ -225,9 +411,17 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                 // this.recordHistory('modify', provisionalClassification, meta);
                 return Promise.resolve(provisionalClassification);
             }).then(result => {
+                let previousSnapshots;
+
+                // To avoid provisional/snapshot data nesting, remove old snapshots from provisional that will be added to the new snapshot
+                if (result && result.associatedInterpretationSnapshots) {
+                    previousSnapshots = result.associatedInterpretationSnapshots;
+                    delete result['associatedInterpretationSnapshots'];
+                }
+
                 // get a fresh copy of the interpretation object
                 this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(newInterpretation => {
-                    let parentSnapshot = {interpretation: newInterpretation};
+                    let parentSnapshot = { interpretation: newInterpretation };
                     let newSnapshot = {
                         resourceId: result.uuid,
                         resourceType: 'interpretation',
@@ -241,6 +435,11 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         this.props.updateSnapshotList(approvalSnapshot['@id'], true);
                         return Promise.resolve(approvalSnapshot);
                     }).then(snapshot => {
+                        // Return old snapshots to provisional before adding latest snapshot
+                        if (previousSnapshots) {
+                            result.associatedInterpretationSnapshots = previousSnapshots;
+                        }
+
                         let newClassification = curator.flatten(result);
                         let newSnapshot = curator.flatten(snapshot);
                         if ('associatedInterpretationSnapshots' in newClassification) {
@@ -265,16 +464,29 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
     render() {
         const approvalSubmitter = this.state.approvalSubmitter;
         const classificationApprover = this.state.classificationApprover;
+        const contributorComment = this.state.contributorComment && this.state.contributorComment.length ? this.state.contributorComment : '';
         const approvalReviewDate = this.state.approvalReviewDate ? moment(this.state.approvalReviewDate).format('MM/DD/YYYY') : '';
         const approvalDate = this.state.approvalDate ? moment(this.state.approvalDate).format('YYYY MM DD, h:mm a') : moment().format('YYYY MM DD, h:mm a');
         const approvalComment = this.state.approvalComment && this.state.approvalComment.length ? this.state.approvalComment : '';
+        const classificationContributorsList = this.state.affiliationsList ? this.state.affiliationsList : null;
+        const approversList = this.state.approversList ? this.state.approversList : null;
+        const classificationContributors = this.state.classificationContributors ? this.state.classificationContributors : null;
+        const additionalApprover = this.state.additionalApprover ? this.state.additionalApprover : null;
         const session = this.props.session;
+        const sopVersion = this.state.sopVersion;
+        const gdm = this.props.gdm;
         const provisional = this.props.provisional;
         const classification = this.props.classification;
         const affiliation = provisional.affiliation ? provisional.affiliation : (this.props.affiliation ? this.props.affiliation : null);
+        const currentUserAffiliation = this.props.affiliation ? this.props.affiliation.affiliation_fullname : 'No Affiliation';
         const affiliationApprovers = this.state.affiliationApprovers;
         const interpretation = this.props.interpretation;
         const submitBusy = this.state.submitBusy;
+        const attributionButtonText = 'Acknowledge Other Contributors';
+        const formHelpText = 'Acknowledge contributing and approving affiliation(s) for this gene-disease classification. Single or multiple affiliations or entities may be chosen.';
+        const contributorHelpText = 'In the event that more than one affiliation or external curation group has contributed to the evidence and/or overall classification of this record, please select each from the dropdown menu.';
+        const contributorWarningText = 'At present, designation of Classification Contributors is restricted to the GCI. In the future, Classification Contributors will appear on curation summaries published to the ClinGen website and/or Evidence Repository to facilitate recognition.';
+        const approverHelpText = 'In the event that another affiliation approved the final approved classification, please select that affiliation from the dropdown menu.';
 
         return (
             <div className="final-approval-panel-content">
@@ -298,13 +510,35 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     {affiliation && affiliation.length ?
                                         <div className="classification-approver">
                                             <dl className="inline-dl clearfix">
-                                                <dt><span>Approver:</span></dt>
+                                                <dt><span>Affiliation Approver:</span></dt>
                                                 <dd>{classificationApprover}</dd>
                                             </dl>
                                         </div>
                                         : null}
+                                    {gdm ?
+                                        <div>
+                                            <div className="sop-version">
+                                                <dl className="inline-dl clearfix">
+                                                    <dt><span>SOP Version:</span></dt>
+                                                    <dd>{sopVersion}</dd>
+                                                </dl>
+                                            </div>
+                                            <div>
+                                                <dl className="inline-dl clearfix">
+                                                    <dt><span>Classification Contributor(s):</span></dt>
+                                                    <dd>{classificationContributors ? getContributorNames(classificationContributors).join(', ') : null}</dd>
+                                                </dl>
+                                            </div>
+                                            <div>
+                                                <dl className="inline-dl clearfix">
+                                                    <dt><span>Contributor Comments:</span></dt>
+                                                    <dd><span>{contributorComment}</span></dd>
+                                                </dl>
+                                            </div>
+                                        </div>
+                                        : null}
                                 </div>
-                                <div className="col-xs-12 col-sm-3">
+                                <div className="col-xs-12 col-sm-5">
                                     <div className="approval-date">
                                         <dl className="inline-dl clearfix preview-approval-date">
                                             <dt><span>Date saved as Approved:</span></dt>
@@ -313,29 +547,38 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                     </div>
                                     <div className="approval-review-date">
                                         <dl className="inline-dl clearfix preview-approval-review-date">
-                                            <dt><span>Date approved:</span></dt>
+                                            <dt><span>Final Approval Date:</span></dt>
                                             <dd><span>{approvalReviewDate ? formatDate(parseDate(approvalReviewDate), "YYYY MMM DD") : null}</span></dd>
                                         </dl>
                                     </div>
-                                </div>
-                                <div className="col-xs-12 col-sm-5">
                                     <div className="approval-comments">
                                         <dl className="inline-dl clearfix preview-approval-comment">
-                                            <dt><span>Additional comments:</span></dt>
+                                            <dt><span>Approver Comments:</span></dt>
                                             <dd><span>{approvalComment ? approvalComment : null}</span></dd>
                                         </dl>
                                     </div>
+                                    {gdm ?
+                                        <div className="additional-approver">
+                                            <dl className="inline-dl clearfix">
+                                                <dt><span>Classification Approver:</span></dt>
+                                                <dd>{additionalApprover ? getApproverNames(additionalApprover) : null}</dd>
+                                            </dl>
+                                        </div>
+                                        : null}
                                 </div>
                             </div>
                             <div className="col-md-12 alert alert-warning approval-preview-note">
                                 <i className="icon icon-exclamation-circle"></i> This is a Preview only; you must still Submit to save
                                 this {interpretation && Object.keys(interpretation).length ? 'Interpretation' : 'Classification'} as Approval.
                                 {interpretation && Object.keys(interpretation).length ? <strong> Approving an Interpretation does not submit it to ClinVar.</strong> : null}
+                                {gdm ? 
+                                    <p className="contributor-warning"><i className="icon icon-exclamation-circle"></i> {contributorWarningText}</p>
+                                    : null}
                             </div>
                         </div>
                         :
                         <div className="approval-edit">
-                            <div className="col-md-12 approval-form-content-wrapper">
+                            <div className="approval-form-content-wrapper">
                                 <div className="col-xs-12 col-sm-4">
                                     <div className="approval-affiliation">
                                         <dl className="inline-dl clearfix">
@@ -355,12 +598,14 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                             </dd>
                                         </dl>
                                     </div>
+                                </div>
+                                <div className="col-xs-12 col-sm-5">
                                     {affiliation && affiliation.length ?
                                         <div className="classification-approver">
                                             {affiliationApprovers && affiliationApprovers.length ?
-                                                <Input type="select" ref={(input) => { this.approverInput = input; }} label="Approver:"
+                                                <Input type="select" ref={(input) => { this.approverInput = input; }} label="Affiliation Approver:"
                                                     error={this.getFormError(this.approverInput)} clearError={this.clrFormErrors.bind(null, this.approverInput)}
-                                                    labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group"
+                                                    labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-5" groupClassName="form-group"
                                                     defaultValue={classificationApprover}>
                                                     <option value="none">Select Approver</option>
                                                     <option value="" disabled className="divider"></option>
@@ -370,40 +615,82 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                                                 </Input>
                                                 :
                                                 <dl className="inline-dl clearfix">
-                                                    <dt><span>Approver:</span></dt>
+                                                    <dt><span>Affiliation Approver:</span></dt>
                                                     <dd>{getAffiliationName(affiliation)}</dd>
                                                 </dl>
                                             }
                                         </div>
                                         : null}
-                                </div>
-                                <div className="col-xs-12 col-sm-3">
-                                    <div className="approval-review-date">
-                                        <div className="form-group">
-                                            <label className="col-sm-5 control-label">Date approved:</label>
-                                            <div className="col-sm-7">
-                                                <DayPickerInput
-                                                    value={approvalReviewDate}
-                                                    onDayChange={this.handleReviewDateChange}
-                                                    formatDate={formatDate}
-                                                    parseDate={parseDate}
-                                                    placeholder={`${formatDate(new Date())}`}
-                                                    dayPickerProps={{
-                                                        selectedDays: approvalReviewDate ? parseDate(approvalReviewDate) : undefined
-                                                    }}
-                                                />
-                                            </div>
+                                    <div className="approval-review-date form-group">
+                                        <label className="col-sm-4 control-label">Final Approval Date:</label>
+                                        <div className="col-sm-3 approval-date">
+                                            <DayPickerInput
+                                                value={approvalReviewDate}
+                                                onDayChange={this.handleReviewDateChange}
+                                                formatDate={formatDate}
+                                                parseDate={parseDate}
+                                                placeholder={`${formatDate(new Date())}`}
+                                                dayPickerProps={{
+                                                    selectedDays: approvalReviewDate ? parseDate(approvalReviewDate) : undefined
+                                                }}
+                                            />
                                         </div>
                                     </div>
                                 </div>
-                                <div className="col-xs-12 col-sm-5">
-                                    <div className="approval-comments">
-                                        <Input type="textarea" ref={(input) => { this.approvalCommentInput = input; }}
-                                            label="Additional comments:" value={approvalComment} rows="5"
-                                            labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
+                                {gdm ? 
+                                    <div className="sop-version">
+                                        <Input type="select" ref={(input) => { this.sopVersionInput = input; }} label="SOP Version:"
+                                            value={sopVersion} labelClassName="sop-label col-sm-2 control-label" wrapperClassName="col-sm-1" groupClassName="form-group">
+                                            {sopVersions.map((version, i) => {
+                                                return <option key={i} value={version}>{version}</option>;
+                                            })}
+                                        </Input>
                                     </div>
-                                </div>
+                                    : 
+                                    <div className="col-xs-12 col-sm-3">
+                                        <Input type="textarea" ref={(input) => { this.approvalCommentInput = input; }} label="Approver Comments:" rows="5"
+                                            value={approvalComment} labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="additional-comment form-group"/>
+                                    </div>
+                                }
+                                {(classificationContributorsList && classificationContributorsList.length) && this.state.showAttributionForm ?
+                                    <div className="col-md-6 contributor-form">
+                                        <div className="contributor-form">
+                                            <label className="control-label">Classification Contributor(s):</label>
+                                            <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={contributorHelpText}>
+                                                <i className="icon icon-info-circle secondary-approvers-help"></i>
+                                            </span>
+                                            <Select isMulti options={classificationContributorsList} placeholder="Select Affiliation(s)" defaultValue={this.state.retainSelectedContributor} onChange={this.handleContributorSelect} />
+                                        </div>
+                                        <div className="contributor-form">
+                                            <Input type="textarea" ref={(input) => { this.contributorCommentInput = input; }}
+                                                label="Contributor Comments" value={contributorComment} rows="5" labelClassName="control-label" />
+                                        </div>
+                                    </div>
+                                    : null}
+                                {this.state.showAttributionForm ?
+                                    <div className="col-md-6 approval-form">
+                                        <div className="curation-approvers approval-form">
+                                            <label className="control-label">Classification Approver:</label>
+                                            <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={approverHelpText}>
+                                                <i className="icon icon-info-circle secondary-approvers-help"></i>
+                                            </span>
+                                            <Select options={approversList} placeholder="Select Classification Approver" defaultValue={this.state.retainSelectedApprover} onChange={this.handleApproverSelect} />
+                                        </div>
+                                        <div className="approval-form">
+                                            <Input type="textarea" ref={(input) => { this.approvalCommentInput = input; }}
+                                                label="Approver Comments:" value={approvalComment} rows="5" labelClassName="control-label" />
+                                        </div>
+                                    </div>
+                                    : null}
                             </div>
+                            {gdm && !this.state.showAttributionForm ?
+                                <div className="col-md-12 contributor-toggle-button">
+                                    <button className="btn btn-primary btn-inline-spacer" onClick={this.openAttributionForm}>{attributionButtonText}</button>
+                                    <span className="text-info contextual-help" data-toggle="tooltip" data-placement="top" data-tooltip={formHelpText}>
+                                        <i className="secondary-approvers-help icon icon-info-circle"></i>
+                                    </span>
+                                </div>
+                                : null}
                         </div>
                     }
                     <div className="col-md-12 approval-form-buttons-wrapper">
@@ -432,6 +719,18 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         }
                     </div>
                 </Form>
+                <ModalComponent modalTitle="Warning" modalClass="modal-default" modalWrapperClass="conflicting-affiliations"
+                    bootstrapBtnClass="btn btn-primary" actuatorClass="input-group-affiliation" onRef={ref => (this.child = ref)}>
+                    <div className="modal-body">
+                        <p className="alert alert-warning">You are currently curating an Interpretation under the wrong affiliation. You are logged in as <strong>{currentUserAffiliation}</strong> and 
+                            curating an interpretation for <strong>{provisional.affiliation ? getAffiliationName(provisional.affiliation) : 'No Affiliation'}</strong>. Either close this tab in your browser or redirect to the Dashboard below.
+                        </p>
+                    </div>
+                    <div className="modal-footer">
+                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleAlertClick.bind(null, false)} title="Cancel" />
+                        <Input type="button" inputClassName="btn-default btn-inline-spacer" clickHandler={this.handleAlertClick.bind(null, true)} title="Go to Dashboard" />
+                    </div>
+                </ModalComponent>
             </div>
         );
     }

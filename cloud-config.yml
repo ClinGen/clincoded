@@ -116,7 +116,7 @@ runcmd:
 - sudo -u clincoded git clone --no-checkout https://github.com/ClinGen/clincoded.git .
 - sudo -u clincoded git checkout %(COMMIT)s
 # Enable messaging/publication code (committed as comment in order to pass Trusty-based Travis build testing)
-- sudo -u clincoded git checkout acb95eb480e608545cfd6dbe0dac6f86f6a04659 src/clincoded/__init__.py
+- sudo -u clincoded git checkout 46742b6326baa3db660d0cebd26e9eb8f4116f77 src/clincoded/__init__.py
 - mkdir /opt/cloudwatchmon
 - chown build:build /opt/cloudwatchmon
 - sudo -u build virtualenv --python=python2.7 /opt/cloudwatchmon
@@ -212,12 +212,11 @@ write_files:
 
 - path: /etc/default/elasticsearch
   content: |
-    # Reduce to 10g for instance with prod data
     # Use c4.8xlarge instance type for prod instance
     # Use c4.4xlarge instance type for test instance with prod data
     if test "%(BACKUPDB)s" = "s3_data"
     then
-      ES_HEAP_SIZE=10g
+      ES_HEAP_SIZE=16g
     else
       ES_HEAP_SIZE=2g
     fi

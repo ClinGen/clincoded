@@ -6,6 +6,7 @@ import moment from 'moment';
 import { RestMixin } from '../rest';
 import { Form, FormMixin, Input } from '../../libs/bootstrap/form';
 import { getAffiliationName } from '../../libs/get_affiliation_name';
+import { getApproverNames, getContributorNames } from '../../libs/get_approver_names';
 import AlertMessage from '../../libs/bootstrap/alert';
 import * as CuratorHistory from '../curator_history';
 import * as curator from '../curator';
@@ -26,6 +27,9 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         selectedSnapshotUUID: PropTypes.string,
         updateSnapshotList: PropTypes.func,
         updateProvisionalObj: PropTypes.func,
+        postTrackData: PropTypes.func,
+        getContributors: PropTypes.func,
+        setUNCData: PropTypes.func,
         triggerPublishLinkAlert: PropTypes.func,
         clearPublishState: PropTypes.func
     },
@@ -73,7 +77,8 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
             showAlertMessage: false,
             alertType: null,
             alertClass: null,
-            alertMsg: null
+            alertMsg: null,
+            submitBusy: false // Flag to indicate that the submit button is in a 'busy' state
         };
     },
 
@@ -119,7 +124,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
      * Method to handle editing the publish form data
      */
     handleEditPublish() {
-        this.setState({isPublishPreview: false});
+        this.setState({ isPublishPreview: false });
     },
 
     /**
@@ -143,7 +148,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
      * Method to hide error alert
      */
     hideAlert() {
-        this.setState({showAlertMessage: false});
+        this.setState({ showAlertMessage: false });
     },
 
     /**
@@ -164,18 +169,55 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                         resolve(result);
                     } else {
                         console.log('Message delivery failure: %s', result.message);
+                        this.setState({ submitBusy: false });
                         this.showAlert(alertType, alertClass, alertMsg);
                         reject(result);
                     }
                 }).catch(error => {
                     console.log('Internal data retrieval error: %o', error);
+                    this.setState({ submitBusy: false });
                     this.showAlert(alertType, alertClass, alertMsg);
                     reject(error);
                 });
             } else {
+                this.setState({ submitBusy: false });
                 this.showAlert(alertType, alertClass, alertMsg);
                 reject(null);
             }
+        });
+    },
+
+    /**
+     * Method to send GDM publish/unpublish provisional data to Data Exchange
+     * @param {object} provisional - provisional classification object
+     * @param {string} publishSnapshotId - current publish/unpublish snapshot Id
+     */
+    sendToDataExchange(provisional, publishSnapshotId) {
+        const publishSubmitter = this.props.session && this.props.session.user_properties ? this.props.session.user_properties : null;
+        const status = provisional.publishClassification ? 'published' : 'unpublished';
+        const publishRole = provisional.publishClassification ? ['publisher'] : ['unpublisher'];
+        // Get all contributors
+        const contributors = this.props.getContributors(publishSnapshotId);
+
+        // Add this provisional publisher/unpublisher to contributors list
+        if (publishSubmitter) {
+            contributors.push({ 
+                name: publishSubmitter.title ? publishSubmitter.title : '',
+                id: publishSubmitter.uuid ? publishSubmitter.uuid : '',
+                email: publishSubmitter.email ? publishSubmitter.email : '',
+                roles: publishRole
+            });
+        }
+
+        // Create data object to be sent to Data Exchange
+        const publishDate = provisional.publishDate ? provisional.publishDate : '';
+        let uncData = this.props.setUNCData(provisional, status, publishDate, publishSubmitter, contributors);
+
+        // Post published/unpublished data to Data Exchange
+        this.props.postTrackData(uncData).then(response => {
+            console.log('Successfully sent %s data to Data Exchange for provisional %s at %s', status, provisional.uuid, moment(publishDate).toISOString());
+        }).catch(error => {
+            console.log('Error sending %s data to Data Exchange for provisional %s at %s - Error: %o', status, provisional.uuid, moment(publishDate).toISOString(), error);
         });
     },
 
@@ -187,6 +229,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         e.preventDefault();
         e.stopPropagation();
 
+        this.setState({ submitBusy: true });
         if (this.state.selectedSnapshot && this.state.selectedSnapshot['@type'] && this.state.selectedSnapshot['@id']) {
             let associatedResourceSnapshots, resourceProperName, resourceName;
             const selectedResourceType = this.state.selectedResourceType;
@@ -284,6 +327,10 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                         return Promise.reject(responseProvisional);
                     }
                 }).then(resultProvisional => {
+                    // Send publish GDM provisional data to Data Exchange
+                    if (selectedResourceType === 'gdm' && this.props.gdm && Object.keys(this.props.gdm).length) {
+                        this.sendToDataExchange(resultProvisional, this.state.selectedSnapshot['@id']);
+                    }
 
                     // Create selected/published snapshot object, updated with publish event data
                     const publishSnapshot = {
@@ -317,7 +364,6 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                 snapshot.resource.publishClassification && snapshot['@id'] !== this.state.selectedSnapshot['@id'])) : {};
 
                             if (previouslyPublishedSnapshot && previouslyPublishedSnapshot.resource) {
-
                                 // Update previously-published snapshot with automatic unpublish data
                                 previouslyPublishedSnapshot.resource.publishComment = resourceProperName + ' previously published by ' +
                                     previouslyPublishedSnapshot.resource.publishSubmitter + ' on ' +
@@ -350,6 +396,11 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                     } else {
                                         return Promise.reject(responseSnapshot);
                                     }
+                                }).then(resultSnapshot => {
+                                    // Send unpublish GDM provisional data to Data Exchange
+                                    if (selectedResourceType === 'gdm' && resultSnapshot && resultSnapshot.resource && this.props.gdm && Object.keys(this.props.gdm).length) {
+                                        this.sendToDataExchange(resultSnapshot.resource, resultSnapshot['@id']);
+                                    }
                                 }).catch(error => {
                                     console.log('Automatic unpublishing snapshot error = : %o', error);
                                 });
@@ -381,6 +432,8 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         const publishComment = this.state.publishComment && this.state.publishComment.length ? this.state.publishComment : '';
         const session = this.props.session;
         const provisional = this.state.selectedProvisional;
+        const additionalApprover = provisional ? provisional.additionalApprover : null;
+        const classificationContributors = provisional ? provisional.classificationContributors : null;
         const classification = this.props.classification;
         const affiliation = provisional.affiliation ? provisional.affiliation : (this.props.affiliation ? this.props.affiliation : null);
         const interpretation = this.props.interpretation;
@@ -388,6 +441,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         const publishEventLower = provisional.publishClassification ? 'unpublished' : 'published';
         const publicationEventLower = provisional.publishClassification ? 'unpublication' : 'publication';
         const selectedResourceType = this.state.selectedResourceType;
+        const submitBusy = this.state.submitBusy;
         let affiliationSubgroup;
 
         // Set variables based on the (parent) resource type
@@ -408,6 +462,14 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                         <dl className="inline-dl clearfix">
                                             <dt><span>ClinGen Affiliation:</span></dt>
                                             <dd>{affiliation ? getAffiliationName(affiliation, affiliationSubgroup) : null}</dd>
+                                        </dl>
+                                        <dl className="inline-dl clearfix">
+                                            <dt><span>Classification Approver:</span></dt>
+                                            <dd>{additionalApprover ? getApproverNames(additionalApprover) : null}</dd>
+                                        </dl>
+                                        <dl className="inline-dl clearfix">
+                                            <dt><span>Classification Contributor(s):</span></dt>
+                                            <dd>{classificationContributors ? getContributorNames(classificationContributors).join(', ') : null}</dd>
                                         </dl>
                                     </div>
                                     <div className="publish-submitter">
@@ -478,14 +540,15 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                         {this.state.isPublishPreview ?
                             <div className="button-group">
                                 <button type="button" className="btn btn-default btn-inline-spacer"
-                                    onClick={this.handleCancelPublish}>
+                                    onClick={this.handleCancelPublish} disabled={submitBusy}>
                                     Cancel {publishEvent}
                                 </button>
                                 <button type="button" className="btn btn-info btn-inline-spacer"
-                                    onClick={this.handleEditPublish}>
+                                    onClick={this.handleEditPublish} disabled={submitBusy}>
                                     Edit <i className="icon icon-pencil"></i>
                                 </button>
-                                <button type="submit" className="btn btn-primary btn-inline-spacer pull-right">
+                                <button type="submit" className="btn btn-primary btn-inline-spacer pull-right" disabled={submitBusy}>
+                                    {submitBusy ? <span className="submit-spinner"><i className="icon icon-spin icon-cog"></i></span> : null}
                                     {publishEvent} <i className="icon icon-check-square-o"></i>
                                 </button>
                                 <AlertMessage visible={this.state.showAlertMessage} type={this.state.alertType}

@@ -183,3 +183,8 @@ def interpretation_6_7(value, system):
     # Add provisional_variant & affiliation fields in search result
     return
 
+@upgrade_step('interpretation', '7', '8')
+def interpretation_7_8(value, system):
+    # issue found during bug fix, https://github.com/ClinGen/clincoded/issues/2066
+    # add Semidominant inheritance (HP:0032113) to modeInheritance property
+    return

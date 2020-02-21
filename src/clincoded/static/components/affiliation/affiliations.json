@@ -10,8 +10,9 @@
             }
         },
         "approver": [
-            "Lisa Kurtz",
-            "Michael Gollob"
+            "Melanie Care",
+            "Michael Gollob",
+            "Liz Kearns"
         ]
     },
     {
@@ -45,7 +46,7 @@
         "approver": [
             "Cindy James",
             "Jan Jongbloed",
-            "Lisa Kurtz",
+            "Courtney Thaxton",
             "Peter van Tintelen",
             "Ray Hershberger"
         ]
@@ -61,7 +62,6 @@
             }
         },
         "approver": [
-            "Lisa Kurtz",
             "Mafalda Bourbon"
         ]
     },
@@ -132,7 +132,9 @@
         "subgroups": {
             "vcep": {
                 "id": "50009",
-                "fullname": "Lysosomal Storage Disorders VCEP"
+                "fullname": "Lysosomal Storage Disorders VCEP",
+                "guildelines_name": "ClinGen Lysosomal Storage Disorders Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_url": "https://www.clinicalgenome.org/affiliation/50009/docs/assertion-criteria"
             }
         }
     },
@@ -152,7 +154,7 @@
         },
         "approver": [
             "Heather Baudet",
-            "Jen McGlaughon"
+            "Justyne Ross"
         ]
     },
     {
@@ -182,7 +184,7 @@
             "vcep": {
                 "id": "50012",
                 "fullname": "PTEN VCEP",
-                "guidelines_name": "ClinGen PTEN Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_name": "ClinGen PTEN Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 2",
                 "guidelines_url": "https://www.clinicalgenome.org/affiliation/50012/docs/assertion-criteria"
             }
         },
@@ -197,7 +199,9 @@
         "subgroups": {
             "vcep": {
                 "id": "50013",
-                "fullname": "TP53 VCEP"
+                "fullname": "TP53 VCEP",
+                "guidelines_name": "ClinGen TP53 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_url": "https://www.clinicalgenome.org/affiliation/50013/docs/assertion-criteria"
             }
         },
         "approver": [
@@ -214,7 +218,7 @@
             "vcep": {
                 "id": "50014",
                 "fullname": "CDH1 VCEP",
-                "guidelines_name": "ClinGen CDH1 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_name": "ClinGen CDH1 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 2",
                 "guidelines_url": "https://www.clinicalgenome.org/affiliation/50014/docs/assertion-criteria"
             }
         },
@@ -279,9 +283,10 @@
         "affiliation_fullname": "UNC Biocuration Core",
         "publish_approval": true,
         "approver": [
-            "Courtney Thaxton",
-            "Jen McGlaughon",
-            "Jenny Goldstein"
+            "Jenny Goldstein",
+            "Shruthi Mohan",
+            "Justyne Ross",
+            "Courtney Thaxton"
         ]
     },
     {
@@ -376,7 +381,7 @@
         "approver": [
             "Amy Sturm",
             "Arthur Wilde",
-            "Lisa Kurtz",
+            "Liz Kearns",
             "Melanie Care",
             "Michael Gollob",
             "Valeria Novelli"
@@ -455,8 +460,13 @@
             }
         },
         "approver": [
-            "Chandler Douglas",
-            "Carsten Bonnemann"
+            "Ozge Birsoy",
+            "Carsten Bonnemann",
+            "May Flowers",
+            "Liz Kearns",
+            "Shannon McNulty",
+            "Mayher Patel",
+            "Justyne Ross"
         ]
     },
     {
@@ -475,16 +485,16 @@
         "subgroups": {
             "vcep": {
                 "id": "50034",
-                "fullname": "Myeloid Malignancy VCEP"
+                "fullname": "Myeloid Malignancy VCEP",
+                "guidelines_name": "ClinGen Myeloid Malignancy Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_url": "https://www.clinicalgenome.org/affiliation/50034/docs/assertion-criteria"
             }
         },
         "approver": [
             "David Wu",
-            "Justyne Ross",
             "Lucy Godley",
             "Sharon Plon",
             "Xi Luo",
-            "Ying Wang",
             "Shruthi Mohan",
             "Simone Feurstein"
         ]
@@ -500,7 +510,17 @@
             }
         },
         "approver": [
-            "Lisa Kurtz",
+            "Tomohiko Ai",
+            "Babken Asatryan",
+            "Rudy Celeghin",
+            "Judith Fan",
+            "Elizabeth Jordan",
+            "Liz Kearns",
+            "Ronald Lekanne dit Deprez",
+            "Argelia Medeiros",
+            "Laiken Peterson",
+            "Alexandros Protonotarios",
+            "Petros Syrris",
             "Courtney Thaxton"
         ]
     },
@@ -670,6 +690,139 @@
             "gcep": {
                 "id": "40049",
                 "fullname": "Peroxisomal Disorders GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10050",
+        "affiliation_fullname": "DICER1 and miRNA-Processing Gene",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50050",
+                "fullname": "DICER1 and miRNA-Processing Gene VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10051",
+        "affiliation_fullname": "von Willebrand Disease",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50051",
+                "fullname": "von Willebrand Disease VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10052",
+        "affiliation_fullname": "Hemoglobinopathy",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50052",
+                "fullname": "Hemoglobinopathy VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10053",
+        "affiliation_fullname": "Glaucoma",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50053",
+                "fullname": "Glaucoma VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10054",
+        "affiliation_fullname": "Myopathies"
+    },
+    {
+        "affiliation_id": "10055",
+        "affiliation_fullname": "Dosage Sensitivity"
+    },
+    {
+        "affiliation_id": "10056",
+        "affiliation_fullname": "Actionability"
+    },
+    {
+        "affiliation_id": "10057",
+        "affiliation_fullname": "Somatic Cancer"
+    },
+    {
+        "affiliation_id": "10058",
+        "affiliation_fullname": "ABCD1",
+        "publish_approval": true
+    },
+    {
+        "affiliation_id": "10059",
+        "affiliation_fullname": "Craniosynostosis",
+        "publish_approval": true
+    },
+    {
+        "affiliation_id": "10060",
+        "affiliation_fullname": "Orphan Diseases",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40060",
+                "fullname": "Orphan Diseases GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10061",
+        "affiliation_fullname": "Limb Girdle Muscular Dystrophy",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40061",
+                "fullname": "Limb Girdle Muscular Dystrophy GCEP"
+            }
+        },
+        "approver": [
+            "Chris Weihl",
+            "Elizabeth Kearns",
+            "Courtney Thaxton",
+            "Shruthi Mohan",
+            "May Flowers"
+        ]
+    },
+    {
+        "affiliation_id": "10062",
+        "affiliation_fullname": "InSiGHT_Dev"
+    },
+    {
+        "affiliation_id": "10063",
+        "affiliation_fullname": "Charcot-Marie-Tooth",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40063",
+                "fullname": "Charcot-Marie-Tooth GCEP"
+            }
+        },
+        "approver": [
+            "Stephan Zuchner",
+            "Dana Bis-Brewer",
+            "Courtney Thaxton",
+            "Megan Mayers",
+            "May Flowers",
+            "Elizabeth Kearns"
+        ]
+    },
+    {
+        "affiliation_id": "10064",
+        "affiliation_fullname": "Thrombosis",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50064",
+                "fullname": "Thrombosis VCEP"
             }
         }
     }

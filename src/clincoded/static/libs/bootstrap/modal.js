@@ -29,6 +29,9 @@ export default class ModalComponent extends Component {
 
     componentDidMount() {
         this.props.onRef(this);
+        if (this.props.modalOpen === true) {
+            this.openModal();
+        }
     }
 
     componentWillUnmount() {
@@ -52,13 +55,19 @@ export default class ModalComponent extends Component {
     }
 
     render() {
+        const disabled = this.props.actuatorDisabled ? true : false;
+        const className = this.props.bootstrapBtnClass ? this.props.bootstrapBtnClass + this.props.actuatorClass : "btn btn-default " + this.props.actuatorClass;
         return (
             <div className={this.props.modalWrapperClass}>
                 {this.props.actuatorTitle ?
-                    <a className={this.props.bootstrapBtnClass ? this.props.bootstrapBtnClass + this.props.actuatorClass : "btn btn-default " + this.props.actuatorClass}
-                        onClick={() => this.openModal()}>{this.props.actuatorTitle}</a>
+                    <a  className={className}
+                        onClick={() => this.openModal()}
+                        disabled={disabled}
+                        >
+                        {this.props.actuatorTitle}
+                    </a>
                 : null}
-                <Modal isOpen={this.state.isModalOpen}>
+                <Modal isOpen={this.state.isModalOpen} modalWidthPct={this.props.modalWidthPct}>
                     {this.props.modalTitle ?
                         <div className={"modal-header " + this.props.modalClass}>
                             <h4 className="modal-title">{this.props.modalTitle}</h4>
@@ -74,9 +83,12 @@ export default class ModalComponent extends Component {
 ModalComponent.propTypes = {
     modalTitle: PropTypes.string, // Title in modal's header
     modalClass: PropTypes.string, // CSS class for modal header
+    modalOpen: PropTypes.bool, // If ready to invoke modal dialog
+    modalWidthPct: PropTypes.number, // Percentage width of screen, e.g. `90` for 90% width
     modalWrapperClass: PropTypes.string, // CSS class for modal DOM wrapper
     bootstrapBtnClass: PropTypes.string, // Bootstrap class for button (e.g. btn-default, btn-primary)
     actuatorClass: PropTypes.string, // CSS class for link/button to invoke modal
+    actuatorDisabled: PropTypes.bool,  // If the link/button is disabled
     actuatorTitle: PropTypes.oneOfType([ // Text for link/button to invoke modal
         PropTypes.object,
         PropTypes.string
@@ -89,11 +101,15 @@ class Modal extends Component {
         if (this.props.isOpen === false) {
             return null;
         }
+        let style = {};
+        if (this.props.modalWidthPct) {
+            style['width'] = `${this.props.modalWidthPct}%`;
+        }
 
         return (
             <div className="modal-wrapper">
                 <div className="modal" style={{display: 'block'}}>
-                    <div className="modal-dialog">
+                    <div className="modal-dialog" style={style}>
                         <div className="modal-content">
                             {this.props.children}
                         </div>

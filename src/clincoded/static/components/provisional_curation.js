@@ -233,9 +233,13 @@ var ProvisionalCuration = createReactClass({
             newProvisional.approvedClassification = false;
             if (newProvisional.approvalSubmitter) delete newProvisional.approvalSubmitter;
             if (newProvisional.classificationApprover) delete newProvisional.classificationApprover;
+            if (newProvisional.classificationContributors) delete newProvisional.classificationContributors;
+            if (newProvisional.additionalApprover) delete newProvisional.additionalApprover;
             if (newProvisional.approvalDate) delete newProvisional.approvalDate;
             if (newProvisional.approvalReviewDate) delete newProvisional.approvalReviewDate;
             if (newProvisional.approvalComment) delete newProvisional.approvalComment;
+            if (newProvisional.contributorComment) delete newProvisional.contributorComment;
+            newProvisional.sopVersion = '';
             newProvisional.publishClassification = false;
             if (newProvisional.publishSubmitter) delete newProvisional.publishSubmitter;
             if (newProvisional.publishAffiliation) delete newProvisional.publishAffiliation;
@@ -1155,7 +1159,8 @@ var ProvisionalCuration = createReactClass({
                                                                         <div className="col-xs-12 col-sm-6">
                                                                             <div className="classification-evidence-summary">
                                                                                 <Input type="textarea" ref="classification-evidence-summary" value={this.state.evidenceSummary} handleChange={this.handleChange}
-                                                                                    label={<span className="label-main">Evidence Summary (optional):<span className="label-note">Rationale for the clinical validity classification</span></span>}
+                                                                                    label={<span className="label-main">Evidence Summary (optional):<span className="label-note">Rationale for the clinical validity classification</span><br />
+                                                                                        <span className="label-note"><a href="https://clinicalgenome.org/site/assets/files/3439/gene_curation_evidence_summary_12_11_18.pdf" target="_block">View Example Evidence Summary Text</a></span></span>}
                                                                                     placeholder="Note: This text will appear on ClinGen's website if you publish this Classification."
                                                                                     rows="8" labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
                                                                             </div>

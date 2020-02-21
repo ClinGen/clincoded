@@ -5,13 +5,16 @@ import os
 import urllib.request
 import requests
 import json
+import sys
 import clincoded.messaging.templates.gci_to_dx, clincoded.messaging.templates.vci_to_dx
 
-saved_affiliation = None
+affiliation_data = []
+saved_affiliation = []
 
 def includeme(config):
     config.add_route('publish', '/publish')
     config.add_route('generate-clinvar-data', '/generate-clinvar-data')
+    config.add_route('track-data', '/track-data')
     config.scan(__name__)
 
 # Retrieve data from search result(s) using a path (list of keys)
@@ -360,23 +363,89 @@ def add_contradictory_evidence(data, evidence, template):
     else:
         template['Value'] = 'NO'
 
-# Lookup affiliation data associated with a provided ID (using a JSON file maintained for the UI)
+# Load affiliation data from a JSON file maintained for the UI
+def load_affiliation_data():
+    global affiliation_data
+
+    if not affiliation_data:
+        try:
+            affiliation_data = json.load(open('src/clincoded/static/components/affiliation/affiliations.json'))
+
+        except Exception:
+            pass
+
+# Add dictionary containing secondary contributors/approver to the message template
+def add_secondary_contributors_approver(data, template):
+    global affiliation_data
+    contributors = get_data_by_path(data, ['resource', 'classificationContributors'], [])
+    approver = get_data_by_path(data, ['resource', 'additionalApprover'])
+
+    if len(contributors) > 0 or approver:
+        load_affiliation_data()
+        template['contributors'] = []
+
+    if len(contributors) > 0:
+        for affiliation in affiliation_data:
+            try:
+                if affiliation['affiliation_id'] in contributors:
+                    template['contributors'].append({
+                        'id': affiliation['affiliation_id'],
+                        'name': affiliation['affiliation_fullname'],
+                        'role': 'secondary contributor'
+                    })
+
+            except Exception:
+                pass
+
+    try:
+        template['contributors'].sort(key = lambda contributor: contributor['name'])
+
+    except Exception:
+        pass
+
+    if approver:
+        for affiliation in affiliation_data:
+            try:
+                if approver == affiliation['subgroups']['gcep']['id']:
+                    template['contributors'].append({
+                        'id': approver,
+                        'name': affiliation['subgroups']['gcep']['fullname'],
+                        'role': 'secondary approver'
+                    })
+                    break
+
+            except Exception:
+                pass
+
+            try:
+                if approver == affiliation['subgroups']['vcep']['id']:
+                    template['contributors'].append({
+                        'id': approver,
+                        'name': affiliation['subgroups']['vcep']['fullname'],
+                        'role': 'secondary approver'
+                    })
+                    break
+
+            except Exception:
+                pass
+
+# Lookup affiliation data associated with a provided ID
 def lookup_affiliation_data(affiliation_id, affiliation_key, affiliation_subgroup=None):
+    global affiliation_data
     global saved_affiliation
 
     if affiliation_id and affiliation_key:
         if not saved_affiliation or 'affiliation_id' not in saved_affiliation or affiliation_id != saved_affiliation['affiliation_id']:
-            try:
-                affiliation_data = json.load(open('src/clincoded/static/components/affiliation/affiliations.json'))
+            load_affiliation_data()
 
-                for affiliation in affiliation_data:
+            for affiliation in affiliation_data:
+                try:
                     if affiliation_id == affiliation['affiliation_id']:
                         saved_affiliation = affiliation
                         break
 
-            except Exception:
-                pass
-                return None
+                except Exception:
+                    pass
 
         try:
             if affiliation_subgroup:
@@ -532,6 +601,10 @@ def add_data_to_msg_template(data, evidence, evidence_counts, template):
             # Special handling to incorporate contradictory evidence (articles)
             if key == 'ValidContradictoryEvidence':
                 add_contradictory_evidence(data, evidence, value)
+
+            # Special handling to incorporate secondary contributors/approver
+            elif key == 'summary':
+                add_secondary_contributors_approver(data, value)
 
             if not template[key]:
                 keys_to_delete.append(key)
@@ -849,3 +922,97 @@ def generate_clinvar_data(request):
             return_object['message'] = 'Failed to build complete data set'
 
     return return_object
+
+# track data - send GCI events tracking data(message) to Data Exchange
+# Events include GDM is created, classification is provisionally approved, approved, published, and unpublished
+@view_config(route_name='track-data', request_method='POST')
+def track_data(request):
+    elasticsearch_server = 'http://localhost:9200/clincoded'
+    return_object = {'status': 'Error',
+        'message': 'Unable to deliver track data'}
+
+    # Store JSON-encoded content of data
+    try:
+        resultJSON = request.json
+
+    except Exception as e:
+        sys.stderr.write('**** track-data: Error sending data to Data Exchange - data not in expected format ****\n')
+        return_object['message'] = 'Retrieved data not in expected format'
+        return return_object
+
+    # Construct message
+    try:
+        message = json.dumps(resultJSON, separators=(',', ':'))
+
+    except Exception as e:
+        sys.stderr.write('**** track-data: Error sending data to Data Exchange - failed to build complete message ****\n')
+        if e.args:
+            return_object['message'] = e.args
+        else:
+            return_object['message'] = 'Failed to build complete message'
+        return return_object
+
+    return_object = {'status': 'Error',
+                    'message': message,
+                    'error': 'Unable to deliver track data'}
+
+    # Set GDM uuid and action date as message key
+    key = resultJSON['report_id'] + '-' + resultJSON['date']
+
+    # Configure message delivery parameters
+    kafka_cert_pw = ''
+
+    if 'KAFKA_CERT_PW' in os.environ:
+        kafka_cert_pw = os.environ['KAFKA_CERT_PW']
+
+    kafka_conf = {'bootstrap.servers': 'localhost:9093',
+            'log_level': 0,
+            'security.protocol': 'ssl',
+            'ssl.key.location': 'etc/certs/client.key',
+            'ssl.key.password': kafka_cert_pw,
+            'ssl.certificate.location': 'etc/certs/client.crt',
+            'ssl.ca.location': 'etc/certs/server.crt'}
+    kafka_topic = 'test'
+    kafka_timeout = 10
+
+    if request.host != 'localhost:6543':
+        kafka_conf = {'bootstrap.servers': 'exchange.clinicalgenome.org:9093',
+            'log_level': 0,
+            'security.protocol': 'ssl',
+            'ssl.key.location': 'etc/certs/dataexchange/client.key',
+            'ssl.key.password': kafka_cert_pw,
+            'ssl.certificate.location': 'etc/certs/dataexchange/client.crt',
+            'ssl.ca.location': 'etc/certs/dataexchange/server.crt'}
+
+        # kafka topic
+        kafka_topic = 'gene_validity_events'
+        if request.host != 'curation.clinicalgenome.org':
+            kafka_topic += '_dev'
+
+    # Send message
+    p = Producer(**kafka_conf)
+
+    def delivery_callback(err, msg):
+        nonlocal return_object
+        if err:
+            return_object = {'status': 'Error',
+                        'message': message,
+                        'error': err}
+
+        else:
+            return_object = {'status': 'Success',
+                         'message': message,
+                         'partition': msg.partition(),
+                         'offset': msg.offset()}
+
+    try:
+        p.produce(kafka_topic, message, key, callback=delivery_callback)
+        p.flush(kafka_timeout)
+        if return_object['status'] == 'Error':
+            sys.stderr.write('**** track-data: Error sending data to Data Exchange - kafka sever error\n Data - %s \n ****\n' % message)
+        return return_object
+
+    except Exception as e:
+        return_object['message'] = 'Message delivery failed'
+        sys.stderr.write('**** track-data: Error sending data to Data Exchange - delivery failed\n Data - %s \n ****\n' % message)
+        return return_object

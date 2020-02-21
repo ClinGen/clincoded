@@ -37,6 +37,7 @@ ORDER = [
     'gdm',
     'population', # VCI
     'computational', # VCI
+    'functional', # VCI
     'evaluation', # VCI
     'provisional_variant', # VCI
     'interpretation', # VCI

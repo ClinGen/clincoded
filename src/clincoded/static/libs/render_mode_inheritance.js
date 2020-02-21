@@ -1,5 +1,6 @@
 'use strict';
 import React from 'react';
+import { external_url_map } from "../components/globals";
 
 /**
  * Method to display either mode of inheritance with adjective,
@@ -33,7 +34,7 @@ function renderModeInheritanceLink(modeInheritance, modeInheritanceAdjective) {
             hpoNumber = modeInheritance.substring(start+1, end);
         }
         if (hpoNumber && hpoNumber.indexOf('HP:') > -1) {
-            let hpoLink = 'http://compbio.charite.de/hpoweb/showterm?id=' + hpoNumber;
+            let hpoLink = external_url_map['HPO'] + hpoNumber;
             return (
                 <span><a href={hpoLink} target="_blank">{modeInheritance.match(/^(.*?)(?: \(HP:[0-9]*?\)){0,1}$/)[1]}</a>{adjective}</span>
             );

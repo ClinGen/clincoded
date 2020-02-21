@@ -68,6 +68,11 @@ var FormMixin = module.exports.FormMixin = {
         return this.formValues[ref];
     },
 
+    // Return an object with all form values
+    getAllFormValues: function() {
+        return this.formValues;
+    },
+
     // Retrieves the saved value of the Input with the given 'ref' value, and the Input
     // value must be numeric. If the Input had no entered value at all, the empty string is
     // returned. If the Input had an entered value but it wasn't numeric, null is returned.
@@ -218,9 +223,11 @@ var FormMixin = module.exports.FormMixin = {
 var Input = module.exports.Input = createReactClass({
     propTypes: {
         type: PropTypes.string.isRequired, // Type of input
-        label: PropTypes.oneOfType([ // <label> for input; string or another React component
-            PropTypes.string,
-            PropTypes.object
+        label: PropTypes.oneOfType([ // <label> for input
+            PropTypes.string,       // Just a string
+            PropTypes.object,       // Another React component
+            PropTypes.array,        // Some JSX
+            PropTypes.element       // Some JSX
         ]),
         hasModal: PropTypes.bool,
         inputGroupBtn: PropTypes.oneOfType([ // <button> for input-group
@@ -244,16 +251,21 @@ var Input = module.exports.Input = createReactClass({
             PropTypes.string,
             PropTypes.number
         ]),
+        controlledValue: PropTypes.string, // Value used if input field does not use ref
         defaultValue: PropTypes.string, // Default value for <select>
-        required: PropTypes.bool, // T to make this a required field
-        clickHandler: PropTypes.func, // Called to handle button click
-        submitHandler: PropTypes.func, // Called to handle submit button click
-        cancelHandler: PropTypes.func, // Called to handle cancel button click
-        submitBusy: PropTypes.bool, //
+        required: PropTypes.bool,       // T to make this a required field
+        clickHandler: PropTypes.func,   // Called to handle button click
+        submitHandler: PropTypes.func,  // Called to handle submit button click
+        cancelHandler: PropTypes.func,  // Called to handle cancel button click
+        submitBusy: PropTypes.bool,     //
         onBlur: PropTypes.func,
         giveFocus: PropTypes.bool,
-        minVal: PropTypes.number, // Minimum value for a number formatted input
-        maxVal: PropTypes.number // Maximum value for a number formatted input
+        minVal: PropTypes.number,       // Minimum value for a number formatted input
+        maxVal: PropTypes.number,       // Maximum value for a number formatted input
+        key: PropTypes.string,          // Passed to react if this is part of a list of inputs
+        inputDisabled: PropTypes.bool,  // If we should disable the input
+        handleChange: PropTypes.func,   // Function to handle a change in the input, akin to onChange
+        fieldStyle: PropTypes.object    // Any custom in-line styles to attatch to the input field
     },
 
     getInitialState: function() {
@@ -382,7 +394,9 @@ var Input = module.exports.Input = createReactClass({
                     <span>
                         <input className={inputClasses} type={inputType} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder}
                             ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} maxLength={this.props.maxLength}
-                            disabled={this.props.inputDisabled} aria-describedby={this.props.helpText ? this.props.helpTextId : null} />
+                            disabled={this.props.inputDisabled} aria-describedby={this.props.helpText ? this.props.helpTextId : null} 
+                            style={this.props.fieldStyle}
+                            />
                         {this.props.helpText ? <p id={this.props.helpTextId} className="form-text text-muted">{this.props.helpText}</p> : null}
                         <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                     </span>
@@ -401,7 +415,9 @@ var Input = module.exports.Input = createReactClass({
                     <div className={this.props.groupClassName}>
                         {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? <span className="required-field"> *</span> : null}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
-                            <select className={inputClasses} ref="input" onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} defaultValue={this.props.hasOwnProperty('value') ? this.props.value : this.props.defaultValue} disabled={this.props.inputDisabled}>
+                            <select className={inputClasses} ref="input" onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur}
+                            defaultValue={this.props.hasOwnProperty('value') ? this.props.value : this.props.defaultValue} disabled={this.props.inputDisabled}
+                            style={this.props.fieldStyle} >
                                 {this.props.children}
                             </select>
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
@@ -416,7 +432,9 @@ var Input = module.exports.Input = createReactClass({
                     <div className={this.props.groupClassName}>
                         {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? <span className="required-field"> *</span> : null}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
-                            <textarea className={inputClasses} id={this.props.id} name={this.props.id} ref="input" defaultValue={this.props.value} placeholder={this.props.placeholder} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} disabled={this.props.inputDisabled} rows={this.props.rows} />
+                            <textarea className={inputClasses} id={this.props.id} name={this.props.id} ref="input" defaultValue={this.props.value} value={this.props.controlledValue}
+                            placeholder={this.props.placeholder} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} disabled={this.props.inputDisabled}
+                            rows={this.props.rows} style={this.props.fieldStyle} />
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                         </div>
                     </div>
@@ -441,7 +459,8 @@ var Input = module.exports.Input = createReactClass({
                 inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '') + (this.props.submitBusy ? ' submit-busy' : '');
                 input = (
                     <span className={this.props.wrapperClassName}>
-                        <input className={inputClasses} type={this.props.type} value={this.props.title} onClick={this.props.clickHandler} disabled={this.props.inputDisabled || this.props.submitBusy} />
+                        <input className={inputClasses} type={this.props.type} value={this.props.title} onClick={this.props.clickHandler} 
+                        disabled={this.props.inputDisabled || this.props.submitBusy} style={this.props.fieldStyle} />
                     </span>
                 );
                 break;
@@ -453,7 +472,8 @@ var Input = module.exports.Input = createReactClass({
                 inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '') + (this.props.submitBusy ? ' submit-busy' : '');
                 input = (
                     <span className={this.props.wrapperClassName}>
-                        <button className={inputClasses} onClick={this.props.clickHandler} disabled={this.props.inputDisabled || this.props.submitBusy}>
+                        <button className={inputClasses} onClick={this.props.clickHandler} disabled={this.props.inputDisabled || this.props.submitBusy}
+                        style={this.props.fieldStyle} >
                         {this.props.submitBusy ? <span className="submit-spinner"><i className="icon icon-spin icon-cog"></i></span> : null}{this.props.title}</button>
                     </span>
                 );
@@ -464,7 +484,8 @@ var Input = module.exports.Input = createReactClass({
                     <div className={this.props.groupClassName}>
                         {this.props.label ? <label htmlFor={this.props.id} className={this.props.labelClassName}><span>{this.props.label}{this.props.required ? <span className="required-field"> *</span> : null}</span></label> : null}
                         <div className={this.props.wrapperClassName}>
-                            <input className={inputClasses} ref="input" type={this.props.type} onChange={this.handleChange.bind(null, this.props.id)} disabled={this.props.inputDisabled} checked={this.props.checked} />
+                            <input className={inputClasses} ref="input" type={this.props.type} onChange={this.handleChange.bind(null, this.props.id)} 
+                            disabled={this.props.inputDisabled} checked={this.props.checked} style={this.props.fieldStyle} />
                             <div className="form-error">{this.props.error ? <span>{this.props.error}</span> : <span>&nbsp;</span>}</div>
                         </div>
                     </div>
@@ -476,7 +497,8 @@ var Input = module.exports.Input = createReactClass({
                 inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '') + (this.props.submitBusy ? ' submit-busy' : '');
                 input = (
                     <span className={this.props.wrapperClassName}>
-                        <button className={inputClasses} onClick={this.props.submitHandler} disabled={this.props.inputDisabled || this.props.submitBusy}>
+                        <button className={inputClasses} onClick={this.props.submitHandler} 
+                        disabled={this.props.inputDisabled || this.props.submitBusy} style={this.props.fieldStyle}>
                         {this.props.submitBusy ? <span className="submit-spinner"><i className="icon icon-spin icon-cog"></i></span> : null}{title}</button>
                     </span>
                 );
@@ -487,7 +509,8 @@ var Input = module.exports.Input = createReactClass({
                 inputClasses = 'btn' + (this.props.inputClassName ? ' ' + this.props.inputClassName : '');
                 input = (
                     <span className={this.props.wrapperClassName}>
-                        <button className={inputClasses} onClick={this.props.cancelHandler} disabled={this.props.inputDisabled}>{title}</button>
+                        <button className={inputClasses} onClick={this.props.cancelHandler} disabled={this.props.inputDisabled}
+                        style={this.props.fieldStyle} >{title}</button>
                     </span>
                 );
                 break;
@@ -499,7 +522,7 @@ var Input = module.exports.Input = createReactClass({
                         <div className="input-group">
                             <input className={inputClasses} type="text" id={this.props.id} name={this.props.id} placeholder={this.props.placeholder}
                                 ref="targetInput" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur}
-                                maxLength={this.props.maxLength} disabled={this.props.inputDisabled} />
+                                maxLength={this.props.maxLength} disabled={this.props.inputDisabled} style={this.props.fieldStyle} />
                             <span className="input-group-btn">
                                 {this.props.hasModal ?
                                     this.props.inputGroupBtn
@@ -522,7 +545,10 @@ var Input = module.exports.Input = createReactClass({
             default:
                 break;
         }
-
-        return <span>{input}</span>;
+        if (this.props.key) {
+            return <span key={this.props.key}>{input}</span>;
+        } else {
+            return <span>{input}</span>;
+        }
     }
 });

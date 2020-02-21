@@ -120,6 +120,12 @@
         "uuid": "75f11790-ad18-4309-a9f4-ffde0a1043bd"
     },
     {
+        "name": "transfer-curation",
+        "title": "Transfer Curation",
+        "status": "released",
+        "uuid": "b5e6d093-62fa-4a39-b708-927e2a850859"
+    },
+    {
         "name": "gene-disease-evidence-summary",
         "title": "Gene Disease Evidence Summary",
         "status": "released",
