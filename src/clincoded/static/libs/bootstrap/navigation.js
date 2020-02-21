@@ -103,13 +103,15 @@ var NavItem = module.exports.NavItem = createReactClass({
         styles: PropTypes.string, // CSS classes to add to <li> elements
         href: PropTypes.string, // URL to link this item to
         icon: PropTypes.string, // CSS class for fontawesome icon (e.g. 'icon-home')
-        target: PropTypes.string // target attribute
+        target: PropTypes.string, // target attribute
+        disabled: PropTypes.bool // disable the <a> link for the item
         // Additional properties (data attributes) set on <a> for the item
     },
 
     getInitialState() {
         return {
-            dropdownActive: false
+            dropdownActive: false,
+            disabled: false
         };
     },
 
@@ -191,6 +193,7 @@ var NavItem = module.exports.NavItem = createReactClass({
         var iconClass = this.props.icon ? this.props.icon + ' icon icon-alt' : '';
         var contentClass = iconClass ? 'sr-only' : '';
         var title = this.props.title;
+        iconClass = this.props.disabled ? iconClass + ' disabled' : iconClass;
 
         return (
             <li className={title === 'space' ? 'white-space' : 'link'}>
