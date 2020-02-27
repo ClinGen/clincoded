@@ -20,3 +20,20 @@ def provisional_variant_3_4(value, system):
     # Add publication properties and update schema version
     return
 
+@upgrade_step('provisional_variant', '4', '5')
+def provisional_variant_4_5(value, system):
+    # https://github.com/ClinGen/clincoded/issues/2132
+    # Remove existing provisional/snapshot nested data
+
+    try:
+        for snapshot in value['associatedInterpretationSnapshots']:
+            try:
+                del snapshot['resource']['associatedInterpretationSnapshots']
+
+            except KeyError:
+                pass
+
+    except KeyError:
+        pass
+
+    return
