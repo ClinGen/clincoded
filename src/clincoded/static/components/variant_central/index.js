@@ -7,6 +7,7 @@ import { RestMixin } from '../rest';
 import { VariantCurationHeader } from './header';
 import { VariantCurationActions } from './actions';
 import { VariantCurationInterpretation } from './interpretation';
+import { parsePubmed } from '../../libs/parse-pubmed';
 import { parseClinvar } from '../../libs/parse-resources';
 import { getHgvsNotation } from './helpers/hgvs_notation';
 import { setPrimaryTranscript } from './helpers/primary_transcript';
@@ -56,6 +57,7 @@ var VariantCurationHub = createReactClass({
             ext_myGeneInfo_ClinVar: null,
             ext_ensemblGeneId: null,
             ext_geneSynonyms: null,
+            ext_ldhData: null,
             ext_singleNucleotide: true,
             ext_gnomadExac: false,
             loading_clinvarEutils: true,
@@ -66,6 +68,9 @@ var VariantCurationHub = createReactClass({
             loading_pageData: true,
             loading_myVariantInfo: true,
             loading_myGeneInfo: true,
+            loading_ldhData: true,
+            loading_ldhFuncData: true,
+            error_ldhFuncData: null,
             calculated_pathogenicity: null,
             autoClassification: null,
             provisionalPathogenicity: null,
@@ -172,18 +177,22 @@ var VariantCurationHub = createReactClass({
     getClinVarData: function(uuid) {
         return this.getRestData('/variants/' + uuid, null, true).then(response => {
             // The variant object successfully retrieved
-            this.setState({variantObj: response});
-            // ping out external resources (all async)
-            this.fetchClinVarEutils(this.state.variantObj);
-            this.fetchMyVariantInfo(this.state.variantObj);
-            this.fetchEnsemblVariation(this.state.variantObj);
-            this.fetchEnsemblHGVSVEP(this.state.variantObj);
-            this.parseVariantType(this.state.variantObj);
-            const session = this.props.session;
-            if (session && session.user_properties && session.user_properties.email !== 'clingen.demo.curator@genome.stanford.edu') {
-                this.fetchPageData(this.state.variantObj);
-            }
-            this.fetchMyVariantInfoMetadata();
+            this.setState({variantObj: response}, () => {
+                // ping out external resources (all async)
+                this.fetchClinVarEutils(this.state.variantObj);
+                this.fetchMyVariantInfo(this.state.variantObj);
+                this.fetchEnsemblVariation(this.state.variantObj);
+                this.fetchEnsemblHGVSVEP(this.state.variantObj);
+                this.fetchLdhData(this.state.variantObj).then(ldhData => {
+                    this.fetchFunctionalData(ldhData);
+                });
+                this.parseVariantType(this.state.variantObj);
+                const session = this.props.session;
+                if (session && session.user_properties && session.user_properties.email !== 'clingen.demo.curator@genome.stanford.edu') {
+                    this.fetchPageData(this.state.variantObj);
+                }
+                this.fetchMyVariantInfoMetadata();
+            });
         }).catch(function(e) {
             console.log('FETCH CLINVAR ERROR=: %o', e);
         });
@@ -325,6 +334,162 @@ var VariantCurationHub = createReactClass({
             } else {
                 this.setState({loading_ensemblHgvsVEP: false});
             }
+        }
+    },
+
+    /**
+     * Fetches linked data relevant to this variant using CA ID
+     * Note: Support for ClinVar ID not yet implemented in LDH
+     * @param {object} variant object containing variant information
+     */
+    fetchLdhData: function(variant) {
+        if (variant) {
+            const { carId, clinvarVariantId } = variant;
+            const variantId = carId ? carId : clinvarVariantId;
+            if (variantId) {
+                return this.getRestData('/ldh/' + variantId).then(ldhData => {
+                    this.setState({ ext_ldhData: ldhData, loading_ldhData: false });
+                    return ldhData;
+                }).catch(err => {
+                    this.setState({ loading_ldhData: false });
+                    console.log('LDH Fetch Error: ', err);
+                });
+            } else {
+                this.setState({ loading_ldhData: false });
+            }
+        } else {
+            this.setState({ loading_ldhData: false });
+        }
+    },
+
+    /**
+     * Queries the FDRepo and PubMed for additional data necessary to display functional data
+     * Transforms AlleleFunctionalImpactStatements into the desired shape to be consumed
+     * @param {object} ldhData raw linked data object that has been fetched from the LDH
+     */
+    fetchFunctionalData: function(ldhData) {
+        // Returns the AFIS records as an object with the pubmedId as the key
+        const getAfisObject = (afisRecords) => {
+            const afisObject = {};
+            afisRecords.forEach(record => {
+                const pubmedId = _.property(['entContent', 'Experiment', 'Source', 'entId'])(record);
+                const effects = _.property(['entContent', 'Effect'])(record) || [];
+                if (effects.length && effects.length > 1) {
+                    // Sort is necessary because effects are not sorted in LDH
+                    // Materials should be sorted too, but support for that was not added to the LDH 
+                    effects.sort((a, b) => {
+                        if (a.number < b.number) {
+                            return -1;
+                        }
+                        if (a.number > b.number) {
+                            return 1;
+                        }
+                        return 0;
+                    });
+                }
+                if (pubmedId) {
+                    if (afisObject[pubmedId] && afisObject[pubmedId].statements) {
+                        afisObject[pubmedId].statements.push(record);
+                        // Sort is necessary because experiments are not sorted in LDH
+                        afisObject[pubmedId].statements.sort((a, b) => {
+                            const experimentA = _.property(['entContent', 'Experiment', 'Number'])(a);
+                            const experimentB = _.property(['entContent', 'Experiment', 'Number'])(b);
+                            if (experimentA < experimentB) {
+                                return -1;
+                            }
+                            if (experimentA > experimentB) {
+                                return 1;
+                            }
+                            return 0;
+                        });
+                    } else {
+                        afisObject[pubmedId] = {
+                            statements: [record],
+                        };
+                    }
+                }
+            });
+            return afisObject;
+        };
+
+        // Fetches pubmed data for each source article
+        const getPubmedArticles = (afisObject) => {
+            const pubmedUrls = [];
+            const pubmedIdKeys = Object.keys(afisObject);
+            if (pubmedIdKeys && pubmedIdKeys.length > 0) {
+                const searchStr = '/search/?type=article&' + pubmedIdKeys.map(pmid => 'pmid=' + pmid).join('&');
+                return this.getRestData(searchStr).then(articles => {
+                    if (articles['@graph'] && (articles['@graph'].length === pubmedIdKeys.length)) {
+                        return articles['@graph'];
+                    }
+                    const foundArticles = articles['@graph'] || [];
+                    const missingPmids = _.difference(pubmedIdKeys, foundArticles.map(article => article.pmid));
+                    missingPmids.forEach(id => {
+                        pubmedUrls.push(external_url_map['PubMedSearch'] + id);
+                    });
+                    return this.getRestDatasXml(pubmedUrls).then(xmls => {
+                        xmls.forEach(xml => {
+                            const data = parsePubmed(xml);
+                            if (data.pmid) {
+                                foundArticles.push(data);
+                            } else {
+                                throw 'Missing PMID articles';
+                            }
+                        });
+                        return foundArticles;
+                    }).catch(err => {
+                        throw err;
+                    });
+                });
+            } else {
+                this.setState({ loading_ldhFuncData: false });
+            }
+        };
+
+        // Sets pubmed articles in the @afisObject and replaces the AFIS with the completed @afisObject
+        const setPubmedArticles = (afisObject, articles) => {
+            if (!Array.isArray(articles)) {
+                return;
+            }
+            articles.forEach((article, articleIdx) => {
+                afisObject[article.pmid].pubmedSource = article;
+                const lastRecord = (articleIdx === articles.length - 1);
+                if (lastRecord) {
+                    // Use JSON parse and stringify to make a deep copy of @ext_ldhData to avoid state mutation
+                    const ldhData = JSON.parse(JSON.stringify(this.state.ext_ldhData));
+                    if (ldhData && ldhData.ld && ldhData.ld.AlleleFunctionalImpactStatement) {
+                        ldhData.ld.AlleleFunctionalImpactStatement = afisObject;
+                    }
+                    this.setState({ ext_ldhData: ldhData }, () => {
+                        this.setState({ loading_ldhFuncData: false });
+                    });
+                }
+            });
+        };
+
+        const afisRecords = _.property(['ld', 'AlleleFunctionalImpactStatement'])(ldhData) || [];
+        const afisUrls = [];
+        if (afisRecords.length > 0) {
+            afisRecords.forEach(record => {
+                afisUrls.push(`/afis/${record.ldhId}`);
+            });
+            this.getRestDatas(afisUrls).then(fdrData => {
+                fdrData.forEach((results, index) => {
+                    afisRecords[index].fdr = results;
+                });
+                const afisObject = getAfisObject(afisRecords);
+                getPubmedArticles(afisObject).then(articles => {
+                    setPubmedArticles(afisObject, articles);
+                }).catch(err => {
+                    this.setState({ loading_ldhFuncData: false, error_ldhFuncData: err });
+                    console.log('Pubmed Fetch Error', err);
+                });
+            }).catch(err => {
+                this.setState({ loading_ldhFuncData: false, error_ldhFuncData: err });
+                console.log('Func Data Fetch Error: ', err);
+            });
+        } else {
+            this.setState({ loading_ldhFuncData: false });
         }
     },
 
@@ -611,6 +776,7 @@ var VariantCurationHub = createReactClass({
                             ext_clinVarSCV={this.state.ext_clinVarSCV}
                             ext_clinvarInterpretationSummary={this.state.ext_clinvarInterpretationSummary}
                             ext_ensemblGeneId={this.state.ext_ensemblGeneId}
+                            ext_ldhData={this.state.ext_ldhData}
                             ext_geneSynonyms={this.state.ext_geneSynonyms}
                             ext_singleNucleotide={this.state.ext_singleNucleotide}
                             ext_gnomadExac={this.state.ext_gnomadExac}
@@ -619,9 +785,12 @@ var VariantCurationHub = createReactClass({
                             loading_clinvarSCV={this.state.loading_clinvarSCV}
                             loading_ensemblHgvsVEP={this.state.loading_ensemblHgvsVEP}
                             loading_ensemblVariation={this.state.loading_ensemblVariation}
+                            loading_ldhData={this.state.loading_ldhData}
+                            loading_ldhFuncData={this.state.loading_ldhFuncData}
                             loading_pageData={this.state.loading_pageData}
                             loading_myVariantInfo={this.state.loading_myVariantInfo}
                             loading_myGeneInfo={this.state.loading_myGeneInfo}
+                            error_ldhFuncData={this.state.error_ldhFuncData}
                             setCalculatedPathogenicity={this.setCalculatedPathogenicity}
                             selectedTab={selectedTab} selectedSubtab={selectedSubtab}
                             selectedCriteria={selectedCriteria} affiliation={affiliation} />

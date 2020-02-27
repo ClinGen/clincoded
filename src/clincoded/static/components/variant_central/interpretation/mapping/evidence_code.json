@@ -24,7 +24,7 @@
         "class": "benign-strong",
         "definition": "Well-established functional studies show no deleterious effect",
         "definitionLong": "Well established <i>in vitro</i> or <i>in vivo</i> functional studies show no damaging effect on protein function or splicing",
-        "category": "experimental",
+        "category": "functional",
         "diseaseDependent": true
     },
     "BS4": {

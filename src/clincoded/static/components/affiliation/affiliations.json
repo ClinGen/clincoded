@@ -10,8 +10,9 @@
             }
         },
         "approver": [
-            "Lisa Kurtz",
-            "Michael Gollob"
+            "Melanie Care",
+            "Michael Gollob",
+            "Liz Kearns"
         ]
     },
     {
@@ -45,7 +46,7 @@
         "approver": [
             "Cindy James",
             "Jan Jongbloed",
-            "Lisa Kurtz",
+            "Courtney Thaxton",
             "Peter van Tintelen",
             "Ray Hershberger"
         ]
@@ -61,7 +62,6 @@
             }
         },
         "approver": [
-            "Lisa Kurtz",
             "Mafalda Bourbon"
         ]
     },
@@ -154,7 +154,7 @@
         },
         "approver": [
             "Heather Baudet",
-            "Jen McGlaughon"
+            "Justyne Ross"
         ]
     },
     {
@@ -283,9 +283,10 @@
         "affiliation_fullname": "UNC Biocuration Core",
         "publish_approval": true,
         "approver": [
-            "Courtney Thaxton",
-            "Jen McGlaughon",
-            "Jenny Goldstein"
+            "Jenny Goldstein",
+            "Shruthi Mohan",
+            "Justyne Ross",
+            "Courtney Thaxton"
         ]
     },
     {
@@ -380,7 +381,7 @@
         "approver": [
             "Amy Sturm",
             "Arthur Wilde",
-            "Lisa Kurtz",
+            "Liz Kearns",
             "Melanie Care",
             "Michael Gollob",
             "Valeria Novelli"
@@ -459,8 +460,13 @@
             }
         },
         "approver": [
-            "Chandler Douglas",
-            "Carsten Bonnemann"
+            "Ozge Birsoy",
+            "Carsten Bonnemann",
+            "May Flowers",
+            "Liz Kearns",
+            "Shannon McNulty",
+            "Mayher Patel",
+            "Justyne Ross"
         ]
     },
     {
@@ -504,7 +510,17 @@
             }
         },
         "approver": [
-            "Lisa Kurtz",
+            "Tomohiko Ai",
+            "Babken Asatryan",
+            "Rudy Celeghin",
+            "Judith Fan",
+            "Elizabeth Jordan",
+            "Liz Kearns",
+            "Ronald Lekanne dit Deprez",
+            "Argelia Medeiros",
+            "Laiken Peterson",
+            "Alexandros Protonotarios",
+            "Petros Syrris",
             "Courtney Thaxton"
         ]
     },
@@ -795,7 +811,19 @@
             "Dana Bis-Brewer",
             "Courtney Thaxton",
             "Megan Mayers",
-            "May Flowers"
+            "May Flowers",
+            "Elizabeth Kearns"
         ]
+    },
+    {
+        "affiliation_id": "10064",
+        "affiliation_fullname": "Thrombosis",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50064",
+                "fullname": "Thrombosis VCEP"
+            }
+        }
     }
 ]
