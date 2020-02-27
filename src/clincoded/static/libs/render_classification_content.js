@@ -15,7 +15,7 @@ import { renderNewSummaryStatus } from './render_new_summary_status';
  * @param {object} context - The global context object
  * @param (boolean) showProvisionalLink - Whether to render link to view/approve provisioned classification
  */
-export function renderClassificationContent(classification, gdm, context, showProvisionalLink) {
+export function renderClassificationContent(classification, gdm, context, showProvisionalLink, isMyClassification) {
     let affiliationId = classification.affiliation ? classification.affiliation : null;
     let userId = classification.submitted_by.uuid;
     let snapshots = classification.associatedClassificationSnapshots && classification.associatedClassificationSnapshots.length ? classification.associatedClassificationSnapshots : [];
@@ -33,9 +33,9 @@ export function renderClassificationContent(classification, gdm, context, showPr
                 <span>;&nbsp;<strong>Status:</strong></span>
                 {snapshots && snapshots.length ?
                     <span>
-                        {renderProvisionalStatus(snapshots, 'classification', gdm, context, showProvisionalLink)}
+                        {renderProvisionalStatus(snapshots, 'classification', gdm, context, showProvisionalLink, isMyClassification)}
                         {renderApprovalStatus(snapshots, 'classification', context, affiliationId, userId)}
-                        {renderNewProvisionalStatus(snapshots, 'classification', gdm, context, showProvisionalLink)}
+                        {renderNewProvisionalStatus(snapshots, 'classification', gdm, context, showProvisionalLink, isMyClassification)}
                         {renderPublishStatus(snapshots)}
                         {renderNewSummaryStatus(classification)}
                     </span>
