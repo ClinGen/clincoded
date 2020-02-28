@@ -47,12 +47,14 @@ var HpoTermModal = createReactClass({
         e.preventDefault(); e.stopPropagation();
         let hpoWithTermsList = this.state.hpoWithTerms;
         let hpoElimWithTermsList = this.state.hpoElimWithTerms;
-        let inElim = this.props.inElim ? this.props.inElim : false;
+        const inElim = this.props.inElim ? this.props.inElim : false;
         // Check if the modal has valid values to save, and if in Elim (NOT Phenotype); Modal has two use-cases
         if (hpoWithTermsList && !inElim) {
+            hpoWithTermsList = [...new Set(hpoWithTermsList)];
             this.props.passHpoToParent(hpoWithTermsList);
         }
         else if (hpoElimWithTermsList && inElim) {
+            hpoElimWithTermsList = [... new Set(hpoElimWithTermsList)];
             this.props.passElimHpoToParent(hpoElimWithTermsList);
         }
         this.child.closeModal();
