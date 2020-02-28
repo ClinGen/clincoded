@@ -3624,6 +3624,34 @@ table.login-users-interpretations {
 }
 
 /**
+ * Styles for HPO Modal
+ */
+
+ .hpo-term-container {
+    display: flex;
+    padding: 0.4rem 0 1.8rem 0;
+ }
+
+.input-group-hpo {
+    margin-left: 15px;
+    margin-bottom: 15px;
+}
+
+ .hpo-term-list {
+    display: inline-block;
+ }
+
+ .delete-hpo {
+    color: #d9534f;
+    display: inline-block;
+    margin: 5px;
+ }
+
+ .delete-hpo:hover {
+    color: red;
+ }
+
+/**
  * Styles alerts to fade in and out
  */
 .feedback-message {
