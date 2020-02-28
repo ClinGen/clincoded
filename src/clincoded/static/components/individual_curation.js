@@ -16,7 +16,7 @@ import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
 import { ScoreIndividual } from './score/individual_score';
 import { ScoreViewer } from './score/viewer';
-import ModalComponent from '../libs/bootstrap/modal';
+import HpoTermModal from './hpo_term_modal';
 import { IndividualDisease } from './disease';
 import { renderVariantLabelAndTitle } from '../libs/render_variant_label_title';
 import * as curator from './curator';
@@ -68,7 +68,9 @@ const IndividualCuration = createReactClass({
             diseaseUuid: null,
             diseaseError: null,
             scoreError: false,
-            scoreErrorMsg: ''
+            scoreErrorMsg: '',
+            hpoWithTerms: [],
+            hpoElimWithTerms: []
         };
     },
 
@@ -127,8 +129,8 @@ const IndividualCuration = createReactClass({
             if (obj.hpoIdInDiagnosis && obj.hpoIdInDiagnosis.length) {
                 hpoIds = obj.hpoIdInDiagnosis.map(function(hpoid, i) {
                     return (hpoid);
-                }).join(', ');
-                this.refs['hpoid'].setValue(hpoIds);
+                });
+                this.setState({ hpoWithTerms: hpoIds });
             }
             if (obj.termsInDiagnosis) {
                 this.refs['phenoterms'].setValue(obj.termsInDiagnosis);
@@ -149,8 +151,8 @@ const IndividualCuration = createReactClass({
             if (obj.hpoIdInElimination && obj.hpoIdInElimination.length) {
                 hpoElimIds = obj.hpoIdInElimination.map(function(elimhpo, i) {
                     return (elimhpo);
-                }).join(', ');
-                this.refs['nothpoid'].setValue(hpoElimIds);
+                });
+                this.setState({ hpoElimWithTerms: hpoElimIds });
             }
             if (obj.termsInElimination) {
                 this.refs['notphenoterms'].setValue(obj.termsInElimination);
@@ -220,6 +222,12 @@ const IndividualCuration = createReactClass({
 
                 if (stateObj.individual.diagnosis && stateObj.individual.diagnosis.length > 0) {
                     this.setState({diseaseObj: stateObj.individual['diagnosis'][0]});
+                }
+                if (stateObj.individual['hpoIdInDiagnosis'] && stateObj.individual['hpoIdInDiagnosis'].length > 0) {
+                    this.setState({ hpoWithTerms: stateObj.individual['hpoIdInDiagnosis'] });
+                }
+                if (stateObj.individual['hpoIdInElimination'] && stateObj.individual['hpoIdInElimination'].length > 0) {
+                    this.setState({ hpoElimWithTerms: stateObj.individual['hpoIdInElimination'] });
                 }
 
                 if (stateObj.individual.proband) {
@@ -372,8 +380,8 @@ const IndividualCuration = createReactClass({
             var formError = false;
 
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
-            var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
-            var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
+            var hpoids = this.state.hpoWithTerms ? this.state.hpoWithTerms : null;
+            var nothpoids = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : null;
             let recessiveZygosity = this.state.recessiveZygosity;
             let variantUuid0 = this.getFormValue('variantUuid0'),
                 variantUuid1 = this.getFormValue('variantUuid1');
@@ -391,20 +399,6 @@ const IndividualCuration = createReactClass({
                 // PMID list is bad
                 formError = true;
                 this.setFormErrors('otherpmids', 'Use PubMed IDs (e.g. 12345678) separated by commas');
-            }
-
-            // Check that all gene symbols have the proper format (will check for existence later)
-            if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
-                // HPOID list is bad
-                formError = true;
-                this.setFormErrors('hpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
-            }
-
-            // Check that all gene symbols have the proper format (will check for existence later)
-            if (nothpoids && nothpoids.length && _(nothpoids).any(function(id) { return id === null; })) {
-                // NOT HPOID list is bad
-                formError = true;
-                this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
             }
 
             // Get variant uuid's if they were added via the modals
@@ -906,6 +900,18 @@ const IndividualCuration = createReactClass({
         this.loadData();
     },
 
+    passHpoToParent: function(hpoWithTerms) {
+        if (hpoWithTerms) {
+            this.setState({ hpoWithTerms });
+        }
+    },
+
+    passElimHpoToParent: function(hpoElimWithTerms) {
+        if (hpoElimWithTerms) {
+            this.setState({ hpoElimWithTerms });
+        }
+    },
+
     /**
      * Update the 'diseaseObj' state used to save data upon form submission
      */
@@ -1202,8 +1208,12 @@ function IndividualCommonDiseases() {
     let probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
 
     // If we're editing an individual, make editable values of the complex properties
-    let hpoidVal = individual && individual.hpoIdInDiagnosis ? individual.hpoIdInDiagnosis.join(', ') : '';
-    let nothpoidVal = individual && individual.hpoIdInElimination ? individual.hpoIdInElimination.join(', ') : '';
+    const hpoidVal = individual && individual.hpoIdInDiagnosis ? individual.hpoIdInDiagnosis : [];
+    const nothpoidVal = individual && individual.hpoIdInElimination ? individual.hpoIdInElimination : [];
+    const hpoWithTerms = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
+    const hpoElimWithTerms = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
+    const addHpoTermButton = (hpoWithTerms.length || hpoidVal.length) ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
+    const addElimTermButton = (hpoElimWithTerms.length || nothpoidVal.length) ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
 
     // Make a list of diseases from the group, either from the given group,
     // or the individual if we're editing one that has associated groups.
@@ -1242,9 +1252,22 @@ function IndividualCommonDiseases() {
                     curator.renderPhenotype(associatedFamilies, 'Individual', 'hpo', 'Family') : curator.renderPhenotype(null, 'Individual', 'hpo')
                 )
             }
-            <Input type="textarea" ref="hpoid" label={LabelHpoId()} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
-                error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+            <div className="col-sm-5 control-label">
+                <span>
+                    <label>Phenotype(s) in Common&nbsp;</label>
+                    <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+                </span>
+            </div>
+            <div className="form-group hpo-term-container"> 
+                <ul>
+                    {hpoWithTerms.map((term, i) => {
+                        return (
+                            <li key={i}>{term}</li>
+                        );
+                    })}
+                </ul>
+                <HpoTermModal addHpoTermButton={addHpoTermButton} passHpoToParent={this.passHpoToParent} savedHpo={hpoidVal} inElim={false} />
+            </div>   
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
                 curator.renderPhenotype(associatedGroups, 'Individual', 'ft', 'Group')
                 :
@@ -1270,10 +1293,25 @@ function IndividualCommonDiseases() {
                 (associatedFamilies && ((associatedFamilies[0].hpoIdInElimination && associatedFamilies[0].hpoIdInElimination.length) || associatedFamilies[0].termsInElimination) ?
                     curator.renderPhenotype(associatedFamilies, 'Individual', 'nothpo', 'Family') : null
                 ) 
-            }  
-            <Input type="textarea" ref="nothpoid" label={LabelHpoId('not')} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
-                error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+            }
+            <div className="col-sm-5 control-label">
+                <span>
+                    <label className="emphasis">NOT Phenotype(s)&nbsp;</label>
+                    <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+                </span>
+            </div>
+            <div className="form-group hpo-term-container">
+                <span>
+                    <ul>
+                        {hpoElimWithTerms.map((term, i) => {
+                            return (
+                                <li key={i}>{term}</li>
+                            );
+                        })}
+                    </ul>
+                </span>
+                <HpoTermModal addHpoTermButton={addElimTermButton} passElimHpoToParent={this.passElimHpoToParent} savedElimHpo={nothpoidVal} inElim={true} />
+            </div>     
             {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
                 curator.renderPhenotype(associatedGroups, 'Individual', 'notft', 'Group') 
                 :
@@ -1295,19 +1333,6 @@ function IndividualCommonDiseases() {
         </div>
     );
 }
-
-/**
- * HTML labels for inputs follow.
- * @param {string} bool - Value of 'not'
- */
-const LabelHpoId = bool => {
-    return (
-        <span>
-            {bool && bool === 'not' ? <span className="emphasis">NOT </span> : ''}
-            Phenotype(s) <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
-        </span>
-    );
-};
 
 /**
  * HTML labels for inputs follow.
