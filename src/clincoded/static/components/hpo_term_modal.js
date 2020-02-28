@@ -97,7 +97,6 @@ var HpoTermModal = createReactClass({
     fetchHpoName() {
         let hpoIds = this.refs['hpoid'].getValue();
         const hpoidList = this.validateHpo(hpoIds);
-        const hpoWithTerms = [];
         if (hpoidList) {
             hpoidList.forEach(id => {
                 const url = external_url_map['HPOApi'] + id;
@@ -122,7 +121,6 @@ var HpoTermModal = createReactClass({
     fetchHpoInElimName() {
         let hpoIds = this.refs['hpoid'].getValue();
         const hpoidList = this.validateHpo(hpoIds);
-        const hpoElimWithTerms = [];
         if (hpoidList) {
             hpoidList.forEach(id => {
                 const url = external_url_map['HPOApi'] + id;
