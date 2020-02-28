@@ -26,7 +26,7 @@ var portal = {
         {id: 'space', title: 'space'}, // white space between
         {id: 'dashboard', title: 'Dashboard', icon: 'icon-home', url: '/dashboard/'},
         {id: 'demo', title: 'Demo Login'},
-        {id: 'loginout', title: 'Login'}
+        {id: 'loginout', title: 'Login/Sign Up'}
         //{id: 'account', title: 'Account', url: '/account/'},
     ]
 };
@@ -266,7 +266,7 @@ var App = module.exports = createReactClass({
                     <title>ClinGen</title>
                     <link rel="canonical" href={canonical} />
                     <script async src='//www.google-analytics.com/analytics.js'></script>
-                    <script src="https://cdn.auth0.com/js/lock/11.7.2/lock.min.js"></script>
+                    <script src="https://cdn.auth0.com/js/lock/11.20.0/lock.min.js"></script>
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="@@cssFile" />
                     <link rel="stylesheet" href="https://unpkg.com/react-day-picker/lib/style.css" />

@@ -29,3 +29,9 @@ def user_4_5(value, system):
     # https://github.com/ClinGen/clincoded/issues/1507
     # Add affiliation property and update schema version
     return
+
+@upgrade_step('user', '5', '6')
+def user_5_6(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1746
+    # Add usage_intent and institution and update schema version
+    return

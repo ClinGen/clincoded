@@ -1,4 +1,5 @@
 import requests
+import json
 from pyramid.authentication import CallbackAuthenticationPolicy
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -17,6 +18,20 @@ from pyramid.view import (
     view_config,
 )
 
+from pyramid.httpexceptions import (
+    HTTPServiceUnavailable,
+)
+
+from contentbase import (
+    COLLECTIONS,
+    collection_add,
+    validate_request,
+)
+
+from contentbase.validation import (
+    http_error,
+)
+
 _marker = object()
 
 
@@ -27,9 +42,11 @@ def includeme(config):
     config.add_route('session', 'session')
 
 
+class RequestedActivation(HTTPForbidden):
+    title = 'Requsted Activation'
+
 class LoginDenied(HTTPForbidden):
     title = 'Login failure'
-
 
 class LoginNotVerified(HTTPForbidden):
     title = 'Account not verified'
@@ -96,21 +113,42 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
 def login(request):
     """View to check the auth0 assertion and remember the user"""
     login = request.authenticated_userid
+    # If the user has not been added to the database yet, @login will be None
     if login is None:
         namespace = userid = None
     else:
         namespace, userid = login.split('.', 1)
+    
+    body = request.json_body
+    email = body['email'] if 'email' in body else ''
 
+    # If a user is not found in the database
     if namespace != 'auth0':
-        request.session.invalidate()
-        request.session['user_properties'] = {}
-        request.response.headerlist.extend(forget(request))
-        raise LoginDenied()
+        try:
+            create_user(request, body)
+        except:
+            request.session.invalidate()
+            request.session['user_properties'] = {}
+            request.response.headerlist.extend(forget(request))
+            return http_error(HTTPServiceUnavailable(), request)
 
     request.session.invalidate()
     request.session.get_csrf_token()
-    request.session['user_properties'] = request.embed('/current-user', as_user=userid)
-    request.response.headerlist.extend(remember(request, 'mailto.' + userid))
+    request.session['user_properties'] = request.embed('/current-user', as_user=email)
+
+    user_status = request.session['user_properties']['user_status'] if 'user_status' in request.session['user_properties'] else None
+    if user_status == 'requested activation':
+        request.response.status = 403
+        return {
+            "@type": ['RequestedActivation', 'error']
+        }
+    elif user_status == 'inactive':
+        request.response.status = 403
+        return {
+            "@type": ['LoginDenied', 'error']
+        }
+
+    request.response.headerlist.extend(remember(request, 'mailto.' + email))
     return request.session
 
 
@@ -145,3 +183,34 @@ def session(request):
         return request.session
     request.session['user_properties'] = request.embed('/current-user', as_user=userid)
     return request.session
+
+def create_user(request, body):
+    """ Constructs user properties and creates new user in the database """
+    email = body['email'] if 'email' in body else ''
+    first_name = body['firstName'] if 'firstName' in body else ''
+    last_name = body['lastName'] if 'lastName' in body else ''
+    institution = body['institution'] if 'institution' in body else ''
+    usage_intent = body['usageIntent'] if 'usageIntent' in body else ''
+
+    properties = {
+        "email": email,
+        "first_name": first_name,
+        "last_name": last_name,
+        "institution": institution,
+        "usage_intent": usage_intent,
+        "groups": ["curator"],
+        "status": "current",
+        "timezone": "US/Pacific",
+        "job_title": "ClinGen Curator",
+        "affiliation": [],
+        "lab": "59110818-1f5b-4ac5-af38-0d5948aca66e", # Use UUID instead of "/labs/curator/"
+        "submits_for": ["59110818-1f5b-4ac5-af38-0d5948aca66e"], # Use UUID instead of "/labs/curator/"
+        "user_status": "requested activation"
+    }
+    
+    registry = request.registry
+    context = registry[COLLECTIONS]['users']
+    request.body =json.dumps(properties).encode('utf-8')
+    data = request.json
+    validate_request(context.type_info.schema, request, data)
+    collection_add(context, request)

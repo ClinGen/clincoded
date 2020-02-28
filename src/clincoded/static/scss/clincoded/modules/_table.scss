@@ -16,6 +16,10 @@
 }
 
 .table-filter {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
     @media screen and (min-width: $screen-sm-min) {
         text-align: right;
 
@@ -30,6 +34,7 @@
 }
 
 .table-filter-input {
+    display: flex;
     position: relative;
 }
 
@@ -55,6 +60,46 @@
     }
 }
 
+.table-responsive {
+    margin-bottom: 40px;
+
+    td {
+        max-width: 100px;
+        overflow-wrap: break-word;
+    }
+
+    tbody {
+        z-index: -1;
+    }
+    
+}
+
+.fixed-save-button {
+    background: #2697d1;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 50px;
+    display: flex;
+
+    .input-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .submit-feedback {
+        margin-right: 10px;
+        line-height: 32px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        color: white;
+    }
+}
+
+.export-button-spacing {
+    margin-right: 10px;
+}
 
 //**************************************************************************************************
 // GDM table styles (might need to expand this to cover more types of tables, but just GDMs for now)
