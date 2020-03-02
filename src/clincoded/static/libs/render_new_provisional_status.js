@@ -13,8 +13,10 @@ import { renderProvisionalLink } from "./render_provisional_status";
  * @param {boolean} showLink - Whether to render link to view/approve provisional (gdm) or view provisional summary (interpretation)
  * @param {boolean} stringOnly - Whether return status text or status labels/tags (default returns labels/tags)
  * @param {boolean|null} isMyClassification - refer to `renderProvisionalLink()`
+ * @param {string|null} affiliationId - refer to `renderProvisionalLink()`
+ * @param {string|null} userId - refer to `renderProvisionalLink()`
  */
-export function renderNewProvisionalStatus(snapshots, resourceType, gdm, context, showLink, stringOnly=false, isMyClassification=null) {
+export function renderNewProvisionalStatus(snapshots, resourceType, gdm, context, showLink, stringOnly=false, isMyClassification=null, affiliationId=null, userId=null) {
     const sortedSnapshots = snapshots && snapshots.length ? sortListByDate(snapshots, 'date_created') : [];
     // Get any snapshots that had been provisioned
     const provisionedSnapshots = sortedSnapshots.filter(snapshot => {
@@ -54,7 +56,7 @@ export function renderNewProvisionalStatus(snapshots, resourceType, gdm, context
                         data-tooltip={'Provisioned on ' + moment(provisionedSnapshots[0].date_created).format("YYYY MMM DD, h:mm a")}>
                         <span className="badge">NEW</span> PROVISIONAL
                     </span>
-                    {showProvisionalLink ? renderProvisionalLink(provisionedSnapshots[0], resourceType, gdm) : null}
+                    {showProvisionalLink ? renderProvisionalLink(provisionedSnapshots[0], resourceType, gdm, isMyClassification, affiliationId, userId) : null}
                 </span>
             );
         }
