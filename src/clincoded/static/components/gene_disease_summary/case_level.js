@@ -89,7 +89,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                         <span><strong>HPO term(s): </strong>
                             {evidence.hpoIdInDiagnosis.map((term, i) => {
                                 return (
-                                    <div key={i}>{term}</div>
+                                    <div className="hpo-term-summary" key={i}>{term}</div>
                                 );
                             })}
                         </span> 
