@@ -87,9 +87,9 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 }
             }
             // Allow logged-in user/affiliation to view classifications
-            // approved by other users/affiliations, or to view the
+            // approved|provisional by other users/affiliations (classifications owned by other users/affiliations), or to view the
             // approved classification owned by the logged-in user/affiliation
-            if (status === 'Approved' && (affiliationId || userId)) {
+            if ((status === 'Approved' || status === 'Provisional') && (affiliationId || userId)) {
                 if (affiliationId) {
                     curatorAffiliation = {};
                     curatorAffiliation['affiliation_id'] = affiliationId;
