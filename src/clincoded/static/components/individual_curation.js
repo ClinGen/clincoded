@@ -1258,14 +1258,16 @@ function IndividualCommonDiseases() {
                     <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
                 </span>
             </div>
-            <div className="form-group hpo-term-container"> 
-                <ul>
-                    {hpoWithTerms.map((term, i) => {
-                        return (
-                            <li key={i}>{term}</li>
-                        );
-                    })}
-                </ul>
+            <div className="form-group hpo-term-container">
+                {hpoWithTerms.length ?
+                    <ul>
+                        {hpoWithTerms.map((term, i) => {
+                            return (
+                                <li key={i}>{term}</li>
+                            );
+                        })}
+                    </ul>
+                    : null}
                 <HpoTermModal addHpoTermButton={addHpoTermButton} passHpoToParent={this.passHpoToParent} savedHpo={hpoidVal} inElim={false} />
             </div>   
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
@@ -1301,7 +1303,7 @@ function IndividualCommonDiseases() {
                 </span>
             </div>
             <div className="form-group hpo-term-container">
-                <span>
+                {hpoElimWithTerms.length ?
                     <ul>
                         {hpoElimWithTerms.map((term, i) => {
                             return (
@@ -1309,7 +1311,7 @@ function IndividualCommonDiseases() {
                             );
                         })}
                     </ul>
-                </span>
+                    : null}
                 <HpoTermModal addHpoTermButton={addElimTermButton} passElimHpoToParent={this.passElimHpoToParent} savedElimHpo={nothpoidVal} inElim={true} />
             </div>     
             {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?

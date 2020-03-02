@@ -660,14 +660,16 @@ var GroupCommonDiseases = function() {
                     <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
                 </span>
             </div>
-            <div className="form-group hpo-term-container"> 
-                <ul>
-                    {hpoWithTerms.map((term, i) => {
-                        return (
-                            <li key={i}>{term}</li>
-                        );
-                    })}
-                </ul>
+            <div className="form-group hpo-term-container">
+                {hpoWithTerms.length ?
+                    <ul>
+                        {hpoWithTerms.map((term, i) => {
+                            return (
+                                <li key={i}>{term}</li>
+                            );
+                        })}
+                    </ul>
+                    : null}
                 <HpoTermModal addHpoTermButton={addHpoTermButton} passHpoToParent={this.passHpoToParent} savedHpo={hpoidVal} inElim={false} />
             </div>
             <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="2" value={group && group.termsInDiagnosis ? group.termsInDiagnosis : ''}
@@ -681,7 +683,7 @@ var GroupCommonDiseases = function() {
                 </span>
             </div>
             <div className="form-group hpo-term-container">
-                <span>
+                {hpoElimWithTerms.length ?
                     <ul>
                         {hpoElimWithTerms.map((term, i) => {
                             return (
@@ -689,7 +691,7 @@ var GroupCommonDiseases = function() {
                             );
                         })}
                     </ul>
-                </span>
+                    : null}
                 <HpoTermModal addHpoTermButton={addElimTermButton} passElimHpoToParent={this.passElimHpoToParent} savedElimHpo={nothpoidVal} inElim={true} />
             </div> 
             <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="2" value={group && group.termsInElimination ? group.termsInElimination : ''}
