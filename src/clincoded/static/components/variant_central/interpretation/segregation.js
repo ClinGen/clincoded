@@ -468,9 +468,9 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
         return (
             <div className="variant-interpretation segregation">
                 {this.state.interpretation ?
-                    <p className="alert alert-warning">Users should not enter unique or sensitive information that is likely to identify an individual.
-                        Users should not publish data found in this interface without permission from the individual(s) who entered the data. For publication
-                        of aggregate information, please contact ClinGen at <a href="mailto:clingen@clinicalgenome.org">clingen@clinicalgenome.org</a>.</p>
+                    <p className="alert alert-warning">
+                        All information entered and accessed in the ClinGen curation interfaces should be considered publicly accessible, and may not include <a target="_blank" href="//www.hipaajournal.com/considered-phi-hipaa/">protected health information (PHI)</a> or equivalent identifiable information as defined by regulations in your country or region. For more information about ClinGen policies on data sharing, please refer to the <a target="_blank" href="/terms-of-use">VCI Terms of Use</a>.
+                    </p>
                     : null }
 
                 {this.renderMasterTable()}
