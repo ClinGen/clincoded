@@ -177,6 +177,7 @@ dl.dl-horizontal {
 }
 
 // Display external-link fontawesome icon after EVERY link (override later)
+a[target="_blank"]:after,
 a[href^="http://"]:after,
 a[href^="https://"]:after,
 a.external-link:after {
