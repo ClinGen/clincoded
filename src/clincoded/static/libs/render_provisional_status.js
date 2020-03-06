@@ -27,7 +27,9 @@ export function renderProvisionalStatus(snapshots, resourceType, gdm, context, s
         return snapshot.approvalStatus === 'Approved' && snapshot.resourceType === resourceType;
     });
     let showProvisionalLink = false;
-    if (resourceType === 'classification' && context && context.name === 'curation-central' && showLink) {
+    if (resourceType === 'classification' && context && 
+            (context.name === 'curation-central' || context.name === 'provisional-curation' || context.name === 'provisional-classification') 
+            && showLink) {
         showProvisionalLink = true;
     } else if (resourceType === 'interpretation' && showLink) {
         showProvisionalLink = true;
