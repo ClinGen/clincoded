@@ -599,22 +599,32 @@ function clinvarQueryResource() {
         var url = external_url_map['ClinVarEutilsVCV'];
         var data;
         var id = this.state.inputValue;
-        this.getRestDataXml(url + id).then(async (xml) => {
+        this.getRestDataXml(url + id).then((xml) => {
             data = parseClinvar(xml);
             if (data.clinvarVariantId) {
                 // found the result we want
 
                 // try to query MANE transcript title as well (based on CAR), even if ClinVar title will always be favored for displaying variant title; MANE transcript title will have other use due to unique status of MANE.
                 if (data.carId) {
-                    try {
-                        const url = this.props.protocol + external_url_map['CARallele'];
-                        const carJson = await this.getRestData(url + data.carId);
-                        const maneTranscriptTitle = await queryManeTranscriptTitle.call(this, data.carId, carJson);
-                        data['maneTranscriptTitle'] = maneTranscriptTitle || "";
-                    }
-                    catch (error) {
-                        console.warn('Error in querying MANE transcript data = %o', error);
-                    }
+                    // try {
+                    //     const url = this.props.protocol + external_url_map['CARallele'];
+                    //     const carJson = await this.getRestData(url + data.carId);
+                    //     const maneTranscriptTitle = await queryManeTranscriptTitle.call(this, data.carId, carJson);
+                    //     data['maneTranscriptTitle'] = maneTranscriptTitle || "";
+                    // }
+                    // catch (error) {
+                    //     console.warn('Error in querying MANE transcript data = %o', error);
+                    // }
+
+                    // TODO: replace await by process here
+                    const url = this.props.protocol + external_url_map['CARallele'];
+                    this.getRestData(url + data.carId).then((carJson) => queryManeTranscriptTitle.call(this, data.carId, carJson))
+                        .then((maneTranscriptTitle) => {
+                            data['maneTranscriptTitle'] = maneTranscriptTitle || "";
+                            this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+                        })
+                        .catch((error) => console.warn('Error in querying MANE transcript data = %o', error))
+                    ;
                 }
 
                 this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
