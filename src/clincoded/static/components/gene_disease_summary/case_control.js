@@ -66,7 +66,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                     {evidence.diseaseId && evidence.diseaseTerm ?
                         <span>{evidence.diseaseTerm}
                             <span> {!evidence.diseaseFreetext ? (<span>({evidence.diseaseId.replace('_', ':')})</span>)
-                                : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span><br/><strong>HPO term(s):</strong>{evidence.hpoIdInDiagnosis.join(', ')}</span> : null)
+                                : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span><br/><strong>HPO term(s): </strong>{evidence.diseasePhenotypes.join(', ')}</span> : null)
                             }
                             </span>
                         </span>

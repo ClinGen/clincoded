@@ -356,6 +356,9 @@ var GroupCuration = createReactClass({
                     if (nothpoids && nothpoids.length) {
                         newGroup.hpoIdInElimination = nothpoids;
                     }
+                    else if (newGroup.hpoIdInElimination) {
+                        delete newGroup.hpoIdInElimination;
+                    }
                     phenoterms = this.getFormValue('notphenoterms');
                     if (phenoterms) {
                         newGroup.termsInElimination = phenoterms;
@@ -643,8 +646,8 @@ var GroupCommonDiseases = function() {
     const nothpoidVal = group && group.hpoIdInElimination ? group.hpoIdInElimination : [];
     const hpoWithTerms = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
     const hpoElimWithTerms = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
-    const addHpoTermButton = (hpoWithTerms.length || hpoidVal.length) ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
-    const addElimTermButton = (hpoElimWithTerms.length || nothpoidVal.length) ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
+    const addHpoTermButton = hpoWithTerms.length ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
+    const addElimTermButton = hpoElimWithTerms.length ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
 
     return (
         <div className="row">

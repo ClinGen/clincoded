@@ -311,7 +311,7 @@ var FamilyCuration = createReactClass({
         if (associatedGroups && associatedGroups.length > 0) {
             hpoIds = associatedGroups.map(function(associatedGroup, i) {
                 if (associatedGroup.hpoIdInDiagnosis && associatedGroup.hpoIdInDiagnosis.length) {
-                    const hpoTerm = associatedGroup.hpoIdInDiagnosis ? associatedGroup.hpoIdInDiagnosis : [];
+                    const hpoTerm = associatedGroup.hpoIdInDiagnosis;
                     return hpoTerm;
                 }
             });
@@ -346,7 +346,7 @@ var FamilyCuration = createReactClass({
         if (associatedGroups && associatedGroups.length > 0) {
             hpoInElim = associatedGroups.map(function(associatedGroup, i) {
                 if (associatedGroup.hpoIdInElimination && associatedGroup.hpoIdInElimination.length) {
-                    const hpoTerm = associatedGroup.hpoIdInElimination ? associatedGroup.hpoIdInElimination : [];
+                    const hpoTerm = associatedGroup.hpoIdInElimination;
                     return hpoTerm;
                 }
             });
@@ -1276,6 +1276,9 @@ var FamilyCuration = createReactClass({
         if (hpoElimWithTerms) {
             newFamily.hpoIdInElimination = hpoElimWithTerms;
         }
+        else if (newFamily.hpoIdInElimination) {
+            delete newFamily.hpoIdInElimination;
+        }
         phenoterms = this.getFormValue('notphenoterms');
         if (phenoterms) {
             newFamily.termsInElimination = phenoterms;
@@ -1694,8 +1697,8 @@ function FamilyCommonDiseases() {
     const nothpoidVal = family && family.hpoIdInElimination ? family.hpoIdInElimination : [];
     const hpoWithTerms = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
     const hpoElimWithTerms = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
-    const addHpoTermButton = (hpoWithTerms.length || hpoidVal.length) ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
-    const addElimTermButton = (hpoElimWithTerms.length || nothpoidVal.length) ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
+    const addHpoTermButton = hpoWithTerms.length ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
+    const addElimTermButton = hpoElimWithTerms.length ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
 
     // Make a list of diseases from the group, either from the given group,
     // or the family if we're editing one that has associated groups.renderPhenotype

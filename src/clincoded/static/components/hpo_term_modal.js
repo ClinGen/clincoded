@@ -45,17 +45,17 @@ var HpoTermModal = createReactClass({
 
     saveForm(e) {
         e.preventDefault(); e.stopPropagation();
-        let hpoWithTermsList = this.state.hpoWithTerms;
-        let hpoElimWithTermsList = this.state.hpoElimWithTerms;
+        let hpoWithTermsList = _.uniq(this.state.hpoWithTerms);
+        let hpoElimWithTermsList = _.uniq(this.state.hpoElimWithTerms);
         const inElim = this.props.inElim ? this.props.inElim : false;
         // Check if the modal has valid values to save, and if in Elim (NOT Phenotype); Modal has two use-cases
         if (hpoWithTermsList && !inElim) {
-            hpoWithTermsList = [...new Set(hpoWithTermsList)];
             this.props.passHpoToParent(hpoWithTermsList);
+            this.setState({ hpoWithTerms: hpoWithTermsList });
         }
         else if (hpoElimWithTermsList && inElim) {
-            hpoElimWithTermsList = [... new Set(hpoElimWithTermsList)];
             this.props.passElimHpoToParent(hpoElimWithTermsList);
+            this.setState({ hpoElimWithTerms: hpoElimWithTermsList });
         }
         this.child.closeModal();
     },
@@ -78,15 +78,17 @@ var HpoTermModal = createReactClass({
     },
 
     deleteHpo(index) {
-        const hpo = this.state.hpoWithTerms.filter((hpo, hpoIndex) => {
-            return hpoIndex !== index;
+        const term = this.state.hpoWithTerms[index];
+        const hpo = this.state.hpoWithTerms.filter(hpo => {
+            return hpo !== term;
         });
         this.setState({ hpoWithTerms: hpo });
     },
 
     deleteElimHpo(index) {
-        const elimHpo = this.state.hpoElimWithTerms.filter((hpo, hpoIndex) => {
-            return hpoIndex !== index;
+        const term = this.state.hpoElimWithTerms[index];
+        const elimHpo = this.state.hpoElimWithTerms.filter(hpo => {
+            return hpo !== term;
         });
         this.setState({ hpoElimWithTerms: elimHpo });
     },
@@ -140,8 +142,8 @@ var HpoTermModal = createReactClass({
     },
 
     render() {
-        let hpoWithTerms = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
-        let hpoElimWithTerms = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
+        let hpoWithTerms = _.uniq(this.state.hpoWithTerms ? this.state.hpoWithTerms : []);
+        let hpoElimWithTerms = _.uniq(this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : []);
 
         return (
             <div>

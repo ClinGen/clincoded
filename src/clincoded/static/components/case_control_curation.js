@@ -547,6 +547,9 @@ const CaseControlCuration = createReactClass({
                     if (nothpoids && nothpoids.length) {
                         newCaseGroup.hpoIdInElimination = nothpoids;
                     }
+                    else if (newCaseGroup.hpoIdInElimination) {
+                        delete newCaseGroup.hpoIdInElimination;
+                    }
                     phenoterms = this.getFormValue(prefix + 'notphenoTerms');
                     if (phenoterms) {
                         newCaseGroup.termsInElimination = phenoterms;
@@ -1197,12 +1200,12 @@ function GroupCommonDiseases(groupType) {
         group = this.state.controlGroup;
     }
 
-    let hpoidVal = group && group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis : [];
-    let nothpoidVal = group && group.hpoIdInElimination ? group.hpoIdInElimination : [];
+    const hpoidVal = group && group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis : [];
+    const nothpoidVal = group && group.hpoIdInElimination ? group.hpoIdInElimination : [];
     const hpoWithTerms = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
     const hpoElimWithTerms = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
-    const addHpoTermButton = (hpoWithTerms.length || hpoidVal.length) ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
-    const addElimTermButton = (hpoElimWithTerms.length || nothpoidVal.length) ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
+    const addHpoTermButton = hpoWithTerms.length  ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
+    const addElimTermButton = hpoElimWithTerms.length ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
 
     return (
         <div className="row section section-disease">
@@ -1233,7 +1236,7 @@ function GroupCommonDiseases(groupType) {
             </div>
             <Input type="textarea" ref={phenoTerms} label={<LabelPhenoTerms />} rows="2" inputDisabled={inputDisabled}
                 value={group && group.termsInDiagnosis ? group.termsInDiagnosis : ''}
-                error={this.getFormError(phenoTerms)} clearError={this.clrMultiFormErrors.bind(null, phenoTerms)}
+                error={this.getFormError(phenoTerms)} clearError={this.clrMultiFormErrors.bind(null, [phenoTerms])}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in {cohortLabel}</em> if they are specifically noted in the paper.</p>
             <div className="col-sm-5 control-label">

@@ -684,7 +684,7 @@ const IndividualCuration = createReactClass({
         // Fill in the individual fields from the Diseases & Phenotypes panel
         if (hpoids && hpoids.length) {
             newIndividual.hpoIdInDiagnosis = hpoids;
-        } else if (newIndividual.hpoIdInDiagnosis && newIndividual.hpoIdInDiagnosis.length) {
+        } else if (newIndividual.hpoIdInDiagnosis) {
             delete newIndividual.hpoIdInDiagnosis;
         }
         var phenoterms = this.getFormValue('phenoterms');
@@ -695,6 +695,9 @@ const IndividualCuration = createReactClass({
         }
         if (nothpoids && nothpoids.length) {
             newIndividual.hpoIdInElimination = nothpoids;
+        }
+        else if (newIndividual.hpoIdInElimination) {
+            delete newIndividual.hpoIdInElimination
         }
         phenoterms = this.getFormValue('notphenoterms');
         if (phenoterms) {
@@ -1212,8 +1215,8 @@ function IndividualCommonDiseases() {
     const nothpoidVal = individual && individual.hpoIdInElimination ? individual.hpoIdInElimination : [];
     const hpoWithTerms = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
     const hpoElimWithTerms = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
-    const addHpoTermButton = (hpoWithTerms.length || hpoidVal.length) ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
-    const addElimTermButton = (hpoElimWithTerms.length || nothpoidVal.length) ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
+    const addHpoTermButton = hpoWithTerms.length ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
+    const addElimTermButton = hpoElimWithTerms.length ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
 
     // Make a list of diseases from the group, either from the given group,
     // or the individual if we're editing one that has associated groups.
