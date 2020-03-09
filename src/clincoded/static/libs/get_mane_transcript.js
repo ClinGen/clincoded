@@ -67,13 +67,13 @@ export const parseManeTranscriptIdFromLdh = (ldhJson) => {
 /**
  * Method to return the MANE transcript id given the json fetched from genomic CAR.
  * @param {object} genomicCarJson - Genomic CAR json response object.
- * @returns {(string|null)} MANE transcript id.
+ * @returns {string} MANE transcript id. If cannot parse MANE transcript id, returns empty string.
  */
 export const parseManeTranscriptIdFromGenomicCar = (genomicCarJson) => {
     const {
         externalRecords: {
             MANEPrefRefSeq: {
-                id = null
+                id = ''
             } = {}
         }
     } = genomicCarJson;
