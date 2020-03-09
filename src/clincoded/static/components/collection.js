@@ -161,6 +161,23 @@ const Table = module.exports.Table = createReactClass({
     },
 
     /**
+     * Formats datetime string using moment
+     * @param {string} datetime datetime string to be formatted
+     */
+    getFormattedDate: function (datetime) {
+        return moment(datetime).format('YYYY-MM-DD h:mm:ssa');
+    },
+
+    /**
+     * Return true if @value is a date string in ISO 8601 format
+     * otherwise return false
+     * @param {string} value string to be validated
+     */
+    isValidDate: function(value) {
+        return moment(value, moment.ISO_8601).isValid();
+    },
+
+    /**
      * Fetches data if `context` contains property `all`, otherwise extract data from context
      * @param {object} props Component props
      * @param {array} columns Passed along to data processing function, extractData
@@ -210,7 +227,8 @@ const Table = module.exports.Table = createReactClass({
                 return { value, sortable };
             });
             const text = cells.map((cell) => {
-                return cell.value;
+                const cellValue = this.isValidDate(cell.value) ? this.getFormattedDate(cell.value) : cell.value;
+                return cellValue;
             }).join(' ').toLowerCase();
             return { item, cells, text };
         });
@@ -318,7 +336,7 @@ const Table = module.exports.Table = createReactClass({
                     'First Name': row.item.first_name,
                     'Last Name': row.item.last_name,
                     'User Status': row.item.user_status,
-                    'Creation Date': moment(row.item.date_created).format('YYYY-MM-DD h:mm:ssa')
+                    'Creation Date': this.getFormattedDate(row.item.date_created)
                 });
             });
             exportCSV(formattedUsers, { filename: 'users-export.csv' });
@@ -403,10 +421,10 @@ const Table = module.exports.Table = createReactClass({
                     <td key={index}><a href={row.item['@id']}>{cellValue}</a></td>
                 );
             }
-            // If the current @cellValue is the same as the date_created, format the date
-            if (row.item && row.item.date_created === cellValue) {
+            // If the current @cellValue is a valid date, format the date
+            if (this.isValidDate(cellValue)) {
                 return (
-                    <td key={index}>{ moment(cellValue).format('YYYY-MM-DD h:mm:ssa') }</td>
+                    <td key={index}>{ this.getFormattedDate(cellValue) }</td>
                 );
             }
             // If the current @cellValue is the same as the user_status, render a select field

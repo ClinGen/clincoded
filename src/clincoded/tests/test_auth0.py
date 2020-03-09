@@ -46,7 +46,7 @@ def test_login_unknown_user(anontestapp, auth0_encode_user_token):
     res = anontestapp.get('/session')
     csrf_token = str(res.json['_csrft_'])
     headers = {'X-CSRF-Token': csrf_token}
-    res = anontestapp.post_json('/login', auth0_encode_user_token, headers=headers, status=403)
+    res = anontestapp.post_json('/login', auth0_encode_user_token, headers=headers, status=503)
     assert 'Set-Cookie' in res.headers
 
 

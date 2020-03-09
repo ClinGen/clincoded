@@ -136,7 +136,7 @@
             "title": "User Status",
             "description": "Status of the user. Grants or restricts access to the interfaces",
             "type": "string",
-            "default": "active",
+            "default": "requested activation",
             "enum": ["requested activation", "active", "inactive"]
         }
     },

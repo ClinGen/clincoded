@@ -42,7 +42,7 @@ var Home = module.exports.Home = createReactClass({
                     <div className="row">
                         <div className="col-sm-12">
                             <div className="project-info site-title">
-                                <h1>ClinGen Curator Interfaces</h1>
+                                <h1>ClinGen Curation Interfaces</h1>
                                 <h4>Variant Curation &#8226; Gene Curation</h4>
                                 <p className="lead">ClinGen is a National Institutes of Health (NIH)-funded resource dedicated to building an authoritative central resource that defines the clinical relevance of genes and variants for use in precision medicine and research. One of the key goals of ClinGen is to implement an evidence-based consensus for curating genes and variants. For more information on the ClinGen and how to get involved, please visit the ClinGen portal at <a href="https://www.clinicalgenome.org" target="_blank" rel="noopener noreferrer">clinicalgenome.org</a></p>
                                 <p className="lead">

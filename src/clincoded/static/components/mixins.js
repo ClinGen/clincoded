@@ -150,8 +150,8 @@ module.exports.Auth0 = {
                         primaryColor: '#294297'
                     },
                     languageDictionary: {
-                        title: "ClinGen Curator Interface",
-                        signUpTerms: 'I have read and agree to the <a href="/terms-of-use" target="_blank">Terms of Use</a>',
+                        title: "ClinGen Curation Interfaces",
+                        signUpTerms: 'I have read and agree to the <a href="/terms-of-use" target="_blank" rel="noopener noreferrer" style="color: #337ab7; text-decoration: underline;">Terms of Use</a>',
                         signUpSubmitLabel: 'Request Account'
                     },
                     mustAcceptTerms: true

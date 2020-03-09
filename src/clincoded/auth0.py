@@ -120,7 +120,10 @@ def login(request):
         namespace, userid = login.split('.', 1)
     
     body = request.json_body
-    email = body['email'] if 'email' in body else ''
+    if userid == None:
+        email = body['email'] if 'email' in body else None
+    else:
+        email = userid
 
     # If a user is not found in the database
     if namespace != 'auth0':

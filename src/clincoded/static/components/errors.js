@@ -83,10 +83,9 @@ export class RequestedActivation extends Component {
                             <div className="page-header"><h1><i className="icon icon-exclamation-triangle"></i> Thank you for registering</h1></div>
                             <div className="panel panel-default">
                                 <div className="panel-body">
-                                    <p>Your registration has been received and will be reviewed shortly. You will receive an email when your account is granted access to the interfaces.</p>
-                                    <p><span className="section-header">Step 1 <span className="text-success"><i className="icon icon-check"></i> Completed</span></span>Register your user name and password with <a href="https://auth0.com/signup" target="_blank" rel="noopener noreferrer">Auth0</a>, a third-party system that will manage your password.</p>
-                                    <p><span className="section-header">Step 2 <span className="text-success"><i className="icon icon-check"></i> Completed</span></span>Log in to request access to the interfaces.</p>
-                                    <p>If you have any questions, please contact us at <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a></p>
+                                    <p>Your request for access to the interfaces has been received. Once your account is activated, you will receive a confirmation email.</p>
+                                    <p>If you are a ClinGen curator, your coordinator will arrange for you to be added to your affiliation. To learn more about volunteering for curation efforts with ClinGen please check our <a href="https://www.clinicalgenome.org/working-groups/c3/" target="_blank" rel="noopener noreferrer">Community Curation</a> site.</p>
+                                    <p>Please contact us at <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a> with any questions.</p>
                                 </div>
                             </div>
                             <div className="alert alert-info">
@@ -113,7 +112,7 @@ export class LoginDenied extends Component {
                             <div className="page-header"><h1><i className="icon icon-exclamation-triangle"></i> Access Denied</h1></div>
                             <div className="panel panel-default">
                                 <div className="panel-body">
-                                    <p>If you have any questions, please contact us at <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a></p>
+                                    <div>If you have any questions, please contact us at <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a>.</div>
                                 </div>
                             </div>
                             <div className="alert alert-info">
@@ -141,10 +140,10 @@ export class LoginNotVerified extends Component {
                             <div className="page-header"><h1><i className="icon icon-exclamation-triangle"></i> Auth0 account not yet verified</h1></div>
                             <div className="panel panel-default">
                                 <div className="panel-body">
-                                    <p>Auth0 account activation requires email verification - please check your inbox for an email from Auth0 and verify it according to the instructions.</p>
-                                    <p>Once you have completed Auth0 email verification, please log in to complete the registration of your account.</p>
-                                    <p>Please note that access to the ClinGen Gene Curation Interface is currently restricted to ClinGen curators.</p>
-                                    <p>If you have any questions, please contact us at <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a></p>
+                                    <p><span className="section-header">Step 1 <span className="text-success"><i className="icon icon-check"></i> Completed</span></span>Sign up with your email and password.</p>
+                                    <p><span className="section-header">Step 2 </span>Please check your inbox for an email from Auth0 and verify your email according to the instructions.</p>
+                                    <p><span className="section-header">Step 3 </span>Please log in to complete the registration of your account.</p>
+                                    <p>If you have any questions, please contact us at <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a>.</p>
                                 </div>
                             </div>
                         </div>

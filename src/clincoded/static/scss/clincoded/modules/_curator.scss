@@ -3661,7 +3661,7 @@ table.login-users-interpretations {
  * Styles for error pages
  */
 .type-error {
-    &.type-LoginDenied, &.type-LoginNotVerified {
+    &.type-LoginDenied, &.type-LoginNotVerified, &.type-RequestedActivation {
         h1 {
             .icon {
                 font-size: 95%;
@@ -3679,12 +3679,12 @@ table.login-users-interpretations {
             border-radius: 4px;
 
             .panel-body {
-                font-size: 1.05rem;
+                font-size: 1.15rem;
                 line-height: 160%;
 
                 .section-header {
                     display: block;
-                    font-size: 1.15rem;
+                    font-size: 1.25rem;
                     font-weight: bold;
                 }
 
