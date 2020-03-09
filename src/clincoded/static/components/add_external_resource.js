@@ -779,6 +779,7 @@ function carQueryResource() {
                     // error handling for ClinVar query
                     this.setFormErrors('resourceId', 'Error querying ClinVar for additional data. Please check your input and try again.');
                     finalState.resourceFetched = false;
+                    delete finalState['tempResource'];
                 }
             } else if (data.carId) {
                 // if the CAR result has no ClinVar variant ID, just use the CAR data set
@@ -830,6 +831,7 @@ function carQueryResource() {
                 // in case the above two fail (theoretically a 404 json response, but an error is thrown instead (see below))
                 this.setFormErrors('resourceId', 'CA ID not found');
                 finalState.resourceFetched = false;
+                delete finalState['tempResource'];
             }
 
             // If queried CAR successfully, always try to obtain MANE transcript info (best effort only)
@@ -938,7 +940,12 @@ function carSubmitResource(func) {
     }
 }
 
-
+/**
+ * Extracts and returns the variant MANE transcript title from CAR response data
+ * @param {string|undefined|null} carId The CA ID of the variant. If not provided, will do nothing.
+ * @param {Object|undefined|null} carJson The returned variant response data from CAR API call. If not provided, will do nothing.
+ * @returns {string|null} The MANE transcript title; otherwise return null.
+ */
 async function queryManeTranscriptTitle(carId, carJson) {
     // retrieving MANE transcript requires CAR data in place first
     if (!(carId && carJson)) {
