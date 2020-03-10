@@ -1130,11 +1130,9 @@ def user_5_6(value, system):
         'catherinefletcher@nhs.net': '2018-12-01T08:00:00+00:00',
         'mariaisabel.achatz@nih.gov': '2018-12-01T08:00:00+00:00'
     }
-    if value.get('date_created') != None:
-        email = value['email']
-        email = email.lower()
-        date = date_created_map.get(email)
-        value['date_created'] = date if date != None else '1994-01-01T08:00:00+00:00'
-    if value.get('user_status') != None:
-        value['user_status'] = 'active'
+    email = value['email']
+    email = email.lower()
+    date = date_created_map.get(email)
+    value['date_created'] = date if date != None else '1994-01-01T08:00:00+00:00'
+    value['user_status'] = 'active'
 

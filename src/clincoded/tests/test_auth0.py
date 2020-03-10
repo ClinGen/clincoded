@@ -58,6 +58,7 @@ def test_login_logout(testapp, anontestapp, auth0_encode_user_token, auth0_encod
         'email': email,
         'first_name': 'Auth0',
         'last_name': 'Test User',
+        'user_status': 'active'
     }
     testapp.post_json(url, item, status=201)
 
