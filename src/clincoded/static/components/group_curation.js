@@ -908,7 +908,8 @@ class GroupViewer extends Component {
                                 <div>
                                     <dt>HPO IDs</dt>
                                     <dd>{context.hpoIdInDiagnosis && context.hpoIdInDiagnosis.map(function(hpo, i) {
-                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                        let id = hpo.match(/\HP:\d{7}/g);
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + id} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                     })}</dd>
                                 </div>
 
@@ -920,7 +921,8 @@ class GroupViewer extends Component {
                                 <div>
                                     <dt>NOT HPO IDs</dt>
                                     <dd>{context.hpoIdInElimination && context.hpoIdInElimination.map(function(hpo, i) {
-                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                        let id = hpo.match(/\HP:\d{7}/g);
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + id} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                     })}</dd>
                                 </div>
 

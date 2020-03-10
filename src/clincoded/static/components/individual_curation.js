@@ -1988,7 +1988,8 @@ const IndividualViewer = createReactClass({
                                 <div>
                                     <dt>HPO IDs</dt>
                                     <dd>{individual.hpoIdInDiagnosis && individual.hpoIdInDiagnosis.map(function(hpo, i) {
-                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                        let id = hpo.match(/\HP:\d{7}/g);
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + id} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                     })}</dd>
                                 </div>
 
@@ -2000,7 +2001,8 @@ const IndividualViewer = createReactClass({
                                 <div>
                                     <dt>NOT HPO IDs</dt>
                                     <dd>{individual.hpoIdInElimination && individual.hpoIdInElimination.map(function(hpo, i) {
-                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                        let id = hpo.match(/\HP:\d{7}/g);
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + id} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                     })}</dd>
                                 </div>
 

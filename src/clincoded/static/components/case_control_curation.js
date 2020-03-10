@@ -1715,7 +1715,8 @@ var CaseControlViewer = createReactClass({
                                         <div>
                                             <dt>HPO IDs</dt>
                                             <dd>{caseCohort.hpoIdInDiagnosis && caseCohort.hpoIdInDiagnosis.map(function(hpo, i) {
-                                                return <span key={hpo + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                                let id = hpo.match(/\HP:\d{7}/g);
+                                                return <span key={hpo + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + id} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                             })}</dd>
                                         </div>
 
@@ -1727,7 +1728,8 @@ var CaseControlViewer = createReactClass({
                                         <div>
                                             <dt>NOT HPO IDs</dt>
                                             <dd>{caseCohort.hpoIdInElimination && caseCohort.hpoIdInElimination.map(function(hpo, i) {
-                                                return <span key={hpo + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                                let id = hpo.match(/\HP:\d{7}/g);
+                                                return <span key={hpo + '_' + i}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + id} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                             })}</dd>
                                         </div>
 
