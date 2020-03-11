@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import { curator_page, queryKeyValue, external_url_map } from '../globals';
 import { RestMixin } from '../rest';
+import _ from 'underscore';
 import GeneDiseaseEvidenceSummaryHeader from './header';
 import GeneDiseaseEvidenceSummaryCaseLevel from './case_level';
 import GeneDiseaseEvidenceSummarySegregation from './case_level_segregation';
@@ -11,6 +12,7 @@ import GeneDiseaseEvidenceSummaryCaseControl from './case_control';
 import GeneDiseaseEvidenceSummaryExperimental from './experimental';
 import GeneDiseaseEvidenceSummaryNonscorableEvidence from './nonscorable_evidence';
 import GeneDiseaseEvidenceSummaryClassificationMatrix from './classification_matrix';
+import ViewJson from '../view_json';
 import CASE_INFO_TYPES from '../score/constants/case_info_types';
 
 const GeneDiseaseEvidenceSummary = createReactClass({
@@ -38,6 +40,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             experimentalEvidenceList: [],
             nonscorableEvidenceList: [],
             preview: queryKeyValue('preview', this.props.href),
+            displayJson: false,
             hpoTermsCollection: {
                 caseLevel: {},
                 segregation: {},
@@ -57,6 +60,9 @@ const GeneDiseaseEvidenceSummary = createReactClass({
         let affiliationUtilityBar = document.querySelector('.affiliation-utility-container');
         if (affiliationUtilityBar) {
             affiliationUtilityBar.setAttribute('style', 'display:none');
+        }
+        if (this.jsonView) {
+            this.jsonView.scrollIntoView({ behavior: 'smooth' });
         }
     },
 
@@ -681,18 +687,29 @@ const GeneDiseaseEvidenceSummary = createReactClass({
     },
 
     /**
-     * Method to genetate PDF from HTML
+     * Method to generate PDF from HTML
      * @param {*} e - Window event
      */
     handlePrintPDF(e) {
         window.print();
     },
 
+    /**
+     * Method to toggle JSON from gdm state
+     * @param {*} e
+     */
+    handleViewJSON(e) {
+        this.setState({displayJson: !this.state.displayJson});
+    },
+
     render() {
         const gdm = this.state.gdm;
+        const parsedJson = _.omit(gdm, ['@type', 'actions', 'active']);
+        const json = JSON.stringify(parsedJson, null, 4);
         const provisional = this.state.provisional;
         const snapshotPublishDate = this.state.snapshotPublishDate;
         const hpoTermsCollection = this.state.hpoTermsCollection;
+        let jsonButtonText = this.state.displayJson ? 'Hide JSON' : 'View JSON';
 
         return (
             <div className="gene-disease-evidence-summary-wrapper">
@@ -713,11 +730,17 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                     <GeneDiseaseEvidenceSummaryExperimental experimentalEvidenceList={this.state.experimentalEvidenceList} />
                     <GeneDiseaseEvidenceSummaryNonscorableEvidence nonscorableEvidenceList={this.state.nonscorableEvidenceList} />
                 </div>
+                {this.state.displayJson ? 
+                    <div ref={(ref) => this.jsonView = ref}>
+                        <ViewJson data={json} />
+                    </div>
+                : null}
                 <p className="print-info-note">
                     <i className="icon icon-info-circle"></i> For best printing, choose "Landscape" for layout, 50% for Scale, "Minimum" for Margins, and select "Background graphics".
                 </p>
                 <div className="pdf-download-wrapper">
                     <button className="btn btn-default btn-inline-spacer" onClick={this.handleWindowClose}><i className="icon icon-close"></i> Close</button>
+                    <button className="btn btn-primary btn-inline-spacer" onClick={this.handleViewJSON}>{jsonButtonText}</button>
                     <button className="btn btn-primary btn-inline-spacer pull-right" onClick={this.handlePrintPDF}>Print PDF</button>
                 </div>
             </div>

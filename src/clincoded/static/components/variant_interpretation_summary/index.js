@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import { curator_page, userMatch, queryKeyValue, external_url_map } from '../globals';
 import { RestMixin } from '../rest';
+import _ from 'underscore';
+import ViewJson from '../view_json';
 import VariantInterpretationSummaryHeader from './header';
 import VariantInterpretationSummaryEvaluation from './evaluations';
 
@@ -21,7 +23,8 @@ const VariantInterpretationSummary = createReactClass({
             user: null, // Logged-in user uuid
             interpretation: null, // The parent interpretation object associated with the classification
             classification: {}, // Logged-in user's existing classification object
-            preview: queryKeyValue('preview', this.props.href)
+            preview: queryKeyValue('preview', this.props.href),
+            displayJson: false,
         };
     },
 
@@ -36,6 +39,9 @@ const VariantInterpretationSummary = createReactClass({
         let affiliationUtilityBar = document.querySelector('.affiliation-utility-container');
         if (affiliationUtilityBar) {
             affiliationUtilityBar.setAttribute('style', 'display:none');
+        }
+        if (this.jsonView) {
+            this.jsonView.scrollIntoView({ behavior: 'smooth' });
         }
     },
 
@@ -71,9 +77,21 @@ const VariantInterpretationSummary = createReactClass({
         window.print();
     },
 
+    /**
+     * Method to toggle JSON from interpretation state
+     * @param {*} e - Window event
+     */
+    handleViewJSON(e) {
+        this.setState({displayJson: !this.state.displayJson})
+    },
+
     render() {
         const interpretation = this.state.interpretation;
         const classification = this.state.classification;
+        const parsedJson = _.omit(interpretation, ['@type', 'actions', 'active']);
+        const json = JSON.stringify(parsedJson, null, 4);
+        let jsonButtonText = this.state.displayJson ? 'Hide JSON' : 'View JSON';
+
 
         return (
             <div className="container variant-interprertation-summary-wrapper">
@@ -85,11 +103,17 @@ const VariantInterpretationSummary = createReactClass({
                     <VariantInterpretationSummaryHeader interpretation={interpretation} classification={classification} />
                     <VariantInterpretationSummaryEvaluation interpretation={interpretation} classification={classification} />
                 </div>
+                {this.state.displayJson ? 
+                    <div ref={(ref) => this.jsonView = ref}>
+                        <ViewJson data={json} />
+                    </div>
+                : null}
                 <p className="print-info-note">
                     <i className="icon icon-info-circle"></i> For best printing, choose "Landscape" for layout, 50% for Scale, "Minimum" for Margins, and select "Background graphics".
                 </p>
                 <div className="pdf-download-wrapper">
                     <button className="btn btn-default btn-inline-spacer" onClick={this.handleWindowClose}><i className="icon icon-close"></i> Close</button>
+                    <button className="btn btn-primary btn-inline-spacer" onClick={this.handleViewJSON}>{jsonButtonText}</button>
                     <button className="btn btn-primary btn-inline-spacer pull-right" onClick={this.handlePrintPDF}>Print PDF</button>
                 </div>
             </div>
