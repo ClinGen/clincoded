@@ -151,8 +151,8 @@ var HpoTermModal = createReactClass({
                     actuatorClass="input-group-hpo" actuatorTitle={this.props.addHpoTermButton} onRef={ref => (this.child = ref)}>
                     <div className="modal-body">
                         <strong><span><a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s)</span>:</strong>
-                        <Input type="textarea" ref="hpoid" placeholder="e.g. HP:0010704, HP:0030300" error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')} />
-                        <Input type="button" ref="gethpoidterm" inputClassName="btn-copy btn-sm btn-last" title="Add" clickHandler={this.props.inElim === true ? this.fetchHpoInElimName : this.fetchHpoName} />
+                        <Input type="textarea" ref="hpoid" inputClassName="hpo-text-area" placeholder="e.g. HP:0010704, HP:0030300" rows="4" error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')} />
+                        <Input type="button" ref="gethpoidterm" inputClassName="btn-copy btn-sm btn-last hpo-add-btn" title="Add" clickHandler={this.props.inElim === true ? this.fetchHpoInElimName : this.fetchHpoName} />
                         <div>
                             {hpoWithTerms ? 
                                 <ul>

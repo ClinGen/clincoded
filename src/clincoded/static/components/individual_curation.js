@@ -131,6 +131,8 @@ const IndividualCuration = createReactClass({
                     return (hpoid);
                 });
                 this.setState({ hpoWithTerms: hpoIds });
+            } else {
+                this.setState({ hpoWithTerms: [] });
             }
             if (obj.termsInDiagnosis) {
                 this.refs['phenoterms'].setValue(obj.termsInDiagnosis);
@@ -153,6 +155,8 @@ const IndividualCuration = createReactClass({
                     return (elimhpo);
                 });
                 this.setState({ hpoElimWithTerms: hpoElimIds });
+            } else {
+                this.setState({ hpoElimWithTerms: [] });
             }
             if (obj.termsInElimination) {
                 this.refs['notphenoterms'].setValue(obj.termsInElimination);
