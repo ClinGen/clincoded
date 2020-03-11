@@ -2017,7 +2017,8 @@
         "submits_for": [
             "/labs/curator/"
         ],
-        "timezone": "US/Pacific"
+        "timezone": "US/Pacific",
+        "user_status": "active"
     },
     {
         "email": "jennifer.goldstein@unc.edu",

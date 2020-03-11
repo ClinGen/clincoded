@@ -43,9 +43,6 @@ def groupfinder(login, request):
         return None
 
     user_properties = user.properties
-    user_properties.update({
-        'user_status': 'active'
-    })
 
     if user_properties.get('status') in ('deleted', 'disabled'):
         return None
