@@ -85,13 +85,13 @@ const CaseControlCuration = createReactClass({
         this.loadData();
     },
 
-    passHpoToParent: function(hpoWithTerms) {
+    updateHpo: function(hpoWithTerms) {
         if (hpoWithTerms) {
             this.setState({ hpoWithTerms });
         }
     },
 
-    passElimHpoToParent: function(hpoElimWithTerms) {
+    updateElimHpo: function(hpoElimWithTerms) {
         if (hpoElimWithTerms) {
             this.setState({ hpoElimWithTerms });
         }
@@ -259,9 +259,9 @@ const CaseControlCuration = createReactClass({
             /**********************************/
             /* Only applicable to Case Cohort */
             /**********************************/
-            let hpoids = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
+            let hpoIds = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
             let hpotext = curator.capture.hpoids(this.getFormValue('caseCohort_phenoTerms'));
-            let nothpoids = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
+            let notHpoIds = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
 
             let valid_disease = false;
             if (!this.state.diseaseObj || (this.state.diseaseObj && !this.state.diseaseObj['term'])) {
@@ -533,8 +533,8 @@ const CaseControlCuration = createReactClass({
                     } else {
                         delete newCaseGroup.commonDiagnosis;
                     }
-                    if (hpoids && hpoids.length) {
-                        newCaseGroup.hpoIdInDiagnosis = hpoids;
+                    if (hpoIds && hpoIds.length) {
+                        newCaseGroup.hpoIdInDiagnosis = hpoIds;
                     } else if (newCaseGroup.hpoIdInDiagnosis) {
                         delete newCaseGroup.hpoIdInDiagnosis;
                     }
@@ -544,13 +544,13 @@ const CaseControlCuration = createReactClass({
                     } else if (newCaseGroup.termsInDiagnosis) {
                         delete newCaseGroup.termsInDiagnosis;
                     }
-                    if (nothpoids && nothpoids.length) {
-                        newCaseGroup.hpoIdInElimination = nothpoids;
+                    if (notHpoIds && notHpoIds.length) {
+                        newCaseGroup.hpoIdInElimination = notHpoIds;
                     }
                     else if (newCaseGroup.hpoIdInElimination) {
                         delete newCaseGroup.hpoIdInElimination;
                     }
-                    phenoterms = this.getFormValue(prefix + 'notphenoTerms');
+                    phenoterms = this.getFormValue(prefix + 'notPhenoTerms');
                     if (phenoterms) {
                         newCaseGroup.termsInElimination = phenoterms;
                     }
@@ -1186,22 +1186,22 @@ function GroupName(groupType) {
 // as the calling component.
 function GroupCommonDiseases(groupType) {
     let inputDisabled = (groupType === 'control-cohort') ? true : false;
-    let phenoTerms, notphenoTerms, group, cohortLabel;
+    let phenoTerms, notPhenoTerms, group, cohortLabel;
     if (groupType === 'case-cohort') {
         phenoTerms = 'caseCohort_phenoTerms';
-        notphenoTerms = 'caseCohort_notphenoTerms';
+        notPhenoTerms = 'caseCohort_notPhenoTerms';
         cohortLabel = 'Case Cohort';
         group = this.state.caseGroup;
     }
     if (groupType === 'control-cohort') {
         phenoTerms = 'controlCohort_phenoTerms';
-        notphenoTerms = 'controlCohort_notphenoTerms';
+        notPhenoTerms = 'controlCohort_notPhenoTerms';
         cohortLabel = 'Control Cohort';
         group = this.state.controlGroup;
     }
 
-    const hpoidVal = group && group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis : [];
-    const nothpoidVal = group && group.hpoIdInElimination ? group.hpoIdInElimination : [];
+    const hpoIdVal = group && group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis : [];
+    const notHpoIdVal = group && group.hpoIdInElimination ? group.hpoIdInElimination : [];
     const hpoWithTerms = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
     const hpoElimWithTerms = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
     const addHpoTermButton = hpoWithTerms.length  ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
@@ -1232,7 +1232,7 @@ function GroupCommonDiseases(groupType) {
                         })}
                     </ul>
                     : null}
-                <HpoTermModal addHpoTermButton={addHpoTermButton} passHpoToParent={this.passHpoToParent} savedHpo={hpoidVal} inElim={false} />
+                <HpoTermModal addHpoTermButton={addHpoTermButton} passHpoToParent={this.updateHpo} savedHpo={hpoIdVal} inElim={false} />
             </div>
             <Input type="textarea" ref={phenoTerms} label={<LabelPhenoTerms />} rows="2" inputDisabled={inputDisabled}
                 value={group && group.termsInDiagnosis ? group.termsInDiagnosis : ''}
@@ -1255,9 +1255,9 @@ function GroupCommonDiseases(groupType) {
                         })}
                     </ul>
                     : null}
-                <HpoTermModal addHpoTermButton={addElimTermButton} passElimHpoToParent={this.passElimHpoToParent} savedElimHpo={nothpoidVal} inElim={true} />
+                <HpoTermModal addHpoTermButton={addElimTermButton} passElimHpoToParent={this.updateElimHpo} savedElimHpo={notHpoIdVal} inElim={true} />
             </div>
-            <Input type="textarea" ref={notphenoTerms} label={<LabelPhenoTerms not />} rows="2" inputDisabled={inputDisabled}
+            <Input type="textarea" ref={notPhenoTerms} label={<LabelPhenoTerms not />} rows="2" inputDisabled={inputDisabled}
                 value={group && group.termsInElimination ? group.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>

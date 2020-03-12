@@ -384,8 +384,8 @@ const IndividualCuration = createReactClass({
             var formError = false;
 
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
-            var hpoids = this.state.hpoWithTerms ? this.state.hpoWithTerms : null;
-            var nothpoids = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : null;
+            var hpoIds = this.state.hpoWithTerms ? this.state.hpoWithTerms : null;
+            var notHpoIds = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : null;
             let recessiveZygosity = this.state.recessiveZygosity;
             let variantUuid0 = this.getFormValue('variantUuid0'),
                 variantUuid1 = this.getFormValue('variantUuid1');
@@ -578,7 +578,7 @@ const IndividualCuration = createReactClass({
                     }
                 }).then(data => {
                     // Make a new individual object based on form fields.
-                    var newIndividual = this.createIndividual(individualDiseases, individualArticles, individualVariants, evidenceScores, hpoids, nothpoids);
+                    var newIndividual = this.createIndividual(individualDiseases, individualArticles, individualVariants, evidenceScores, hpoIds, notHpoIds);
                     return this.writeIndividualObj(newIndividual);
                 }).then(newIndividual => {
                     var promise;
@@ -666,7 +666,7 @@ const IndividualCuration = createReactClass({
 
     // Create a family object to be written to the database. Most values come from the values
     // in the form. The created object is returned from the function.
-    createIndividual: function(individualDiseases, individualArticles, individualVariants, individualScores, hpoids, nothpoids) {
+    createIndividual: function(individualDiseases, individualArticles, individualVariants, individualScores, hpoIds, notHpoIds) {
         var value;
         var currIndividual = this.state.individual;
         var family = this.state.family;
@@ -686,8 +686,8 @@ const IndividualCuration = createReactClass({
         }
 
         // Fill in the individual fields from the Diseases & Phenotypes panel
-        if (hpoids && hpoids.length) {
-            newIndividual.hpoIdInDiagnosis = hpoids;
+        if (hpoIds && hpoIds.length) {
+            newIndividual.hpoIdInDiagnosis = hpoIds;
         } else if (newIndividual.hpoIdInDiagnosis) {
             delete newIndividual.hpoIdInDiagnosis;
         }
@@ -697,8 +697,8 @@ const IndividualCuration = createReactClass({
         } else if (newIndividual.termsInDiagnosis) {
             delete newIndividual.termsInDiagnosis;
         }
-        if (nothpoids && nothpoids.length) {
-            newIndividual.hpoIdInElimination = nothpoids;
+        if (notHpoIds && notHpoIds.length) {
+            newIndividual.hpoIdInElimination = notHpoIds;
         }
         else if (newIndividual.hpoIdInElimination) {
             delete newIndividual.hpoIdInElimination
@@ -907,13 +907,13 @@ const IndividualCuration = createReactClass({
         this.loadData();
     },
 
-    passHpoToParent: function(hpoWithTerms) {
+    updateHpo: function(hpoWithTerms) {
         if (hpoWithTerms) {
             this.setState({ hpoWithTerms });
         }
     },
 
-    passElimHpoToParent: function(hpoElimWithTerms) {
+    updateElimHpo: function(hpoElimWithTerms) {
         if (hpoElimWithTerms) {
             this.setState({ hpoElimWithTerms });
         }
@@ -1215,8 +1215,8 @@ function IndividualCommonDiseases() {
     let probandLabel = (individual && individual.proband ? <i className="icon icon-proband"></i> : null);
 
     // If we're editing an individual, make editable values of the complex properties
-    const hpoidVal = individual && individual.hpoIdInDiagnosis ? individual.hpoIdInDiagnosis : [];
-    const nothpoidVal = individual && individual.hpoIdInElimination ? individual.hpoIdInElimination : [];
+    const hpoIdVal = individual && individual.hpoIdInDiagnosis ? individual.hpoIdInDiagnosis : [];
+    const notHpoIdVal = individual && individual.hpoIdInElimination ? individual.hpoIdInElimination : [];
     const hpoWithTerms = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
     const hpoElimWithTerms = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
     const addHpoTermButton = hpoWithTerms.length ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
@@ -1275,7 +1275,7 @@ function IndividualCommonDiseases() {
                         })}
                     </ul>
                     : null}
-                <HpoTermModal addHpoTermButton={addHpoTermButton} passHpoToParent={this.passHpoToParent} savedHpo={hpoidVal} inElim={false} />
+                <HpoTermModal addHpoTermButton={addHpoTermButton} passHpoToParent={this.updateHpo} savedHpo={hpoIdVal} inElim={false} />
             </div>   
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
                 curator.renderPhenotype(associatedGroups, 'Individual', 'ft', 'Group')
@@ -1319,7 +1319,7 @@ function IndividualCommonDiseases() {
                         })}
                     </ul>
                     : null}
-                <HpoTermModal addHpoTermButton={addElimTermButton} passElimHpoToParent={this.passElimHpoToParent} savedElimHpo={nothpoidVal} inElim={true} />
+                <HpoTermModal addHpoTermButton={addElimTermButton} passElimHpoToParent={this.updateElimHpo} savedElimHpo={notHpoIdVal} inElim={true} />
             </div>     
             {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
                 curator.renderPhenotype(associatedGroups, 'Individual', 'notft', 'Group') 

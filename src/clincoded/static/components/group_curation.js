@@ -141,13 +141,13 @@ var GroupCuration = createReactClass({
         this.loadData();
     },
 
-    passHpoToParent: function(hpoWithTerms) {
+    updateHpo: function(hpoWithTerms) {
         if (hpoWithTerms) {
             this.setState({ hpoWithTerms });
         }
     },
 
-    passElimHpoToParent: function(hpoElimWithTerms) {
+    updateElimHpo: function(hpoElimWithTerms) {
         if (hpoElimWithTerms) {
             this.setState({ hpoElimWithTerms });
         }
@@ -169,8 +169,8 @@ var GroupCuration = createReactClass({
             var geneSymbols = curator.capture.genes(this.getFormValue('othergenevariants'));
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
             var hpotext = curator.capture.hpoids(this.getFormValue('phenoterms'));
-            var hpoids = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
-            var nothpoids = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
+            var hpoIds = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
+            var notHpoIds = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
 
             let valid_disease = false;
             if (!this.state.diseaseObj || (this.state.diseaseObj && !this.state.diseaseObj['term'])) {
@@ -340,8 +340,8 @@ var GroupCuration = createReactClass({
                     }
 
                     // Fill in the group fields from the Common Diseases & Phenotypes panel
-                    if (hpoids && hpoids.length) {
-                        newGroup.hpoIdInDiagnosis = hpoids;
+                    if (hpoIds && hpoIds.length) {
+                        newGroup.hpoIdInDiagnosis = hpoIds;
                     }
                     else if (newGroup.hpoIdInDiagnosis) {
                         delete newGroup.hpoIdInDiagnosis;
@@ -353,8 +353,8 @@ var GroupCuration = createReactClass({
                     else if (newGroup.termsInDiagnosis) {
                         delete newGroup.termsInDiagnosis;
                     }
-                    if (nothpoids && nothpoids.length) {
-                        newGroup.hpoIdInElimination = nothpoids;
+                    if (notHpoIds && notHpoIds.length) {
+                        newGroup.hpoIdInElimination = notHpoIds;
                     }
                     else if (newGroup.hpoIdInElimination) {
                         delete newGroup.hpoIdInElimination;
@@ -517,7 +517,7 @@ var GroupCuration = createReactClass({
      */
     updateDiseaseObj(diseaseObj) {
         this.setState({diseaseObj: diseaseObj, diseaseRequired: false}, () => {
-            this.clrMultiFormErrors(['diseaseError', 'hpoid', 'phenoterms']);
+            this.clrMultiFormErrors(['diseaseError', 'phenoterms']);
         });
     },
 
@@ -642,8 +642,8 @@ var GroupName = function() {
 // as the calling component.
 var GroupCommonDiseases = function() {
     let group = this.state.group;
-    const hpoidVal = group && group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis : [];
-    const nothpoidVal = group && group.hpoIdInElimination ? group.hpoIdInElimination : [];
+    const hpoIdVal = group && group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis : [];
+    const notHpoIdVal = group && group.hpoIdInElimination ? group.hpoIdInElimination : [];
     const hpoWithTerms = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
     const hpoElimWithTerms = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
     const addHpoTermButton = hpoWithTerms.length ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
@@ -673,10 +673,10 @@ var GroupCommonDiseases = function() {
                         })}
                     </ul>
                     : null}
-                <HpoTermModal addHpoTermButton={addHpoTermButton} passHpoToParent={this.passHpoToParent} savedHpo={hpoidVal} inElim={false} />
+                <HpoTermModal addHpoTermButton={addHpoTermButton} passHpoToParent={this.updateHpo} savedHpo={hpoIdVal} inElim={false} />
             </div>
             <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="2" value={group && group.termsInDiagnosis ? group.termsInDiagnosis : ''}
-                error={this.getFormError('phenoterms')} clearError={this.clrMultiFormErrors.bind(null, ['hpoid', 'phenoterms'])} handleChange={this.handleChange}
+                error={this.getFormError('phenoterms')} clearError={this.clrMultiFormErrors.bind(null, ['phenoterms'])} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Group</em> if they are specifically noted in the paper.</p>
             <div className="col-sm-5 control-label">
@@ -695,7 +695,7 @@ var GroupCommonDiseases = function() {
                         })}
                     </ul>
                     : null}
-                <HpoTermModal addHpoTermButton={addElimTermButton} passElimHpoToParent={this.passElimHpoToParent} savedElimHpo={nothpoidVal} inElim={true} />
+                <HpoTermModal addHpoTermButton={addElimTermButton} passElimHpoToParent={this.updateElimHpo} savedElimHpo={notHpoIdVal} inElim={true} />
             </div> 
             <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="2" value={group && group.termsInElimination ? group.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />

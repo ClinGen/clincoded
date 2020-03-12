@@ -1406,13 +1406,13 @@ var FamilyCuration = createReactClass({
         this.loadData();
     },
 
-    passHpoToParent: function(hpoWithTerms) {
+    updateHpo: function(hpoWithTerms) {
         if (hpoWithTerms) {
             this.setState({ hpoWithTerms });
         }
     },
 
-    passElimHpoToParent: function(hpoElimWithTerms) {
+    updateElimHpo: function(hpoElimWithTerms) {
         if (hpoElimWithTerms) {
             this.setState({ hpoElimWithTerms });
         }
@@ -1693,8 +1693,8 @@ function FamilyCommonDiseases() {
     let associatedGroups;
 
     // If we're editing a family, make editable values of the complex properties
-    const hpoidVal = family && family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis : [];
-    const nothpoidVal = family && family.hpoIdInElimination ? family.hpoIdInElimination : [];
+    const hpoIdVal = family && family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis : [];
+    const notHpoIdVal = family && family.hpoIdInElimination ? family.hpoIdInElimination : [];
     const hpoWithTerms = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
     const hpoElimWithTerms = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
     const addHpoTermButton = hpoWithTerms.length ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
@@ -1735,7 +1735,7 @@ function FamilyCommonDiseases() {
                         })}
                     </ul>
                     : null}
-                <HpoTermModal addHpoTermButton={addHpoTermButton} passHpoToParent={this.passHpoToParent} savedHpo={hpoidVal} inElim={false} />
+                <HpoTermModal addHpoTermButton={addHpoTermButton} passHpoToParent={this.updateHpo} savedHpo={hpoIdVal} inElim={false} />
             </div>
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
                 curator.renderPhenotype(associatedGroups, 'Family', 'ft', 'Group') : curator.renderPhenotype(null, 'Family', 'ft')
@@ -1765,7 +1765,7 @@ function FamilyCommonDiseases() {
                         })}
                     </ul>
                     : null}
-                <HpoTermModal addHpoTermButton={addElimTermButton} passElimHpoToParent={this.passElimHpoToParent} savedElimHpo={nothpoidVal} inElim={true} />
+                <HpoTermModal addHpoTermButton={addElimTermButton} passElimHpoToParent={this.updateElimHpo} savedElimHpo={notHpoIdVal} inElim={true} />
             </div>
             {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
                 curator.renderPhenotype(associatedGroups, 'Family', 'notft', 'Group') : null}

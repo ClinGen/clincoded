@@ -33,14 +33,9 @@ var HpoTermModal = createReactClass({
     },
 
     componentDidMount() {
-        const savedHpo = this.props.savedHpo ? this.props.savedHpo : null;
-        const savedElimHpo = this.props.savedElimHpo ? this.props.savedElimHpo : null;
-        if (savedHpo && savedHpo.length) {
-            this.setState({ hpoWithTerms: savedHpo });
-        }
-        if (savedElimHpo && savedElimHpo.length) {
-            this.setState({ hpoElimWithTerms: savedElimHpo });
-        }
+        const savedHpo = this.props.savedHpo && this.props.savedHpo.length ? this.props.savedHpo : [];
+        const savedElimHpo = this.props.savedElimHpo && this.props.savedElimHpo.length ? this.props.savedElimHpo : [];
+        this.setState({ hpoWithTerms: savedHpo, hpoElimWithTerms: savedElimHpo });
     },
 
     saveForm(e) {
@@ -64,16 +59,16 @@ var HpoTermModal = createReactClass({
         this.handleModalClose();
     },
 
-    validateHpo(hpoids) {
-        const checkIds = curator.capture.hpoids(hpoids);
+    validateHpo(hpoIds) {
+        const checkIds = curator.capture.hpoids(hpoIds);
         // Check HPO ID format
-        if (checkIds && checkIds.length && _(checkIds).any(function(id) { return id === null; })) {
+        if (checkIds && checkIds.length && _(checkIds).any(id => id === null)) {
             // HPOID list is bad
             this.setFormErrors('hpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
         }
-        else if (checkIds && checkIds.length && !_(checkIds).any(function(id) { return id === null; })) {
-            const hpoidList = _.without(checkIds, null);
-            return hpoidList;
+        else if (checkIds && checkIds.length && !_(checkIds).any(id => id === null)) {
+            const hpoIdList = _.without(checkIds, null);
+            return hpoIdList;
         }
     },
 
@@ -95,47 +90,24 @@ var HpoTermModal = createReactClass({
     
     /**
      * Method to fetch HPO term names and append them to HPO ids
+     * @param {string} type - A string used to differentiate between hpo/elim hpo, setState accordingly
     */
-    fetchHpoName() {
+    fetchHpoName(type) {
         let hpoIds = this.refs['hpoid'].getValue();
-        const hpoidList = this.validateHpo(hpoIds);
-        if (hpoidList) {
-            hpoidList.forEach(id => {
+        const hpoIdList = this.validateHpo(hpoIds);
+        if (hpoIdList) {
+            hpoIdList.forEach(id => {
                 const url = external_url_map['HPOApi'] + id;
                 // Make the OLS REST API call
                 this.getRestData(url).then(response => {
                     const termLabel = response['details']['name'];
                     const hpoWithTerm = `${termLabel} (${id})`;
-                    this.setState({ hpoWithTerms: [...this.state.hpoWithTerms, hpoWithTerm] });
+                    this.setState({ [type]: [...this.state[type], hpoWithTerm] });
                 }).catch(err => {
                     // Unsuccessful retrieval
                     console.warn('Error in fetching HPO data =: %o', err);
                     const hpoWithTerm = id + ' (note: term not found)';
-                    this.setState({ hpoWithTerms: [...this.state.hpoWithTerms, hpoWithTerm] });
-                });
-            });
-        }
-    },
-
-    /**
-     * Method to fetch HPO term names and append them to HPO In Elimination ids
-     */
-    fetchHpoInElimName() {
-        let hpoIds = this.refs['hpoid'].getValue();
-        const hpoidList = this.validateHpo(hpoIds);
-        if (hpoidList) {
-            hpoidList.forEach(id => {
-                const url = external_url_map['HPOApi'] + id;
-                // Make the OLS REST API call
-                this.getRestData(url).then(response => {
-                    const termLabel = response['details']['name'];
-                    const hpoWithTerm = `${termLabel} (${id})`;
-                    this.setState({ hpoElimWithTerms: [...this.state.hpoElimWithTerms, hpoWithTerm] });
-                }).catch(err => {
-                    // Unsuccessful retrieval
-                    console.warn('Error in fetching HPO data =: %o', err);
-                    const hpoWithTerm = id + ' (note: term not found)';
-                    this.setState({ hpoElimWithTerms: [...this.state.hpoElimWithTerms, hpoWithTerm] });
+                    this.setState({ [type]: [...this.state[type], hpoWithTerm] });
                 });
             });
         }
@@ -152,7 +124,7 @@ var HpoTermModal = createReactClass({
                     <div className="modal-body">
                         <strong><span><a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s)</span>:</strong>
                         <Input type="textarea" ref="hpoid" inputClassName="hpo-text-area" placeholder="e.g. HP:0010704, HP:0030300" rows="4" error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')} />
-                        <Input type="button" ref="gethpoidterm" inputClassName="btn-copy btn-sm btn-last hpo-add-btn" title="Add" clickHandler={this.props.inElim === true ? this.fetchHpoInElimName : this.fetchHpoName} />
+                        <Input type="button" ref="gethpoidterm" inputClassName="btn-copy btn-sm btn-last hpo-add-btn" title="Add" clickHandler={this.props.inElim === true ? () => this.fetchHpoName('hpoElimWithTerms') : () => this.fetchHpoName('hpoWithTerms')} />
                         <div>
                             {hpoWithTerms ? 
                                 <ul>
