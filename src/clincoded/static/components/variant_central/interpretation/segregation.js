@@ -469,7 +469,7 @@ var CurationInterpretationSegregation = module.exports.CurationInterpretationSeg
             <div className="variant-interpretation segregation">
                 {this.state.interpretation ?
                     <p className="alert alert-warning">
-                        All information entered and accessed in the ClinGen curation interfaces should be considered publicly accessible, and may not include <a target="_blank" href="//www.hipaajournal.com/considered-phi-hipaa/">protected health information (PHI)</a> or equivalent identifiable information as defined by regulations in your country or region. For more information about ClinGen policies on data sharing, please refer to the <a target="_blank" href="/terms-of-use">Terms of Use</a>.
+                        All information entered and accessed in the ClinGen curation interfaces should be considered publicly accessible, and may not include <a className="external-link" target="_blank" href="//www.hipaajournal.com/considered-phi-hipaa/">protected health information (PHI)</a> or equivalent identifiable information as defined by regulations in your country or region. For more information about ClinGen policies on data sharing, please refer to the <a className="external-link" target="_blank" href="/terms-of-use">Terms of Use</a>.
                     </p>
                     : null }
 
