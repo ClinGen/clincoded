@@ -41,7 +41,9 @@ export function renderNewProvisionalStatus(snapshots, resourceType, gdm, context
         }
     }
     let showProvisionalLink = false;
-    if (resourceType === 'classification' && context && context.name === 'curation-central' && showLink) {
+    if (resourceType === 'classification' &&
+        context && context.name.match(/curation-central|provisional-curation|provisional-classification/) 
+        && showLink) {
         showProvisionalLink = true;
     } else if (resourceType === 'interpretation' && showLink) {
         showProvisionalLink = true;
