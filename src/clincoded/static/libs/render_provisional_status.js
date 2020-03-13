@@ -62,7 +62,7 @@ export function renderProvisionalStatus(snapshots, resourceType, gdm, context, s
  * @param {string|null} affiliationId - only effective when @param isMyClassification is false. Used to display affiliation information in the evidence summary page.
  * @param {string|null} userId - only effective when @param isMyClassification is false. Used to display user information in the evidence summary page when the classification author doesn't belong to any affiliation.
  */
-function renderProvisionalLink(snapshot, resourceType, gdm, isMyClassification=null, affiliationId=null, userId=null) {
+export function renderProvisionalLink(snapshot, resourceType, gdm, isMyClassification=null, affiliationId=null, userId=null) {
     if (resourceType === 'classification') {
         let linkTarget = '_self';
         
