@@ -80,11 +80,11 @@ export class RequestedActivation extends Component {
                 <div className={itemClass(context, 'panel-gray')}>
                     <div className="row">
                         <div className="col-sm-12">
-                            <div className="page-header"><h1><i className="icon icon-exclamation-triangle"></i> Thank you for registering</h1></div>
+                            <div className="page-header"><h1><i className="text-success icon icon-check-circle"></i> Thank you for registering</h1></div>
                             <div className="panel panel-default">
                                 <div className="panel-body">
                                     <p>Your request for access to the interfaces has been received. Once your account is activated, you will receive a confirmation email.</p>
-                                    <p>If you are a ClinGen curator, your coordinator will arrange for you to be added to your affiliation. To learn more about volunteering for curation efforts with ClinGen please check our <a href="https://www.clinicalgenome.org/working-groups/c3/" target="_blank" rel="noopener noreferrer">Community Curation</a> site.</p>
+                                    <p>If you are a ClinGen curator, your coordinator will arrange for you to be added to your affiliation. To learn more about volunteering for curation efforts with ClinGen, please check our <a href="https://www.clinicalgenome.org/working-groups/c3/" target="_blank" rel="noopener noreferrer">Community Curation</a> site.</p>
                                     <p>Please contact us at <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a> with any questions.</p>
                                 </div>
                             </div>
