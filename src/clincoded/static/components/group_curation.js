@@ -13,7 +13,7 @@ import { parseAndLogError } from './mixins';
 import { parsePubmed } from '../libs/parse-pubmed';
 import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
-import ModalComponent from '../libs/bootstrap/modal';
+import HpoTermModal from './hpo_term_modal';
 import { GroupDisease } from './disease';
 import * as curator from './curator';
 const CurationMixin = curator.CurationMixin;
@@ -45,7 +45,9 @@ var GroupCuration = createReactClass({
             diseaseObj: {},
             diseaseUuid: null,
             diseaseError: null,
-            diseaseRequired: false
+            diseaseRequired: false,
+            hpoWithTerms: [],
+            hpoElimWithTerms: []
         };
     },
 
@@ -113,6 +115,12 @@ var GroupCuration = createReactClass({
                 if (stateObj.group['commonDiagnosis'] && stateObj.group['commonDiagnosis'].length > 0) {
                     this.setState({diseaseObj: stateObj.group['commonDiagnosis'][0]});
                 }
+                if (stateObj.group['hpoIdInDiagnosis'] && stateObj.group['hpoIdInDiagnosis'].length > 0) {
+                    this.setState({ hpoWithTerms: stateObj.group['hpoIdInDiagnosis'] });
+                }
+                if (stateObj.group['hpoIdInElimination'] && stateObj.group['hpoIdInElimination'].length > 0) {
+                    this.setState({ hpoElimWithTerms: stateObj.group['hpoIdInElimination'] });
+                }
             }
 
             // Set all the state variables we've collected
@@ -133,6 +141,18 @@ var GroupCuration = createReactClass({
         this.loadData();
     },
 
+    updateHpo: function(hpoWithTerms) {
+        if (hpoWithTerms) {
+            this.setState({ hpoWithTerms });
+        }
+    },
+
+    updateElimHpo: function(hpoElimWithTerms) {
+        if (hpoElimWithTerms) {
+            this.setState({ hpoElimWithTerms });
+        }
+    },
+
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
 
@@ -148,20 +168,9 @@ var GroupCuration = createReactClass({
             // Parse comma-separated list fields
             var geneSymbols = curator.capture.genes(this.getFormValue('othergenevariants'));
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
-            var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
             var hpotext = curator.capture.hpoids(this.getFormValue('phenoterms'));
-            var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
-
-            var valid_phoId = false;
-            // Check HPO ID format
-            if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
-                // HPOID list is bad
-                formError = true;
-                this.setFormErrors('hpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
-            }
-            else if (hpoids && hpoids.length && !_(hpoids).any(function(id) { return id === null; })) {
-                valid_phoId = true;
-            }
+            var hpoIds = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
+            var notHpoIds = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
 
             let valid_disease = false;
             if (!this.state.diseaseObj || (this.state.diseaseObj && !this.state.diseaseObj['term'])) {
@@ -171,13 +180,12 @@ var GroupCuration = createReactClass({
             }
 
             // Check HPO ID and HPO text
-            if (!formError && !valid_disease && !valid_phoId && (!hpotext || !hpotext.length)) {
+            if (!formError && !valid_disease && (!hpotext || !hpotext.length)) {
                 // Can not empty at all of them
                 formError = true;
                 this.setState({diseaseError: 'Required', diseaseRequired: true}, () => {
                     this.setFormErrors('diseaseError', 'Enter disease term and/or HPO Id(s) and/or Phenotype free text.');
                 });
-                this.setFormErrors('hpoid', 'Enter disease term and/or HPO Id(s) and/or Phenotype free text.');
                 this.setFormErrors('phenoterms', 'Enter disease term and/or HPO Id(s) and/or Phenotype free text.');
             }
 
@@ -193,13 +201,6 @@ var GroupCuration = createReactClass({
                 // PMID list is bad
                 formError = true;
                 this.setFormErrors('otherpmids', 'Use PubMed IDs (e.g. 12345678) separated by commas');
-            }
-
-            // Check that all gene symbols have the proper format (will check for existence later)
-            if (nothpoids && nothpoids.length && _(nothpoids).any(function(id) { return id === null; })) {
-                // NOT HPOID list is bad
-                formError = true;
-                this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
             }
 
             if (!formError) {
@@ -339,8 +340,8 @@ var GroupCuration = createReactClass({
                     }
 
                     // Fill in the group fields from the Common Diseases & Phenotypes panel
-                    if (hpoids && hpoids.length) {
-                        newGroup.hpoIdInDiagnosis = hpoids;
+                    if (hpoIds && hpoIds.length) {
+                        newGroup.hpoIdInDiagnosis = hpoIds;
                     }
                     else if (newGroup.hpoIdInDiagnosis) {
                         delete newGroup.hpoIdInDiagnosis;
@@ -352,8 +353,11 @@ var GroupCuration = createReactClass({
                     else if (newGroup.termsInDiagnosis) {
                         delete newGroup.termsInDiagnosis;
                     }
-                    if (nothpoids && nothpoids.length) {
-                        newGroup.hpoIdInElimination = nothpoids;
+                    if (notHpoIds && notHpoIds.length) {
+                        newGroup.hpoIdInElimination = notHpoIds;
+                    }
+                    else if (newGroup.hpoIdInElimination) {
+                        delete newGroup.hpoIdInElimination;
                     }
                     phenoterms = this.getFormValue('notphenoterms');
                     if (phenoterms) {
@@ -513,7 +517,7 @@ var GroupCuration = createReactClass({
      */
     updateDiseaseObj(diseaseObj) {
         this.setState({diseaseObj: diseaseObj, diseaseRequired: false}, () => {
-            this.clrMultiFormErrors(['diseaseError', 'hpoid', 'phenoterms']);
+            this.clrMultiFormErrors(['diseaseError', 'phenoterms']);
         });
     },
 
@@ -638,8 +642,12 @@ var GroupName = function() {
 // as the calling component.
 var GroupCommonDiseases = function() {
     let group = this.state.group;
-    let hpoidVal = group && group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis.join(', ') : '';
-    let nothpoidVal = group && group.hpoIdInElimination ? group.hpoIdInElimination.join(', ') : '';
+    const hpoIdVal = group && group.hpoIdInDiagnosis ? group.hpoIdInDiagnosis : [];
+    const notHpoIdVal = group && group.hpoIdInElimination ? group.hpoIdInElimination : [];
+    const hpoWithTerms = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
+    const hpoElimWithTerms = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
+    const addHpoTermButton = hpoWithTerms.length ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
+    const addElimTermButton = hpoElimWithTerms.length ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
 
     return (
         <div className="row">
@@ -649,37 +657,51 @@ var GroupCommonDiseases = function() {
             </div>
             <GroupDisease gdm={this.state.gdm} group={group} updateDiseaseObj={this.updateDiseaseObj} diseaseObj={this.state.diseaseObj}
                 error={this.state.diseaseError} clearErrorInParent={this.clearErrorInParent} session={this.props.session} required={this.state.diseaseRequired} />
-            <Input type="textarea" ref="hpoid" label={<LabelHpoId />} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
-                error={this.getFormError('hpoid')} clearError={this.clrMultiFormErrors.bind(null, ['hpoid', 'phenoterms'])} handleChange={this.handleChange}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+            <div className="col-sm-5 control-label">
+                <span>
+                    <label>Phenotype(s) in Common&nbsp;</label>
+                    <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+                </span>
+            </div>
+            <div className="form-group hpo-term-container">
+                {hpoWithTerms.length ?
+                    <ul>
+                        {hpoWithTerms.map((term, i) => {
+                            return (
+                                <li key={i}>{term}</li>
+                            );
+                        })}
+                    </ul>
+                    : null}
+                <HpoTermModal addHpoTermButton={addHpoTermButton} passHpoToParent={this.updateHpo} savedHpo={hpoIdVal} inElim={false} />
+            </div>
             <Input type="textarea" ref="phenoterms" label={<LabelPhenoTerms />} rows="2" value={group && group.termsInDiagnosis ? group.termsInDiagnosis : ''}
-                error={this.getFormError('phenoterms')} clearError={this.clrMultiFormErrors.bind(null, ['hpoid', 'phenoterms'])} handleChange={this.handleChange}
+                error={this.getFormError('phenoterms')} clearError={this.clrMultiFormErrors.bind(null, ['phenoterms'])} handleChange={this.handleChange}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Group</em> if they are specifically noted in the paper.</p>
-            <Input type="textarea" ref="nothpoid" label={<LabelHpoId not />} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
-                error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+            <div className="col-sm-5 control-label">
+                <span>
+                    <label className="emphasis">NOT Phenotype(s)&nbsp;</label>
+                    <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+                </span>
+            </div>
+            <div className="form-group hpo-term-container">
+                {hpoElimWithTerms.length ?
+                    <ul>
+                        {hpoElimWithTerms.map((term, i) => {
+                            return (
+                                <li key={i}>{term}</li>
+                            );
+                        })}
+                    </ul>
+                    : null}
+                <HpoTermModal addHpoTermButton={addElimTermButton} passElimHpoToParent={this.updateElimHpo} savedElimHpo={notHpoIdVal} inElim={true} />
+            </div> 
             <Input type="textarea" ref="notphenoterms" label={<LabelPhenoTerms not />} rows="2" value={group && group.termsInElimination ? group.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
         </div>
     );
 };
-
-// HTML labels for inputs follow.
-var LabelHpoId = createReactClass({
-    propTypes: {
-        not: PropTypes.bool // T to show 'NOT' version of label
-    },
-
-    render: function() {
-        return (
-            <span>
-                {this.props.not ? <span className="emphasis">NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
-                <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
-            </span>
-        );
-    }
-});
 
 // HTML labels for inputs follow.
 var LabelPhenoTerms = createReactClass({
@@ -886,7 +908,8 @@ class GroupViewer extends Component {
                                 <div>
                                     <dt>HPO IDs</dt>
                                     <dd>{context.hpoIdInDiagnosis && context.hpoIdInDiagnosis.map(function(hpo, i) {
-                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                        let id = hpo.match(/\HP:\d{7}/g);
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + id} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                     })}</dd>
                                 </div>
 
@@ -898,7 +921,8 @@ class GroupViewer extends Component {
                                 <div>
                                     <dt>NOT HPO IDs</dt>
                                     <dd>{context.hpoIdInElimination && context.hpoIdInElimination.map(function(hpo, i) {
-                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                        let id = hpo.match(/\HP:\d{7}/g);
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + id} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                     })}</dd>
                                 </div>
 
