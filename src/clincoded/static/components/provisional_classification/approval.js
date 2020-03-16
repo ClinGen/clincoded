@@ -345,6 +345,14 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                 // this.recordHistory('modify', provisionalClassification, meta);
                 return Promise.resolve(provisionalClassification);
             }).then(result => {
+                let previousSnapshots;
+
+                // To avoid provisional/snapshot data nesting, remove old snapshots from provisional that will be added to the new snapshot
+                if (result && result.associatedClassificationSnapshots) {
+                    previousSnapshots = result.associatedClassificationSnapshots;
+                    delete result['associatedClassificationSnapshots'];
+                }
+
                 // get a fresh copy of the gdm object
                 this.getRestData('/gdm/' + this.props.gdm.uuid).then(newGdm => {
                     // Send approval data to Data Exchange
@@ -364,6 +372,11 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         this.props.updateSnapshotList(approvalSnapshot['@id'], true);
                         return Promise.resolve(approvalSnapshot);
                     }).then(snapshot => {
+                        // Return old snapshots to provisional before adding latest snapshot
+                        if (previousSnapshots) {
+                            result.associatedClassificationSnapshots = previousSnapshots;
+                        }
+
                         let newClassification = curator.flatten(result);
                         let newSnapshot = curator.flatten(snapshot);
                         if ('associatedClassificationSnapshots' in newClassification) {
@@ -398,6 +411,14 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                 // this.recordHistory('modify', provisionalClassification, meta);
                 return Promise.resolve(provisionalClassification);
             }).then(result => {
+                let previousSnapshots;
+
+                // To avoid provisional/snapshot data nesting, remove old snapshots from provisional that will be added to the new snapshot
+                if (result && result.associatedInterpretationSnapshots) {
+                    previousSnapshots = result.associatedInterpretationSnapshots;
+                    delete result['associatedInterpretationSnapshots'];
+                }
+
                 // get a fresh copy of the interpretation object
                 this.getRestData('/interpretation/' + this.props.interpretation.uuid).then(newInterpretation => {
                     let parentSnapshot = { interpretation: newInterpretation };
@@ -414,6 +435,11 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         this.props.updateSnapshotList(approvalSnapshot['@id'], true);
                         return Promise.resolve(approvalSnapshot);
                     }).then(snapshot => {
+                        // Return old snapshots to provisional before adding latest snapshot
+                        if (previousSnapshots) {
+                            result.associatedInterpretationSnapshots = previousSnapshots;
+                        }
+
                         let newClassification = curator.flatten(result);
                         let newSnapshot = curator.flatten(snapshot);
                         if ('associatedInterpretationSnapshots' in newClassification) {
