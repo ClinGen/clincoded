@@ -160,5 +160,11 @@
         "title": "ClinGen Curation Interfaces Admin Console",
         "status": "released",
         "uuid": "72232361-8eae-4e55-9c38-e967aa6d9bd2"
+    },
+    {
+        "name": "terms-of-use",
+        "title": "Terms of Use",
+        "status": "public",
+        "uuid": "278b7bf6-3ad8-49f7-b032-98450017b9b6"
     }
 ]
