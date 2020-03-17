@@ -2906,6 +2906,7 @@ dl.inline-dl {
     }
 }
 
+.terms-of-use-box,
 .homepage-main-box {
     h1, h2 {
         font-weight: 500;
@@ -2925,6 +2926,7 @@ dl.inline-dl {
         font-size: 19px;
     }
 
+    .terms-info,
     .project-info {
         background-color: #eee;
         border-radius: 6px;
@@ -2985,6 +2987,10 @@ dl.inline-dl {
         margin: 0 15px 30px 15px;
         padding: 15px 18px;
         text-align: center;
+    }
+
+    .underline {
+        text-decoration: underline;
     }
 }
 

@@ -34,6 +34,9 @@ class CuratorPage(Item):
     item_type = 'curator_page'
     schema = load_schema('clincoded:schemas/curator_page.json')
     name_key = 'name'
+    STATUS_ACL = {
+        'public': ALLOW_EVERYONE_VIEW,
+    }
 
     def unique_keys(self, properties):
         keys = super(CuratorPage, self).unique_keys(properties)
