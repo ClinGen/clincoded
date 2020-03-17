@@ -2906,6 +2906,7 @@ dl.inline-dl {
     }
 }
 
+.terms-of-use-box,
 .homepage-main-box {
     h1, h2 {
         font-weight: 500;
@@ -2925,6 +2926,7 @@ dl.inline-dl {
         font-size: 19px;
     }
 
+    .terms-info,
     .project-info {
         background-color: #eee;
         border-radius: 6px;
@@ -2985,6 +2987,10 @@ dl.inline-dl {
         margin: 0 15px 30px 15px;
         padding: 15px 18px;
         text-align: center;
+    }
+
+    .underline {
+        text-decoration: underline;
     }
 }
 
@@ -3068,6 +3074,10 @@ table.login-users-interpretations {
 .panel.case-control-label-panel {
     .panel-std {
         padding: 30px 45px 20px 45px;
+    }
+
+    .hpo-term {
+        padding-bottom: 5px;
     }
 
     .section {
@@ -3621,6 +3631,42 @@ table.login-users-interpretations {
             margin-bottom: 20px;
         }
     }
+}
+
+/**
+ * Styles for HPO Modal
+ */
+
+.hpo-term-container {
+    display: flex;
+    padding: 0.4rem 0 1.8rem 0;
+}
+
+.hpo-text-area {
+    margin-top: 5px;
+}
+
+.input-group-hpo {
+    margin-left: 13px;
+    margin-bottom: 15px;
+}
+
+.hpo-add-btn {
+    margin-top: 5px;
+}
+
+.hpo-term-list {
+    display: inline-block;
+}
+
+.delete-hpo {
+    color: #d9534f;
+    display: inline-block;
+    margin: 5px;
+}
+
+.delete-hpo:hover {
+    color: red;
 }
 
 /**

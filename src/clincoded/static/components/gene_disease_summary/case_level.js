@@ -2,7 +2,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { external_url_map } from '../globals';
-import HpoTerms from '../../libs/get_hpo_term';
 import { renderVariantTitle } from '../../libs/render_variant_title';
 
 class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
@@ -87,8 +86,12 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                 </td>
                 <td className="evidence-phenotypes">
                     {evidence.hpoIdInDiagnosis.length ?
-                        <span><strong>HPO term(s):</strong>
-                            <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} hpoTerms={this.props.hpoTerms} />
+                        <span><strong>HPO term(s): </strong>
+                            {evidence.hpoIdInDiagnosis.map((term, i) => {
+                                return (
+                                    <div className="hpo-term-summary" key={i}>{term}</div>
+                                );
+                            })}
                         </span> 
                         : null}
                     {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
@@ -257,8 +260,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
 }
 
 GeneDiseaseEvidenceSummaryCaseLevel.propTypes = {
-    caseLevelEvidenceList: PropTypes.array,
-    hpoTerms: PropTypes.object
+    caseLevelEvidenceList: PropTypes.array
 };
 
 export default GeneDiseaseEvidenceSummaryCaseLevel;

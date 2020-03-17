@@ -149,6 +149,9 @@ var NavItem = module.exports.NavItem = createReactClass({
         } else if (e.target === this.refs.menu_item_gene_tracking_system) {
             this.setState({dropdownActive: false});
             window.open('http://clingen.sirs.unc.edu');
+        } else if (e.target === this.refs.menu_item_terms_of_use) {
+            this.setState({dropdownActive: false});
+            window.open('/terms-of-use');
         } else {
             this.setState({dropdownActive: false});
         }
@@ -175,6 +178,7 @@ var NavItem = module.exports.NavItem = createReactClass({
                             <li><a href="#" ref="menu_item_sop_gci">SOP - GCI</a></li>
                             <li><a href="#" ref="menu_item_sop_vci">SOP - VCI</a></li>
                             <li><a href="#" ref="menu_item_gene_tracking_system">Gene Tracking System</a></li>
+                            <li><a href="#" ref="menu_item_terms_of_use">Interface Terms of Use</a></li>
                         </ul>
                         : null}
                 </div>

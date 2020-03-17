@@ -2,7 +2,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { external_url_map } from '../globals';
-import HpoTerms from '../../libs/get_hpo_term';
 
 class GeneDiseaseEvidenceSummaryCaseControl extends Component {
     constructor(props) {
@@ -66,8 +65,8 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                 <td className="evidence-disease">
                     {evidence.diseaseId && evidence.diseaseTerm ?
                         <span>{evidence.diseaseTerm}
-                            <span> {!evidence.diseaseFreetext ? <span>({evidence.diseaseId.replace('_', ':')})</span>
-                                : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span><br /><strong>HPO term(s):</strong><HpoTerms hpoIds={evidence.diseasePhenotypes} /></span> : null)
+                            <span> {!evidence.diseaseFreetext ? (<span>({evidence.diseaseId.replace('_', ':')})</span>)
+                                : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span><br/><strong>HPO term(s): </strong>{evidence.diseasePhenotypes.join(', ')}</span> : null)
                             }
                             </span>
                         </span>
@@ -75,7 +74,11 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                         <span>
                             {evidence.hpoIdInDiagnosis.length ?
                                 <span><strong>HPO term(s):</strong>
-                                    <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} hpoTerms={this.props.hpoTerms} />
+                                {evidence.hpoIdInDiagnosis.map((term, i) => {
+                                    return (
+                                        <div className="hpo-term-summary" key={i}>{term}</div>
+                                    );
+                                })}
                                 </span> 
                                 : null}
                             {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
@@ -229,8 +232,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
 }
 
 GeneDiseaseEvidenceSummaryCaseControl.propTypes = {
-    caseControlEvidenceList: PropTypes.array,
-    hpoTerms: PropTypes.object
+    caseControlEvidenceList: PropTypes.array
 };
 
 export default GeneDiseaseEvidenceSummaryCaseControl;

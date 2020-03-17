@@ -15,7 +15,7 @@ import { AddResourceId } from './add_external_resource';
 import * as CuratorHistory from './curator_history';
 import * as methods from './methods';
 import { makeStarterIndividual, updateProbandVariants, recordIndividualHistory } from './individual_curation';
-import ModalComponent from '../libs/bootstrap/modal';
+import HpoTermModal from './hpo_term_modal';
 import { FamilyDisease, FamilyProbandDisease } from './disease';
 import { renderVariantLabelAndTitle } from '../libs/render_variant_label_title';
 import * as curator from './curator';
@@ -113,7 +113,9 @@ var FamilyCuration = createReactClass({
             diseaseError: null,
             probandDiseaseObj: {},
             probandDiseaseUuid: null,
-            probandDiseaseError: null
+            probandDiseaseError: null,
+            hpoWithTerms: [],
+            hpoElimWithTerms: []
         };
     },
 
@@ -309,15 +311,14 @@ var FamilyCuration = createReactClass({
         if (associatedGroups && associatedGroups.length > 0) {
             hpoIds = associatedGroups.map(function(associatedGroup, i) {
                 if (associatedGroup.hpoIdInDiagnosis && associatedGroup.hpoIdInDiagnosis.length) {
-                    return (
-                        associatedGroup.hpoIdInDiagnosis.map(function(hpoid, i) {
-                            return (hpoid);
-                        }).join(', ')
-                    );
+                    const hpoTerm = associatedGroup.hpoIdInDiagnosis;
+                    return hpoTerm;
                 }
             });
             if (hpoIds.length) {
-                this.refs['hpoid'].setValue(hpoIds.join(', '));
+                hpoIds.forEach((hpoArr) => {
+                    this.setState({ hpoWithTerms: hpoArr });
+                });
             }
             hpoFreeText = associatedGroups.map(function(associatedGroup, i) {
                 if (associatedGroup.termsInDiagnosis) {
@@ -345,15 +346,14 @@ var FamilyCuration = createReactClass({
         if (associatedGroups && associatedGroups.length > 0) {
             hpoInElim = associatedGroups.map(function(associatedGroup, i) {
                 if (associatedGroup.hpoIdInElimination && associatedGroup.hpoIdInElimination.length) {
-                    return (
-                        associatedGroup.hpoIdInElimination.map(function(elimHpoId, i) {
-                            return (elimHpoId);
-                        }).join(', ')
-                    );
+                    const hpoTerm = associatedGroup.hpoIdInElimination;
+                    return hpoTerm;
                 }
             });
             if (hpoInElim.length) {
-                this.refs['nothpoid'].setValue(hpoInElim.join(', '));
+                hpoInElim.forEach((hpoArr) => {
+                    this.setState({ hpoElimWithTerms: hpoArr });
+                });
             }
             hpoElimFreeText = associatedGroups.map(function(associatedGroup, i) {
                 if (associatedGroup.termsInElimination) {
@@ -544,6 +544,12 @@ var FamilyCuration = createReactClass({
                 if (stateObj.family.commonDiagnosis && stateObj.family.commonDiagnosis.length > 0) {
                     this.setState({diseaseObj: stateObj.family['commonDiagnosis'][0]});
                 }
+                if (stateObj.family['hpoIdInDiagnosis'] && stateObj.family['hpoIdInDiagnosis'].length > 0) {
+                    this.setState({ hpoWithTerms: stateObj.family['hpoIdInDiagnosis'] });
+                }
+                if (stateObj.family['hpoIdInElimination'] && stateObj.family['hpoIdInElimination'].length > 0) {
+                    this.setState({ hpoElimWithTerms: stateObj.family['hpoIdInElimination'] });
+                }
 
                 // Load the previously stored 'Published Calculated LOD score' if any
                 stateObj.publishedLodScore = stateObj.family.segregation.publishedLodScore ? stateObj.family.segregation.publishedLodScore : null;
@@ -711,8 +717,6 @@ var FamilyCuration = createReactClass({
             var hadvar = false; // T if family had variants before being edited here.
 
             var pmids = curator.capture.pmids(this.getFormValue('otherpmids'));
-            var hpoids = curator.capture.hpoids(this.getFormValue('hpoid'));
-            var nothpoids = curator.capture.hpoids(this.getFormValue('nothpoid'));
             let recessiveZygosity = this.state.recessiveZygosity;
             let gdm = this.state.gdm;
             const semiDom = gdm && gdm.modeInheritance ? gdm.modeInheritance.indexOf('Semidominant') > -1 : false;
@@ -735,19 +739,6 @@ var FamilyCuration = createReactClass({
                 this.setFormErrors('otherpmids', 'Use PubMed IDs (e.g. 12345678) separated by commas');
             }
 
-            // Check that all gene symbols have the proper format (will check for existence later)
-            if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
-                // HPOID list is bad
-                formError = true;
-                this.setFormErrors('hpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
-            }
-
-            // Check that all gene symbols have the proper format (will check for existence later)
-            if (nothpoids && nothpoids.length && _(nothpoids).any(function(id) { return id === null; })) {
-                // NOT HPOID list is bad
-                formError = true;
-                this.setFormErrors('nothpoid', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
-            }
             // Get variant uuid's if they were added via the modals
             for (var i = 0; i < maxVariants; i++) {
                 // Grab the values from the variant form panel
@@ -1265,9 +1256,9 @@ var FamilyCuration = createReactClass({
         }
 
         // Fill in the group fields from the Common Diseases & Phenotypes panel
-        var hpoTerms = this.getFormValue('hpoid');
+        var hpoTerms = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
         if (hpoTerms) {
-            newFamily.hpoIdInDiagnosis = _.compact(hpoTerms.toUpperCase().split(', '));
+            newFamily.hpoIdInDiagnosis = hpoTerms;
         }
         else if (newFamily.hpoIdInDiagnosis) {
             // allow to delete HPO ids
@@ -1281,9 +1272,12 @@ var FamilyCuration = createReactClass({
             // allow to delete phenotype free text
             delete newFamily.termsInDiagnosis;
         }
-        hpoTerms = this.getFormValue('nothpoid');
-        if (hpoTerms) {
-            newFamily.hpoIdInElimination = _.compact(hpoTerms.toUpperCase().split(', '));
+        var hpoElimWithTerms = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
+        if (hpoElimWithTerms) {
+            newFamily.hpoIdInElimination = hpoElimWithTerms;
+        }
+        else if (newFamily.hpoIdInElimination) {
+            delete newFamily.hpoIdInElimination;
         }
         phenoterms = this.getFormValue('notphenoterms');
         if (phenoterms) {
@@ -1410,6 +1404,18 @@ var FamilyCuration = createReactClass({
     componentDidMount: function() {
         // Get the 'evidence', 'gdm', and 'group' UUIDs from the query string and save them locally.
         this.loadData();
+    },
+
+    updateHpo: function(hpoWithTerms) {
+        if (hpoWithTerms) {
+            this.setState({ hpoWithTerms });
+        }
+    },
+
+    updateElimHpo: function(hpoElimWithTerms) {
+        if (hpoElimWithTerms) {
+            this.setState({ hpoElimWithTerms });
+        }
     },
 
     componentWillUnmount: function() {
@@ -1687,8 +1693,12 @@ function FamilyCommonDiseases() {
     let associatedGroups;
 
     // If we're editing a family, make editable values of the complex properties
-    let hpoidVal = family && family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis.join(', ') : '';
-    let nothpoidVal = family && family.hpoIdInElimination ? family.hpoIdInElimination.join(', ') : '';
+    const hpoIdVal = family && family.hpoIdInDiagnosis ? family.hpoIdInDiagnosis : [];
+    const notHpoIdVal = family && family.hpoIdInElimination ? family.hpoIdInElimination : [];
+    const hpoWithTerms = this.state.hpoWithTerms ? this.state.hpoWithTerms : [];
+    const hpoElimWithTerms = this.state.hpoElimWithTerms ? this.state.hpoElimWithTerms : [];
+    const addHpoTermButton = hpoWithTerms.length ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
+    const addElimTermButton = hpoElimWithTerms.length ? <span>HPO Terms <i className="icon icon-pencil"></i></span> : <span>HPO Terms <i className="icon icon-plus-circle"></i></span>;
 
     // Make a list of diseases from the group, either from the given group,
     // or the family if we're editing one that has associated groups.renderPhenotype
@@ -1709,9 +1719,24 @@ function FamilyCommonDiseases() {
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
                 curator.renderPhenotype(associatedGroups, 'Family', 'hpo', 'Group') : curator.renderPhenotype(null, 'Family', 'hpo')
             }
-            <Input type="textarea" ref="hpoid" label={LabelHpoId()} rows="4" value={hpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
-                error={this.getFormError('hpoid')} clearError={this.clrFormErrors.bind(null, 'hpoid')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+            <div className="col-sm-5 control-label">
+                <span>
+                    <label>Phenotype(s) in Common&nbsp;</label>
+                    <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+                </span>
+            </div>
+            <div className="form-group hpo-term-container">
+                {hpoWithTerms.length ?
+                    <ul>
+                        {hpoWithTerms.map((term, i) => {
+                            return (
+                                <li key={i}>{term}</li>
+                            );
+                        })}
+                    </ul>
+                    : null}
+                <HpoTermModal addHpoTermButton={addHpoTermButton} passHpoToParent={this.updateHpo} savedHpo={hpoIdVal} inElim={false} />
+            </div>
             {associatedGroups && ((associatedGroups[0].hpoIdInDiagnosis && associatedGroups[0].hpoIdInDiagnosis.length) || associatedGroups[0].termsInDiagnosis) ?
                 curator.renderPhenotype(associatedGroups, 'Family', 'ft', 'Group') : curator.renderPhenotype(null, 'Family', 'ft')
             }
@@ -1724,11 +1749,26 @@ function FamilyCommonDiseases() {
             <p className="col-sm-7 col-sm-offset-5">Enter <em>phenotypes that are NOT present in Family</em> if they are specifically noted in the paper.</p>
             {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
                 curator.renderPhenotype(associatedGroups, 'Family', 'nothpo', 'Group') : null}
-            <Input type="textarea" ref="nothpoid" label={LabelHpoId('not')} rows="4" value={nothpoidVal} placeholder="e.g. HP:0010704, HP:0030300"
-                error={this.getFormError('nothpoid')} clearError={this.clrFormErrors.bind(null, 'nothpoid')}
-                labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" inputClassName="uppercase-input" />
+            <div className="col-sm-5 control-label">
+                <span>
+                    <label className="emphasis">NOT Phenotype(s)&nbsp;</label>
+                    <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
+                </span>
+            </div>
+            <div className="form-group hpo-term-container">
+                {hpoElimWithTerms.length ?
+                    <ul>
+                        {hpoElimWithTerms.map((term, i) => {
+                            return (
+                                <li key={i}>{term}</li>
+                            );
+                        })}
+                    </ul>
+                    : null}
+                <HpoTermModal addHpoTermButton={addElimTermButton} passElimHpoToParent={this.updateElimHpo} savedElimHpo={notHpoIdVal} inElim={true} />
+            </div>
             {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
-                curator.renderPhenotype(associatedGroups, 'Family', 'notft', 'Group') : null}    
+                curator.renderPhenotype(associatedGroups, 'Family', 'notft', 'Group') : null}
             <Input type="textarea" ref="notphenoterms" label={LabelPhenoTerms('not')} rows="2" value={family && family.termsInElimination ? family.termsInElimination : ''}
                 labelClassName="col-sm-5 control-label" wrapperClassName="col-sm-7" groupClassName="form-group" />
             {associatedGroups && ((associatedGroups[0].hpoIdInElimination && associatedGroups[0].hpoIdInElimination.length) || associatedGroups[0].termsInElimination) ?
@@ -1738,19 +1778,6 @@ function FamilyCommonDiseases() {
         </div>
     );
 }
-
-/**
- * HTML labels for inputs follow.
- * @param {string} bool - Value of 'not'
- */
-const LabelHpoId = bool => {
-    return (
-        <span>
-            {bool && bool === 'not' ? <span className="emphasis">NOT Phenotype(s)&nbsp;</span> : <span>Phenotype(s) in Common&nbsp;</span>}
-            <span className="normal">(<a href={external_url_map['HPOBrowser']} target="_blank" title="Open HPO Browser in a new tab">HPO</a> ID(s))</span>:
-        </span>
-    );
-};
 
 /**
  * HTML labels for inputs follow.
@@ -2393,7 +2420,8 @@ const FamilyViewer = createReactClass({
                                 <div>
                                     <dt>HPO IDs</dt>
                                     <dd>{family.hpoIdInDiagnosis && family.hpoIdInDiagnosis.map(function(hpo, i) {
-                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                        let id = hpo.match(/\HP:\d{7}/g);
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + id} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                     })}</dd>
                                 </div>
 
@@ -2405,7 +2433,8 @@ const FamilyViewer = createReactClass({
                                 <div>
                                     <dt>NOT HPO IDs</dt>
                                     <dd>{family.hpoIdInElimination && family.hpoIdInElimination.map(function(hpo, i) {
-                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + hpo} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
+                                        let id = hpo.match(/\HP:\d{7}/g);
+                                        return <span key={hpo}>{i > 0 ? ', ' : ''}<a href={external_url_map['HPO'] + id} title={"HPOBrowser entry for " + hpo + " in new tab"} target="_blank">{hpo}</a></span>;
                                     })}</dd>
                                 </div>
 
