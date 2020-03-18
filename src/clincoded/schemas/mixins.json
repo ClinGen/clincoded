@@ -83,7 +83,8 @@
                 "in progress",
                 "deleted",
                 "replaced",
-                "released"
+                "released",
+                "public"
             ]
         }
     },
