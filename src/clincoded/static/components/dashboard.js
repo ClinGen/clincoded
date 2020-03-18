@@ -18,6 +18,7 @@ import { renderApprovalStatus } from '../libs/render_approval_status';
 import { renderNewProvisionalStatus } from '../libs/render_new_provisional_status';
 import { renderPublishStatus } from '../libs/render_publish_status';
 import { exportCSV } from '../libs/export_csv';
+import { isUserAllowedToCreateGdm } from '../libs/allow_create_gdm';
 
 var Dashboard = createReactClass({
     mixins: [RestMixin, CuratorHistory],
@@ -666,6 +667,9 @@ var Dashboard = createReactClass({
         const affiliation = this.props.affiliation;
         // FIXME: Temporarily suppress history items for adding PMIDs or variants as they are affiliation-agnostic
         const filteredHistories = this.state.histories.filter(history => !history.primary['@id'].match(/articles|variants/ig));
+        const allowToCreateGDM = isUserAllowedToCreateGdm(this.props.session, affiliation);
+        const createGDMLinkClass = allowToCreateGDM ? '' : 'disabled';
+        const createGDMLink = allowToCreateGDM ? '/create-gene-disease/' : '';
 
         return (
             <div className="container">
@@ -690,7 +694,7 @@ var Dashboard = createReactClass({
                                 </li>
                                 <li className="list-group-item"><a href="/interpretation-all/">View list of all Variant Interpretations</a></li>
                                 <li className="list-group-item">
-                                    <a href="/create-gene-disease/">Create Gene-Disease Record</a>
+                                    <a className={createGDMLinkClass} href={createGDMLink}>Create Gene-Disease Record</a>
                                     <a className="help-doc" href="https://github.com/ClinGen/clincoded/wiki/GCI-Curation-Help" title="Gene Curation Help" target="_blank">
                                         <i className="icon icon-question-circle"></i>
                                     </a>

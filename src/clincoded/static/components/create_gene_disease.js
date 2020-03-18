@@ -13,6 +13,7 @@ import * as CuratorHistory from './curator_history';
 import ModalComponent from '../libs/bootstrap/modal';
 import { GdmDisease } from './disease';
 import { getAffiliationName } from '../libs/get_affiliation_name';
+import { isUserAllowedToCreateGdm } from '../libs/allow_create_gdm';
 
 var modesOfInheritance = require('./mapping/modes_of_inheritance.json');
 
@@ -175,121 +176,124 @@ var CreateGeneDisease = createReactClass({
     submitForm: function(e) {
         e.preventDefault(); e.stopPropagation(); // Don't run through HTML submit handler
 
-        // Get values from form and validate them
-        this.saveFormValue('hgncgene', this.refs.hgncgene.getValue().toUpperCase());
-        /**
-         * FIXME: Need to delete orphanet reference
-         */
-        // this.saveFormValue('orphanetid', this.refs.orphanetid.getValue());
-        this.saveFormValue('modeInheritance', this.refs['modeInheritance'].getValue());
-        let moiAdjectiveValue = this.refs.moiAdjective.getValue();
-        if (moiAdjectiveValue && moiAdjectiveValue !== 'none') {
-            this.saveFormValue('moiAdjective', moiAdjectiveValue);
-        }
-        if (this.validateForm()) {
-            // Get the free-text values for the Orphanet ID and the Gene ID to check against the DB
+        // If login user curating as part of an affiliation that has a GCEP then able to create new GDMs
+        if (isUserAllowedToCreateGdm(this.props.session, this.props.affiliation)) {
+            // Get values from form and validate them
+            this.saveFormValue('hgncgene', this.refs.hgncgene.getValue().toUpperCase());
             /**
              * FIXME: Need to delete orphanet reference
              */
-            // var orphaId = this.getFormValue('orphanetid').match(/^ORPHA:?([0-9]{1,6})$/i)[1];
-            this.setState({ submitBusy: true });
-            var geneId = this.getFormValue('hgncgene');
-            var mode = this.getFormValue('modeInheritance');
-            let adjective = this.getFormValue('moiAdjective');
-            const diseaseObj = this.state.diseaseObj;
-            let hgncId = '';
+            // this.saveFormValue('orphanetid', this.refs.orphanetid.getValue());
+            this.saveFormValue('modeInheritance', this.refs['modeInheritance'].getValue());
+            let moiAdjectiveValue = this.refs.moiAdjective.getValue();
+            if (moiAdjectiveValue && moiAdjectiveValue !== 'none') {
+                this.saveFormValue('moiAdjective', moiAdjectiveValue);
+            }
+            if (this.validateForm()) {
+                // Get the free-text values for the Orphanet ID and the Gene ID to check against the DB
+                /**
+                 * FIXME: Need to delete orphanet reference
+                 */
+                // var orphaId = this.getFormValue('orphanetid').match(/^ORPHA:?([0-9]{1,6})$/i)[1];
+                this.setState({ submitBusy: true });
+                var geneId = this.getFormValue('hgncgene');
+                var mode = this.getFormValue('modeInheritance');
+                let adjective = this.getFormValue('moiAdjective');
+                const diseaseObj = this.state.diseaseObj;
+                let hgncId = '';
 
-            // Get the disease and gene objects corresponding to the given Orphanet and Gene IDs in parallel.
-            // If either error out, set the form error fields
-            this.getRestDatas([
-                '/genes/' + geneId
-            ], [
-                function() { 
-                    this.setFormErrors('hgncgene', 'HGNC gene symbol not found');
-                    this.setState({ submitBusy: false });
-                }.bind(this)
-            ]).then(response => {
-                // Save HGNC Id to be used for data tracking
-                hgncId = response[0]['hgncId'];
-                return this.getRestData('/search?type=disease&diseaseId=' + diseaseObj.diseaseId).then(diseaseSearch => {
-                    let diseaseUuid;
-                    if (diseaseSearch.total === 0) {
-                        this.postRestData('/diseases/', diseaseObj).then(result => {
-                            let newDisease = result['@graph'][0];
-                            diseaseUuid = newDisease['uuid'];
-                            this.setState({ diseaseUuid: diseaseUuid });
-                        });
-                    } else {
-                        let _id = diseaseSearch['@graph'][0]['@id'];
-                        diseaseUuid = _id.slice(10, -1);
-                        this.setState({ diseaseUuid: diseaseUuid });
-                    }
-                });
-            }).then(data => {
-                // Load GDM if one with matching gene/disease/mode already exists
-                return this.getRestData(
-                    '/search/?type=gdm&disease.diseaseId=' + diseaseObj.diseaseId + '&gene.symbol=' + geneId + '&modeInheritance=' + mode
-                ).then(gdmSearch => {
-                    if (gdmSearch.total === 0) {
-                        // Matching GDM not found. Create a new GDM
-                        let newGdm = {
-                            gene: geneId,
-                            disease: this.state.diseaseUuid,
-                            modeInheritance: mode
-                        };
-                        if (adjective && adjective.length) {
-                            newGdm['modeInheritanceAdjective'] = adjective;
-                        }
-
-                        // Add affiliation if the user is associated with an affiliation
-                        // and if the data object has no affiliation
-                        if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
-                            if (!newGdm.affiliation) {
-                                newGdm.affiliation = this.props.affiliation.affiliation_id;
-                            }
-                        }
-
-                        // Post the new GDM to the DB. Once promise returns, go to /curation-central page with the UUID
-                        // of the new GDM in the query string.
-                        return this.postRestData('/gdm/', newGdm).then(data => {
-                            var newGdm = data['@graph'][0];
-
-                            // Record history of adding a GDM 
-                            var meta = {
-                                gdm: {
-                                    operation: 'add',
-                                    gene: newGdm.gene,
-                                    disease: newGdm.disease
-                                }
-                            };
-                            this.recordHistory('add', newGdm, meta);
-
-                            // Gather GDM creation data to be sent to Data Exchange
-                            let uncData = this.setUNCData(newGdm, hgncId);
-
-                            // Post GDM creation data to Data Exchange
-                            this.postGdmCreationData(uncData).then(response => {
-                                console.log('Successfully sent GDM creation data to Data Exchange for GDM %s at %s', newGdm.uuid, moment(newGdm.date_created).toISOString());
-                            }).catch(error => {
-                                console.log('Error sending GDM creation data to Data Exchange for GDM %s at %s - Error: %o', newGdm.uuid, moment(newGdm.date_created).toISOString(), error);
+                // Get the disease and gene objects corresponding to the given Orphanet and Gene IDs in parallel.
+                // If either error out, set the form error fields
+                this.getRestDatas([
+                    '/genes/' + geneId
+                ], [
+                    function() {
+                        this.setFormErrors('hgncgene', 'HGNC gene symbol not found');
+                        this.setState({ submitBusy: false });
+                    }.bind(this)
+                ]).then(response => {
+                    // Save HGNC Id to be used for data tracking
+                    hgncId = response[0]['hgncId'];
+                    return this.getRestData('/search?type=disease&diseaseId=' + diseaseObj.diseaseId).then(diseaseSearch => {
+                        let diseaseUuid;
+                        if (diseaseSearch.total === 0) {
+                            this.postRestData('/diseases/', diseaseObj).then(result => {
+                                let newDisease = result['@graph'][0];
+                                diseaseUuid = newDisease['uuid'];
+                                this.setState({ diseaseUuid: diseaseUuid });
                             });
-                            // Navigate to Record Curation
-                            var uuid = data['@graph'][0].uuid;
-                            this.context.navigate('/curation-central/?gdm=' + uuid);
-                        });
-                    } else {
-                        // Found matching GDM. See of the user wants to curate it.
-                        this.setState({
-                            gdm: gdmSearch['@graph'][0],
-                            submitBusy: false
-                        });
-                        this.child.openModal();
-                    }
-                });
-            }).catch(e => {
-                // Some unexpected error happened
-                parseAndLogError.bind(undefined, 'fetchedRequest');
-                this.setState({ submitBusy: false });            });
+                        } else {
+                            let _id = diseaseSearch['@graph'][0]['@id'];
+                            diseaseUuid = _id.slice(10, -1);
+                            this.setState({ diseaseUuid: diseaseUuid });
+                        }
+                    });
+                }).then(data => {
+                    // Load GDM if one with matching gene/disease/mode already exists
+                    return this.getRestData(
+                        '/search/?type=gdm&disease.diseaseId=' + diseaseObj.diseaseId + '&gene.symbol=' + geneId + '&modeInheritance=' + mode
+                    ).then(gdmSearch => {
+                        if (gdmSearch.total === 0) {
+                            // Matching GDM not found. Create a new GDM
+                            let newGdm = {
+                                gene: geneId,
+                                disease: this.state.diseaseUuid,
+                                modeInheritance: mode
+                            };
+                            if (adjective && adjective.length) {
+                                newGdm['modeInheritanceAdjective'] = adjective;
+                            }
+
+                            // Add affiliation if the user is associated with an affiliation
+                            // and if the data object has no affiliation
+                            if (this.props.affiliation && Object.keys(this.props.affiliation).length) {
+                                if (!newGdm.affiliation) {
+                                    newGdm.affiliation = this.props.affiliation.affiliation_id;
+                                }
+                            }
+
+                            // Post the new GDM to the DB. Once promise returns, go to /curation-central page with the UUID
+                            // of the new GDM in the query string.
+                            return this.postRestData('/gdm/', newGdm).then(data => {
+                                var newGdm = data['@graph'][0];
+
+                                // Record history of adding a GDM
+                                var meta = {
+                                    gdm: {
+                                        operation: 'add',
+                                        gene: newGdm.gene,
+                                        disease: newGdm.disease
+                                    }
+                                };
+                                this.recordHistory('add', newGdm, meta);
+
+                                // Gather GDM creation data to be sent to Data Exchange
+                                let uncData = this.setUNCData(newGdm, hgncId);
+
+                                // Post GDM creation data to Data Exchange
+                                this.postGdmCreationData(uncData).then(response => {
+                                    console.log('Successfully sent GDM creation data to Data Exchange for GDM %s at %s', newGdm.uuid, moment(newGdm.date_created).toISOString());
+                                }).catch(error => {
+                                    console.log('Error sending GDM creation data to Data Exchange for GDM %s at %s - Error: %o', newGdm.uuid, moment(newGdm.date_created).toISOString(), error);
+                                });
+                                // Navigate to Record Curation
+                                var uuid = data['@graph'][0].uuid;
+                                this.context.navigate('/curation-central/?gdm=' + uuid);
+                            });
+                        } else {
+                            // Found matching GDM. See of the user wants to curate it.
+                            this.setState({
+                                gdm: gdmSearch['@graph'][0],
+                                submitBusy: false
+                            });
+                            this.child.openModal();
+                        }
+                    });
+                }).catch(e => {
+                    // Some unexpected error happened
+                    parseAndLogError.bind(undefined, 'fetchedRequest');
+                    this.setState({ submitBusy: false });            });
+            }
         }
     },
 
@@ -324,6 +328,9 @@ var CreateGeneDisease = createReactClass({
         const moiKeys = Object.keys(modesOfInheritance);
         let gdm = this.state.gdm;
         const submitBusy = this.state.submitBusy;
+        const allowToCreateGDM = isUserAllowedToCreateGdm(this.props.session, this.props.affiliation);
+        const submitClass = 'btn-default pull-right ' + (allowToCreateGDM ? '' : ' disabled');
+        const submitErrClass = 'submit-err pull-right ' + (allowToCreateGDM ? ' hidden' : '');
 
         return (
             <div className="container">
@@ -361,7 +368,7 @@ var CreateGeneDisease = createReactClass({
                                 </Input>
                                 <div><p className="alert alert-warning">The above options (gene, disease, mode of inheritance, or adjective) can be altered for a Gene:Disease record up until a PMID has been added to the record. This includes
                                     adding an adjective to a Gene:Disease:Mode of inheritance record that has already been created or editing an adjective associated with a record.</p></div>
-                                <Input type="submit" inputClassName="btn-default pull-right" submitBusy={submitBusy} id="submit" />
+                                <Input type="submit" inputClassName={submitClass} submitBusy={submitBusy} id="submit" />
                             </div>
                         </Form>
                         {gdm && gdm.gene && gdm.disease && gdm.modeInheritance ?
@@ -377,6 +384,7 @@ var CreateGeneDisease = createReactClass({
                                 </div>
                             </ModalComponent>
                         : null}
+                        <div className={submitErrClass}>Only GCEP curators have permission to create new Gene-Disease Records</div>
                     </Panel>
                 </div>
             </div>
