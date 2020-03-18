@@ -37,12 +37,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             caseControlEvidenceList: [],
             experimentalEvidenceList: [],
             nonscorableEvidenceList: [],
-            preview: queryKeyValue('preview', this.props.href),
-            hpoTermsCollection: {
-                caseLevel: {},
-                segregation: {},
-                caseControl: {}
-            }
+            preview: queryKeyValue('preview', this.props.href)
         };
     },
 
@@ -283,11 +278,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                             caseLevelEvidence['sequencingMethod'] = segregation && segregation.sequencingMethod ? segregation.sequencingMethod : null;
                             // Put object into array
                             caseLevelEvidenceList.push(caseLevelEvidence);
-                            this.setState({caseLevelEvidenceList: caseLevelEvidenceList}, () => {
-                                if (this.state.caseLevelEvidenceList.length) {
-                                    this.fetchHpoTerms(this.state.caseLevelEvidenceList, 'caseLevel');
-                                }
-                            });
+                            this.setState({caseLevelEvidenceList: caseLevelEvidenceList});
                         }
                     }
                 });
@@ -388,11 +379,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                     segregationEvidence['sequencingMethod'] = segregation && segregation.sequencingMethod ? segregation.sequencingMethod : null;
                     // Put object into array
                     segregationEvidenceList.push(segregationEvidence);
-                    this.setState({segregationEvidenceList: segregationEvidenceList}, () => {
-                        if (this.state.segregationEvidenceList.length) {
-                            this.fetchHpoTerms(this.state.segregationEvidenceList, 'segregation');
-                        }
-                    });
+                    this.setState({segregationEvidenceList: segregationEvidenceList});
                 }
             }
         });
@@ -476,11 +463,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                                             caseControlEvidence['hpoIdInDiagnosis'] = caseControl.caseCohort.hpoIdInDiagnosis && caseControl.caseCohort.hpoIdInDiagnosis.length ? caseControl.caseCohort.hpoIdInDiagnosis : [];
                                             // Put object into array
                                             caseControlEvidenceList.push(caseControlEvidence);
-                                            this.setState({caseControlEvidenceList: caseControlEvidenceList}, () => {
-                                                if (this.state.caseControlEvidenceList.length) {
-                                                    this.fetchHpoTerms(this.state.caseControlEvidenceList, 'caseControl');
-                                                }
-                                            });
+                                            this.setState({caseControlEvidenceList: caseControlEvidenceList});
                                         }
                                     }
                                 }
@@ -633,45 +616,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
         return explanation;
     },
 
-    fetchHpoTerms(evidenceList, evidenceType) {
-        let allHpoIds = [];
-        if (evidenceList && evidenceList.length) {
-            evidenceList.forEach(evidence => {
-                if (evidence.hpoIdInDiagnosis && evidence.hpoIdInDiagnosis.length) {
-                    Array.prototype.push.apply(allHpoIds, evidence.hpoIdInDiagnosis);
-                }
-            });
-        }
-        let uniqueHpoIds = allHpoIds.length ? [...(new Set(allHpoIds))] : [];
-        let hpoTermsCollection = this.state.hpoTermsCollection;
-        uniqueHpoIds.forEach(id => {
-            let url = external_url_map['HPOApi'] + id.replace(':', '_');
-            // Make the OLS REST API call
-            this.getRestData(url).then(result => {
-                let termLabel = result['_embedded']['terms'][0]['label'];
-                if (evidenceType === 'caseLevel') {
-                    hpoTermsCollection['caseLevel'][id] = termLabel ? termLabel : id + ' (note: term not found)';
-                } else if (evidenceType === 'segregation') {
-                    hpoTermsCollection['segregation'][id] = termLabel ? termLabel : id + ' (note: term not found)';
-                } else if (evidenceType === 'caseControl') {
-                    hpoTermsCollection['caseControl'][id] = termLabel ? termLabel : id + ' (note: term not found)';
-                }
-                this.setState({hpoTermsCollection: hpoTermsCollection});
-            }).catch(err => {
-                // Unsuccessful retrieval
-                console.warn('Error in fetching HPO data =: %o', err);
-                if (evidenceType === 'caseLevel') {
-                    hpoTermsCollection['caseLevel'][id] = id + ' (note: term not found)';
-                } else if (evidenceType === 'segregation') {
-                    hpoTermsCollection['segregation'][id] = id + ' (note: term not found)';
-                } else if (evidenceType === 'caseControl') {
-                    hpoTermsCollection['caseControl'][id] = id + ' (note: term not found)';
-                }
-                this.setState({hpoTermsCollection: hpoTermsCollection});
-            });
-        });
-    },
-
     /**
      * Method to close current window
      * @param {*} e - Window event
@@ -692,7 +636,6 @@ const GeneDiseaseEvidenceSummary = createReactClass({
         const gdm = this.state.gdm;
         const provisional = this.state.provisional;
         const snapshotPublishDate = this.state.snapshotPublishDate;
-        const hpoTermsCollection = this.state.hpoTermsCollection;
 
         return (
             <div className="gene-disease-evidence-summary-wrapper">
@@ -707,9 +650,9 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                     {!this.state.preview && provisional && Object.keys(provisional).length ?
                         <GeneDiseaseEvidenceSummaryClassificationMatrix classification={provisional} />
                         : null}
-                    <GeneDiseaseEvidenceSummaryCaseLevel caseLevelEvidenceList={this.state.caseLevelEvidenceList} hpoTerms={hpoTermsCollection.caseLevel} />
-                    <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.state.segregationEvidenceList} hpoTerms={hpoTermsCollection.segregation} />
-                    <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} hpoTerms={hpoTermsCollection.caseControl} />
+                    <GeneDiseaseEvidenceSummaryCaseLevel caseLevelEvidenceList={this.state.caseLevelEvidenceList} />
+                    <GeneDiseaseEvidenceSummarySegregation segregationEvidenceList={this.state.segregationEvidenceList} />
+                    <GeneDiseaseEvidenceSummaryCaseControl caseControlEvidenceList={this.state.caseControlEvidenceList} />
                     <GeneDiseaseEvidenceSummaryExperimental experimentalEvidenceList={this.state.experimentalEvidenceList} />
                     <GeneDiseaseEvidenceSummaryNonscorableEvidence nonscorableEvidenceList={this.state.nonscorableEvidenceList} />
                 </div>

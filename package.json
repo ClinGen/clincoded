@@ -45,7 +45,7 @@
     "envify": "^4.0.0",
     "es5-shim": "^4.0.3",
     "form-serialize": "^0.7.1",
-    "grunt": "^1.0.1",
+    "grunt": "1.0.x",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-filerev": "^2.3.1",

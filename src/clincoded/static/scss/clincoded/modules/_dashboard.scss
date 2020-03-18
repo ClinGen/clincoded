@@ -60,6 +60,17 @@
                         content: '';
                     }
                 }
+
+                a.disabled {
+                    &,
+                    &:focus,
+                    &:link,
+                    &:hover {
+                        color: $navbar-default-link-disabled-color;
+                        text-decoration: none;
+                        cursor: not-allowed;
+                    }
+                }
             }
         }
 

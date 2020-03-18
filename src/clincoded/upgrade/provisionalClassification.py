@@ -90,3 +90,12 @@ def provisionalClassification_9_10(value, system):
         pass
 
     return
+
+@upgrade_step('provisionalClassification', '10', '11')
+def provisionalClassification_10_11(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1913
+    # Renamed "No Reported Evidence" to "No Known Disease Relationship"
+    if 'alteredClassification' in value:
+        if value['alteredClassification'] == 'No Reported Evidence':
+            value['alteredClassification'] = 'No Known Disease Relationship'
+    return
