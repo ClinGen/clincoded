@@ -14,6 +14,8 @@ export function renderVariantLabelAndTitle(variant, linkout, showInHeader) {
     let variantLabel;
     if (variant.clinvarVariantTitle) {
         variantLabel = linkout ? <LabelClinVarVariantTitle /> : 'ClinVar Preferred Title';
+    } else if (variant.maneTranscriptTitle) {
+        variantLabel = 'MANE Transcript HGVS Title';
     } else if (variant.canonicalTranscriptTitle) {
         variantLabel = 'Canonical Transcript HGVS Title';
     } else if (variant.hgvsNames && (variant.hgvsNames.GRCh38 || variant.hgvsNames.GRCh37)) {

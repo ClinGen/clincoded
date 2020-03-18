@@ -4,7 +4,8 @@ import React from 'react';
 /**
  * Method to display the title of a variant.
  * 1st option is the ClinVar Preferred Title if it's present.
- * 2nd alternative is a string constructed with the canonical transcript, gene symbol and protein change.
+ * 2nd alternative is a string constructed with the MANE transcript, gene symbol and protein change.
+ * 3rd alternative is a string constructed with the canonical transcript, gene symbol and protein change.
  * The fallback is the GRCh38 NC_ HGVS name.
  * @param {object} variant - A variant object
  * @param {boolean} stringOnly - Whether the output should be just string
@@ -14,6 +15,8 @@ export function renderVariantTitle(variant, stringOnly) {
     if (variant) {
         if (variant.clinvarVariantId && variant.clinvarVariantTitle) {
             variantTitle = variant.clinvarVariantTitle;
+        } else if (variant.maneTranscriptTitle) {
+            variantTitle = variant.maneTranscriptTitle;
         } else if (variant.carId && variant.canonicalTranscriptTitle) {
             variantTitle = variant.canonicalTranscriptTitle;
         } else if (variant.hgvsNames && Object.keys(variant.hgvsNames).length && !variantTitle) {

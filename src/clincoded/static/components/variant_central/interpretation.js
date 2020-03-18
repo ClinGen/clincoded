@@ -305,7 +305,7 @@ class InterpretationAddHistory extends Component {
             disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease;
         return (
             <div>
-                <span>Interpretation added to Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh37 ? variant.hgvsNames.GRCh37 : variant.hgvsNames.GRCh38)}</strong></a></span>
+                <span>Interpretation added to Variant <a href={"/variant-central/?edit=true&variant=" + variant.uuid + "&interpretation=" + interpretation.uuid}><strong>{renderVariantTitle(variant)}</strong></a></span>
                 <span>; {moment(history.date_created).format("YYYY MMM DD, h:mm a")}</span>
             </div>
         );
@@ -322,7 +322,7 @@ class InterpretationModifyHistory extends Component {
             variant = history.meta && history.meta.interpretation && history.meta.interpretation.variant,
             disease = history.meta && history.meta.interpretation && history.meta.interpretation.disease,
             modeInheritance = history.meta && history.meta.interpretation && history.meta.interpretation.modeInheritance && history.meta.interpretation.modeInheritance.indexOf('(') > -1 ? history.meta.interpretation.modeInheritance.substring(0, history.meta.interpretation.modeInheritance.indexOf('(') - 1) : history.meta.interpretation.modeInheritance;
-        const interpretationName = <span><strong>{variant.clinvarVariantTitle ? variant.clinvarVariantTitle : (variant.hgvsNames.GRCh38 ? variant.hgvsNames.GRCh38 : variant.hgvsNames.GRCh37)}{disease ? `–${disease.term}` : null}</strong>{modeInheritance ? <span><strong>–</strong><i>{modeInheritance}</i></span> : null}</span>;
+        const interpretationName = <span><strong>{renderVariantTitle(variant)}{disease ? `–${disease.term}` : null}</strong>{modeInheritance ? <span><strong>–</strong><i>{modeInheritance}</i></span> : null}</span>;
         return (
             <div>
                 {history.meta.interpretation.mode == 'edit-disease' ?
