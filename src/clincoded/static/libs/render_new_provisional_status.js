@@ -2,6 +2,7 @@
 import React from 'react';
 import moment from 'moment';
 import { sortListByDate } from './helpers/sort';
+import { renderProvisionalLink } from "./render_provisional_status";
 
 /**
  * Method to render the 'NEW PROVISIONAL' status of a given GDM's classification
@@ -11,8 +12,11 @@ import { sortListByDate } from './helpers/sort';
  * @param {object} context - The global context object
  * @param {boolean} showLink - Whether to render link to view/approve provisional (gdm) or view provisional summary (interpretation)
  * @param {boolean} stringOnly - Whether return status text or status labels/tags (default returns labels/tags)
+ * @param {boolean|null} isMyClassification - refer to `renderProvisionalLink()`
+ * @param {string|null} affiliationId - refer to `renderProvisionalLink()`
+ * @param {string|null} userId - refer to `renderProvisionalLink()`
  */
-export function renderNewProvisionalStatus(snapshots, resourceType, gdm, context, showLink, stringOnly=false) {
+export function renderNewProvisionalStatus(snapshots, resourceType, gdm, context, showLink, stringOnly=false, isMyClassification=null, affiliationId=null, userId=null) {
     const sortedSnapshots = snapshots && snapshots.length ? sortListByDate(snapshots, 'date_created') : [];
     // Get any snapshots that had been provisioned
     const provisionedSnapshots = sortedSnapshots.filter(snapshot => {
@@ -37,7 +41,9 @@ export function renderNewProvisionalStatus(snapshots, resourceType, gdm, context
         }
     }
     let showProvisionalLink = false;
-    if (resourceType === 'classification' && context && context.name === 'curation-central' && showLink) {
+    if (resourceType === 'classification' &&
+        context && context.name.match(/curation-central|provisional-curation|provisional-classification/) 
+        && showLink) {
         showProvisionalLink = true;
     } else if (resourceType === 'interpretation' && showLink) {
         showProvisionalLink = true;
@@ -52,33 +58,11 @@ export function renderNewProvisionalStatus(snapshots, resourceType, gdm, context
                         data-tooltip={'Provisioned on ' + moment(provisionedSnapshots[0].date_created).format("YYYY MMM DD, h:mm a")}>
                         <span className="badge">NEW</span> PROVISIONAL
                     </span>
-                    {showProvisionalLink ? renderProvisionalLink(provisionedSnapshots[0], resourceType, gdm) : null}
+                    {showProvisionalLink ? renderProvisionalLink(provisionedSnapshots[0], resourceType, gdm, isMyClassification, affiliationId, userId) : null}
                 </span>
             );
         }
     } else {
         return null;
-    }
-}
-
-/**
- * Method to render linkout to the evidence summary of a given approved classification or interpretation
- * @param {object} snapshot - The approved classification or interpretation snapshot
- * @param {string} resourceType - A string value of either 'classification' or 'interpretation'
- * @param {object} gdm - The GDM object
- */
-function renderProvisionalLink(snapshot, resourceType, gdm) {
-    if (resourceType === 'classification') {
-        return (
-            <span className="classification-link-item">
-                <a href={'/provisional-classification/?gdm=' + gdm.uuid + '&approval=yes'} title="View/Approve Current Provisional"><i className="icon icon-link"></i></a>
-            </span>
-        );
-    } else if (resourceType === 'interpretation') {
-        return (
-            <span className="classification-link-item">
-                <a href={'/variant-interpretation-summary/?snapshot=' + snapshot.uuid} title="View Current Provisional" target="_blank"><i className="icon icon-link"></i></a>
-            </span>
-        );
     }
 }

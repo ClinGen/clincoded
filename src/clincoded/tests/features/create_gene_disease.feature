@@ -2,11 +2,24 @@
 Feature: Create Gene Disease
 
     Scenario: See Required-Fields errors
+        When I visit "/logout"
+        Then I should see "Demo Login"
+        When I press "Demo Login"
+        And I wait for 10 seconds
+        Then I should see "Logout ClinGen Test Curator"
         When I visit "/create-gene-disease/"
         And I click the element with the css selector ".btn-default"
         Then I should see "Required"
+        When I press "Logout ClinGen Test Curator"
+        And I wait for 5 seconds
+        Then I should see "Any user may explore the demo version of the ClinGen interfaces"
 
     Scenario: Add GDM
+        When I visit "/logout"
+        Then I should see "Demo Login"
+        When I press "Demo Login"
+        And I wait for 10 seconds
+        Then I should see "Logout ClinGen Test Curator"
         When I visit "/create-gene-disease/"
         And I press "Disease"
         And I wait for an element with the css selector ".modal-open" to load
@@ -43,6 +56,9 @@ Feature: Create Gene Disease
 
         And I click the element with the css selector ".btn-default"
         Then I should not see "Required"
+        When I press "Logout ClinGen Test Curator"
+        And I wait for 5 seconds
+        Then I should see "Any user may explore the demo version of the ClinGen interfaces"
 
 
     Scenario: Test GDM alert modal

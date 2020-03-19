@@ -465,6 +465,7 @@
             "May Flowers",
             "Liz Kearns",
             "Shannon McNulty",
+            "Brooke Palus",
             "Mayher Patel",
             "Justyne Ross"
         ]
@@ -577,12 +578,12 @@
     },
     {
         "affiliation_id": "10040",
-        "affiliation_fullname": "Platelet Disorder",
+        "affiliation_fullname": "Platelet Disorders",
         "publish_approval": true,
         "subgroups": {
             "vcep": {
                 "id": "50040",
-                "fullname": "Platelet Disorder VCEP"
+                "fullname": "Platelet Disorders VCEP"
             }
         }
     },
@@ -761,7 +762,13 @@
     {
         "affiliation_id": "10059",
         "affiliation_fullname": "Craniosynostosis",
-        "publish_approval": true
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40059",
+                "fullname": "Craniosynostosis GCEP"
+            }
+        }
     },
     {
         "affiliation_id": "10060",
@@ -823,6 +830,72 @@
             "vcep": {
                 "id": "50064",
                 "fullname": "Thrombosis VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10065",
+        "affiliation_fullname": "Skeletal Disorders",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40065",
+                "fullname": "Skeletal Disorders GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10066",
+        "affiliation_fullname": "Cystic/Tubulointerstitial",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40066",
+                "fullname": "Cystic/Tubulointerstitial GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10067",
+        "affiliation_fullname": "Tubulopathies",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40067",
+                "fullname": "Tubulopathies GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10068",
+        "affiliation_fullname": "Glomerular",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40068",
+                "fullname": "Glomerular GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10069",
+        "affiliation_fullname": "Complement",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40069",
+                "fullname": "Complement GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10070",
+        "affiliation_fullname": "CAKUT/Obstructive uropathy",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40070",
+                "fullname": "CAKUT/Obstructive uropathy GCEP"
             }
         }
     }

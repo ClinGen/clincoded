@@ -11,7 +11,8 @@ import { Panel } from '../libs/bootstrap/panel';
 import { parseAndLogError } from './mixins';
 import * as CuratorHistory from './curator_history';
 import { parsePubmed } from '../libs/parse-pubmed';
-import { parseClinvar, parseCAR } from '../libs/parse-resources';
+import { parseClinvar, parseCAR, getTranscriptAllelesGeneUrlSet } from '../libs/parse-resources';
+import { parseManeTranscriptIdFromLdh, parseManeTranscriptIdFromGenomicCar, getManeTranscriptTitleFromCar } from "../libs/get_mane_transcript";
 import ModalComponent from '../libs/bootstrap/modal';
 import { getHgvsNotation } from './variant_central/helpers/hgvs_notation';
 import { getCanonicalTranscript } from '../libs/get_canonical_transcript';
@@ -598,10 +599,26 @@ function clinvarQueryResource() {
         var url = external_url_map['ClinVarEutilsVCV'];
         var data;
         var id = this.state.inputValue;
-        this.getRestDataXml(url + id).then(xml => {
+        this.getRestDataXml(url + id).then((xml) => {
             data = parseClinvar(xml);
             if (data.clinvarVariantId) {
                 // found the result we want
+
+                // try to query MANE transcript title as well (based on CAR), even if ClinVar title will always be favored for displaying variant title; MANE transcript title will have other use due to unique status of MANE.
+                if (data.carId) {
+                    const url = this.props.protocol + external_url_map['CARallele'];
+                    this.getRestData(url + data.carId).then((carJson) => queryManeTranscriptTitle(this.getRestData, data.carId, carJson))
+                        .then((maneTranscriptTitle) => {
+                            data['maneTranscriptTitle'] = maneTranscriptTitle || "";
+                            this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+                        })
+                        .catch((error) => {
+                            console.warn('Error in querying MANE transcript data = %o', error);
+                            this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+                        })
+                    ;
+                }
+
                 this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
             } else {
                 // no result from ClinVar
@@ -631,6 +648,7 @@ function clinvarSubmitResource(func) {
                     // In this case, save ClinVar data into the variant.
                     if ((!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle'])
                         || (this.state.tempResource['carId'] !== result['carId'])
+                        || (this.state.tempResource['maneTranscriptTitle'] !== result['maneTranscriptTitle'])
                         || (this.state.tempResource['dbSNPIds'] && this.state.tempResource['dbSNPIds'].length && (!result['dbSNPIds'] || (result['dbSNPIds'] && !result['dbSNPIds'].length)))
                         || (this.state.tempResource['hgvsNames'] && Object.keys(this.state.tempResource['hgvsNames']).length &&
                             ((!result['hgvsNames'] || (result['hgvsNames'] && !Object.keys(result['hgvsNames']).length))
@@ -730,37 +748,49 @@ function carValidateForm() {
 function carQueryResource() {
     // for pinging and parsing data from CAR
     this.saveFormValue('resourceId', this.state.inputValue);
-    var error_msg;
     if (carValidateForm.call(this)) {
         var url = this.props.protocol + external_url_map['CARallele'];
         var data;
         var id = this.state.inputValue;
-        this.getRestData(url + id).then(json => {
+        this.getRestData(url + id).then((json) => new Promise((carApiCallResolve) => {
+            // final state values after query; default to nothing happened
+            let finalState = {
+                queryResourceBusy: false,
+                resourceFetched: true
+            }
+
             data = parseCAR(json);
+            finalState.tempResource = data;
+            
+            // patch data `finalState.tempResource` based on CAR API call data `json`
             if (data.clinvarVariantId) {
                 // if the CAR result has a ClinVar variant ID, query ClinVar with it, and use its data
                 url = external_url_map['ClinVarEutilsVCV'];
-                this.getRestDataXml(url + data.clinvarVariantId).then(xml => {
+                return this.getRestDataXml(url + data.clinvarVariantId).then((xml) => {
                     var data_cv = parseClinvar(xml);
                     if (data_cv.clinvarVariantId) {
                         // found the result we want
                         data_cv.carId = id;
-                        this.setState({queryResourceBusy: false, tempResource: data_cv, resourceFetched: true});
+                        finalState.tempResource = data_cv;
                     } else {
-                        // something failed with the parsing of ClinVar data; roll back to CAR data
-                        this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+                        // something failed with the parsing of ClinVar data; roll back to CAR data (just use initial value of `finalState`)
                     }
-                }).catch(e => {
+
+                    return carApiCallResolve(finalState);
+                }).catch((e) => {
                     // error handling for ClinVar query
                     this.setFormErrors('resourceId', 'Error querying ClinVar for additional data. Please check your input and try again.');
-                    this.setState({queryResourceBusy: false, resourceFetched: false});
-                });
+                    finalState.resourceFetched = false;
+                    delete finalState['tempResource'];
+                    
+                    return carApiCallResolve(finalState);
+                })
             } else if (data.carId) {
                 // if the CAR result has no ClinVar variant ID, just use the CAR data set
                 let hgvs_notation = getHgvsNotation(data, 'GRCh38', true);
                 let request_params = '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&ExAC=1&MaxEntScan=1&GeneSplicer=1&Conservation=1&numbers=1&domains=1&canonical=1&merged=1';
                 if (hgvs_notation) {
-                    this.getRestData(this.props.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params).then(response => {
+                    return this.getRestData(this.props.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params).then((response) => {
                         let ensemblTranscripts = response.length && response[0].transcript_consequences ? response[0].transcript_consequences : [];
                         if (ensemblTranscripts && ensemblTranscripts.length) {
                             let canonicalTranscript = getCanonicalTranscript(ensemblTranscripts);
@@ -775,7 +805,7 @@ function carQueryResource() {
                                                 if (item.proteinEffect && item.proteinEffect.hgvs) {
                                                     proteinChange = item.proteinEffect.hgvs.split(':')[1];
                                                 }
-                                                data['canonicalTranscriptTitle'] = transcriptStart + '(' + item.geneSymbol + '):' + transcriptEnd + ' (' + proteinChange + ')';
+                                                data['canonicalTranscriptTitle'] = `${transcriptStart}(${item.geneSymbol}):${transcriptEnd}${proteinChange ? ` (${proteinChange})` : ''}`;
                                                 delete data['tempAlleles'];
                                             }
                                         }
@@ -785,30 +815,59 @@ function carQueryResource() {
                             // Remove the 'tempAlleles' object at this point regardless
                             // whether the preceding evaluations are executed
                             if (data['tempAlleles']) delete data['tempAlleles'];
-                            this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
                         } else {
                             // Fall back to CAR data without the canonical transcript title if there is no ensembl transcript
                             if (data['tempAlleles']) delete data['tempAlleles'];
-                            this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
                         }
-                    }).catch(err => {
+                        
+                        return carApiCallResolve(finalState);
+                    })
+                    .catch (err => {
                         // Error in VEP get request
                         console.warn('Error in querying Ensembl VEP data = %o', err);
                         // Fall back to CAR data
                         if (data['tempAlleles']) delete data['tempAlleles'];
-                        this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
+                        
+                        return carApiCallResolve(finalState);
                     });
                 } else {
                     // Fall back to CAR data without the canonical transcript title if parsing fails
                     if (data['tempAlleles']) delete data['tempAlleles'];
-                    this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
                 }
             } else {
                 // in case the above two fail (theoretically a 404 json response, but an error is thrown instead (see below))
                 this.setFormErrors('resourceId', 'CA ID not found');
-                this.setState({queryResourceBusy: false, resourceFetched: false});
+                finalState.resourceFetched = false;
+                delete finalState['tempResource'];
             }
-        }).catch(e => {
+
+            // // update all the state once here to ensure state update occurs at the end
+            // this.setState(finalState);
+            return carApiCallResolve(finalState);
+        })
+            .then((finalState) => {
+                // If queried CAR successfully, always try to obtain MANE transcript info (best effort only)
+                // Looking up MANE requires CAR since LDH only has id of transcript at this point, so have to join detail data from CAR
+                if (finalState.resourceFetched) {
+                    return queryManeTranscriptTitle(this.getRestData, id, json).then((maneTranscriptTitle) => {
+                        finalState.tempResource['maneTranscriptTitle'] = maneTranscriptTitle || "";
+                        return finalState;
+                    }).catch((error) => {
+                        console.warn('Error in querying MANE transcript data = %o', error);
+                        return finalState;
+                    })
+                }
+
+                console.warn('CAR not available, will not fetch MANE');
+                
+                return finalState;
+            })
+        // update all the state once here to ensure state update occurs at the end
+        ).then((finalState) => {
+            this.setState(finalState);
+        })
+        .catch(e => {
+            console.error(e);
             // error handling for CAR query
             if (e.status == 404) {
                 this.setFormErrors('resourceId', 'CA ID not found');
@@ -869,7 +928,10 @@ function carSubmitResource(func) {
                 this.getRestData(check['@graph'][0]['@id']).then(result => {
                     // if no variant title in db, or db's variant title not matching the retrieved title,
                     // then update db and fetch result again
-                    if (!result['clinvarVariantTitle'].length || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle'] || result['carId'] !== this.state.tempResource['carId']) {
+                    if (!result['clinvarVariantTitle'].length
+                        || result['clinvarVariantTitle'] !== this.state.tempResource['clinvarVariantTitle'] 
+                        || result['carId'] !== this.state.tempResource['carId']
+                        || result['maneTranscriptTitle'] !== this.state.tempResource['maneTranscriptTitle']) {
                         this.putRestData('/variants/' + result['uuid'], this.state.tempResource).then(result => {
                             return this.getRestData(result['@graph'][0]['@id']).then(result => {
                                 this.props.updateParentForm(result, this.props.fieldNum);
@@ -893,4 +955,50 @@ function carSubmitResource(func) {
             });
         });
     }
+}
+
+/**
+ * Extracts and returns the variant MANE transcript title from CAR response data
+ * @param {Function} getRestData The api call GET utility function.
+ * @param {string|undefined|null} carId The CA ID of the variant. If not provided, will do nothing.
+ * @param {Object|undefined|null} carJson The returned variant response data from CAR API call. If not provided, will do nothing.
+ * @returns {Promise<string|null>} The MANE transcript title; otherwise return null.
+ */
+function queryManeTranscriptTitle(getRestData, carId, carJson) {
+    // retrieving MANE transcript requires CAR data in place first
+    if (!(carId && carJson)) {
+        return null;
+    }
+
+    // collect genes from transcript
+    const geneSet = getTranscriptAllelesGeneUrlSet(carJson.transcriptAlleles);
+
+    // if no gene, or 2 or more than 2 genes, then just abort and don't fetch MANE for variant title
+    if (geneSet.size != 1) {
+        return null;
+    }
+
+    // use LDH (linked data hub) to try to fetch MANE info first
+    return getRestData('/ldh/' + carId).then((ldhJson) => {
+        let maneTranscriptId = parseManeTranscriptIdFromLdh(ldhJson);
+
+        // if LDH doesn't have such variant record yet, as a workaround, query genomic AR (Allele Registry) for MANE
+        if (!maneTranscriptId) {
+            // geneSet should be a set of size of one, we'll just query for this single gene
+            const geneUrl = Array.from(geneSet)[0];
+            const [, geneUrlWithoutScheme] = geneUrl.split('://');
+            // use the same scheme as the webpage of time
+            const geneUrlRequested = `//${geneUrlWithoutScheme}`;
+            return getRestData(geneUrlRequested).then((genomicCarJson) => parseManeTranscriptIdFromGenomicCar(genomicCarJson));
+        }
+
+        return maneTranscriptId;
+    }).then((maneTranscriptId) => {
+        // in case we got MANE transcript from either LDH or genomic AR, we construct the MANE title
+        if (maneTranscriptId) {
+            return getManeTranscriptTitleFromCar(maneTranscriptId, carJson);
+        }
+
+        return null;
+    });
 }

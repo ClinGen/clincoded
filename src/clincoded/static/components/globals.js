@@ -121,15 +121,46 @@ module.exports.editQueryValue = function(href, key, value) {
     return url.format(queryParsed);
 };
 
-// Add a key-value pair as a query string to the given href. If href already
-// has query string values, this function adds the given key value to it.
-module.exports.addQueryKey = function(href, key, value) {
+/**
+ * Add a key-value pair as a query string to the given href.
+ * 
+ * This method will not check if a key already exist. If you call this method with the same key for more than once, 
+ * the same key will be embedded into the url for multiple times. If you want to avoid duplicate keys, 
+ * you can use `queryKeyValue()` to check if a key exists before calling this method.
+ * 
+ * @param {string} href - the base url to add query key to. If href already has query string values, this function adds the given key value to it.
+ * @param {string} key - the query key
+ * @param {string} value - the query value
+ * @param {boolean} allowEmptyValue - If `false`, will do nothing when value is empty (empty string, null, or undefined). Default to `true`.
+ * @returns {string} the result url after query added
+ */
+export const addQueryKey = function(href, key, value, allowEmptyValue=true) {
+    if (!allowEmptyValue && (value === null | value === undefined | value === '')) {
+        return href;
+    }
+
     var existingQuery = href.split(/\?(.+)?/)[1];
     if (existingQuery) {
         return href + '&' + key + '=' + value;
     }
     return href + '?' + key + '=' + value;
 };
+
+/**
+ * Generate url embedded with queries (i.e. GET parametrs).
+ * 
+ * This method allows you to add multiple queries of the same key.
+ * 
+ * @param {string} href - the base url the queries will add to
+ * @param {Array<{ key: string, value: string }>} keyValuePairs - an array of key value pairs that will be added as queries to `href`
+ * @param {boolean} allowEmptyValue - whether to add empty-valued query to url; if `false`, will ignore queries whose value is empty string, null or undefined. This argument will just be passed to `addQueryKey()`.
+ * @returns {string} the url embedded with queries
+ */
+module.exports.getQueryUrl = function(href, keyValuePairs=[], allowEmptyValue=true) {
+    return keyValuePairs.reduce((accumulatedUrl, currentPair) => {
+        return addQueryKey(accumulatedUrl, currentPair.key, currentPair.value, allowEmptyValue);
+    }, href);
+}
 
 
 module.exports.productionHost = {'curation.clinicalgenome.org':1};
@@ -201,7 +232,7 @@ module.exports.external_url_map = {
     'Mondo': 'https://www.ebi.ac.uk/ols/ontologies/mondo',
     'MondoSearch': 'https://www.ebi.ac.uk/ols/ontologies/mondo/terms?iri=http://purl.obolibrary.org/obo/',
     'MondoApi': 'https://www.ebi.ac.uk/ols/api/ontologies/mondo/terms?iri=http://purl.obolibrary.org/obo/',
-    'HPOApi': 'https://www.ebi.ac.uk/ols/api/ontologies/hp/terms?iri=http://purl.obolibrary.org/obo/',
+    'HPOApi': 'https://hpo.jax.org/api/hpo/term/',
     'dbSNP': 'https://www.ncbi.nlm.nih.gov/snp/',
     'CAR': 'http://reg.genome.network/site/cg-registry',
     'CARallele': '//reg.genome.network/allele/',
