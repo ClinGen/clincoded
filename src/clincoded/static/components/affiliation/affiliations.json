@@ -577,12 +577,12 @@
     },
     {
         "affiliation_id": "10040",
-        "affiliation_fullname": "Platelet Disorder",
+        "affiliation_fullname": "Platelet Disorders",
         "publish_approval": true,
         "subgroups": {
             "vcep": {
                 "id": "50040",
-                "fullname": "Platelet Disorder VCEP"
+                "fullname": "Platelet Disorders VCEP"
             }
         }
     },
