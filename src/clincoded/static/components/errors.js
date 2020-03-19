@@ -84,8 +84,8 @@ export class RequestedActivation extends Component {
                             <div className="panel panel-default">
                                 <div className="panel-body">
                                     <p>Your request for access to the interfaces has been received. Once your account is activated, you will receive a confirmation email.</p>
-                                    <p>If you are a ClinGen curator, your coordinator will arrange for you to be added to your affiliation. To learn more about volunteering for curation efforts with ClinGen, please check our <a href="https://www.clinicalgenome.org/working-groups/c3/" target="_blank" rel="noopener noreferrer">Community Curation</a> site.</p>
-                                    <p>Please contact us at <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a> with any questions.</p>
+                                    <p>If you are a ClinGen curator, your coordinator will arrange for you to be added to your affiliation. If you are interested in becoming a volunteer curator for ClinGen, please view information at <a href="https://www.clinicalgenome.org/working-groups/c3/" target="_blank" rel="noopener noreferrer">Community Curation</a>.</p>
+                                    <p>If you have any questions, please contact us at <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a>.</p>
                                 </div>
                             </div>
                             <div className="alert alert-info">

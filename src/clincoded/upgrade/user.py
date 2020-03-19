@@ -41,7 +41,7 @@ def user_5_6(value, system):
         'olivierm@iarc.fr': '2016-11-07T08:00:00+00:00',
         'hmefford@uw.edu': '2016-11-09T08:00:00+00:00',
         'kirt.martin@unc.edu': '2016-11-10T08:00:00+00:00',
-        'miacocca@uwo.ca': '2016-11-10T08:00:00+00:00',
+        'miacocca92@gmail.com': '2016-11-10T08:00:00+00:00',
         'vjobanputra@nygenome.org': '2016-11-14T08:00:00+00:00',
         'shemphill@partners.org': '2016-11-21T08:00:00+00:00',
         'sarmadym@email.chop.edu': '2016-11-21T08:00:00+00:00',
@@ -143,7 +143,7 @@ def user_5_6(value, system):
         'christin.collins@gmail.com': '2017-10-19T07:00:00+00:00',
         'ronza@bcm.edu': '2017-10-19T07:00:00+00:00',
         'yinjiani900129@gmail.com': '2017-11-06T08:00:00+00:00',
-        'xzhuo@bcm.edu': '2017-11-14T08:00:00+00:00',
+        'xmzhuo@gmail.com': '2017-11-14T08:00:00+00:00',
         'erin.currey@nih.gov': '2017-10-19T07:00:00+00:00',
         'ramoser@mail.nih.gov': '2017-10-19T07:00:00+00:00',
         'robert.fullem@nih.gov': '2017-10-19T07:00:00+00:00',
@@ -986,6 +986,26 @@ def user_5_6(value, system):
         'daniel.reich@aruplab.com': '2020-02-24T08:00:00+00:00',
         'glitch8@gmail.com': '2020-02-28T08:00:00+00:00',
         'ligeng313@qq.com': '2020-02-28T08:00:00+00:00',
+        'cwhitten@ambrygen.com': '2020-03-02T08:00:00+00:00',
+        'svetlana.gorokhova@univ-amu.fr': '2020-03-02T08:00:00+00:00',
+        'ruth.loos@mssm.edu': '2020-03-03T08:00:00+00:00',
+        'christie-thomas@uiowa.edu': '2020-03-03T08:00:00+00:00',
+        'poornima2785@gmail.com': '2020-03-05T08:00:00+00:00',
+        'ronaldoj@lncc.br': '2020-03-05T08:00:00+00:00',
+        'chenx30nju@gmail.com': '2020-03-05T08:00:00+00:00',
+        'leon0044@gmail.com': '2020-03-05T08:00:00+00:00',
+        'elizabeth.ewen@agilent.com': '2020-03-05T08:00:00+00:00',
+        'ikeoluwa@jhmi.edu': '2020-03-05T08:00:00+00:00',
+        'eflynn@genedx.com': '2020-03-06T08:00:00+00:00',
+        'kaitlin.lenhart@slh.wisc.edu': '2020-03-06T08:00:00+00:00',
+        'lauren.stalbow@icahn.mssm.edu': '2020-03-06T08:00:00+00:00',
+        'joana.chora@insa.min-saude.pt': '2020-03-10T07:00:00+00:00',
+        's.dunwoodie@victorchang.edu.au': '2020-03-10T07:00:00+00:00',
+        'kwonwongo@gmail.com': '2020-03-10T07:00:00+00:00',
+        'thnelson@geisinger.edu': '2020-03-12T07:00:00+00:00',
+        'heatherkharris1@gmail.com': '2020-03-13T07:00:00+00:00',
+        'giordajc@gmail.com': '2020-03-16T07:00:00+00:00',
+        'minhua.li@bcm.edu': '2020-03-17T07:00:00+00:00',
         # Other
         'tsneddon@broadinstitute.org': '2016-11-04T07:00:00+00:00',
         'ronak.patel@bcm.edu': '2016-11-04T07:00:00+00:00',
@@ -1128,11 +1148,11 @@ def user_5_6(value, system):
         'hitz@stanford.edu': '2018-12-01T08:00:00+00:00',
         'saronson@partners.org': '2018-12-01T08:00:00+00:00',
         'catherinefletcher@nhs.net': '2018-12-01T08:00:00+00:00',
-        'mariaisabel.achatz@nih.gov': '2018-12-01T08:00:00+00:00'
+        'mariaisabel.achatz@nih.gov': '2018-12-01T08:00:00+00:00',
+        'lmadhavr@stanford.edu': '2019-12-16T08:00:00+00:00'
     }
     email = value['email']
     email = email.lower()
     date = date_created_map.get(email)
     value['date_created'] = date if date != None else '1994-01-01T08:00:00+00:00'
     value['user_status'] = 'active'
-
