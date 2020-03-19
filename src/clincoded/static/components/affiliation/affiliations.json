@@ -761,7 +761,13 @@
     {
         "affiliation_id": "10059",
         "affiliation_fullname": "Craniosynostosis",
-        "publish_approval": true
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40059",
+                "fullname": "Craniosynostosis GCEP"
+            }
+        }
     },
     {
         "affiliation_id": "10060",
@@ -823,6 +829,17 @@
             "vcep": {
                 "id": "50064",
                 "fullname": "Thrombosis VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10065",
+        "affiliation_fullname": "Skeletal Disorders",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40065",
+                "fullname": "Skeletal Disorders GCEP"
             }
         }
     }
