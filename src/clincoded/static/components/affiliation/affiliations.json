@@ -842,5 +842,60 @@
                 "fullname": "Skeletal Disorders GCEP"
             }
         }
+    },
+    {
+        "affiliation_id": "10066",
+        "affiliation_fullname": "Cystic/Tubulointerstitial",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40066",
+                "fullname": "Cystic/Tubulointerstitial GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10067",
+        "affiliation_fullname": "Tubulopathies",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40067",
+                "fullname": "Tubulopathies GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10068",
+        "affiliation_fullname": "Glomerular",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40068",
+                "fullname": "Glomerular GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10069",
+        "affiliation_fullname": "Complement",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40069",
+                "fullname": "Complement GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10070",
+        "affiliation_fullname": "CAKUT/Obstructive uropathy",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40070",
+                "fullname": "CAKUT/Obstructive uropathy GCEP"
+            }
+        }
     }
 ]
