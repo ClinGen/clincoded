@@ -784,12 +784,12 @@
     },
     {
         "affiliation_id": "10060",
-        "affiliation_fullname": "Orphan Diseases",
+        "affiliation_fullname": "Syndromic Disorders",
         "publish_approval": true,
         "subgroups": {
             "gcep": {
                 "id": "40060",
-                "fullname": "Orphan Diseases GCEP"
+                "fullname": "Syndromic Disorders GCEP"
             }
         }
     },
