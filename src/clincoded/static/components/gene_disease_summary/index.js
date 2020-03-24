@@ -389,10 +389,10 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                     // Put object into array
                     segregationEvidenceList.push(segregationEvidence);
                     this.setState({segregationEvidenceList: segregationEvidenceList}, () => {
-                    if (this.state.segregationEvidenceList.length) {
-                        this.fetchHpoTerms(this.state.segregationEvidenceList, 'segregation');
-                    }
-                });
+                        if (this.state.segregationEvidenceList.length) {
+                            this.fetchHpoTerms(this.state.segregationEvidenceList, 'segregation');
+                        }
+                    });
                 }
             }
         });
