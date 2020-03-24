@@ -649,7 +649,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 let url = external_url_map['HPOApi'] + id;
                 // Make the OLS REST API call
                 this.getRestData(url).then(result => {
-                    let termLabel = result['_embedded']['terms'][0]['label'];
+                    let termLabel = result['details']['name'];
                     if (evidenceType === 'caseLevel') {
                         hpoTermsCollection['caseLevel'][id] = termLabel ? termLabel : id + ' (note: term not found)';
                     } else if (evidenceType === 'segregation') {
