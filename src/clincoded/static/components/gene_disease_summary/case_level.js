@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { external_url_map } from '../globals';
 import { renderVariantTitle } from '../../libs/render_variant_title';
+import HpoTerms from '../../libs/get_hpo_term';
 
 class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
     constructor(props) {
@@ -93,6 +94,9 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                                 );
                             })}
                         </span> 
+                        : null}
+                    {this.props.hpoTerms.length ?
+                        <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} hpoTerms={this.props.hpoTerms} />
                         : null}
                     {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
                 </td>
@@ -260,7 +264,8 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
 }
 
 GeneDiseaseEvidenceSummaryCaseLevel.propTypes = {
-    caseLevelEvidenceList: PropTypes.array
+    caseLevelEvidenceList: PropTypes.array,
+    hpoTerms: PropTypes.object
 };
 
 export default GeneDiseaseEvidenceSummaryCaseLevel;

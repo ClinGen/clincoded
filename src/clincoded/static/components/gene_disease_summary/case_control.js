@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { external_url_map } from '../globals';
+import HpoTerms from '../../libs/get_hpo_term';
 
 class GeneDiseaseEvidenceSummaryCaseControl extends Component {
     constructor(props) {
@@ -66,7 +67,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                     {evidence.diseaseId && evidence.diseaseTerm ?
                         <span>{evidence.diseaseTerm}
                             <span> {!evidence.diseaseFreetext ? (<span>({evidence.diseaseId.replace('_', ':')})</span>)
-                                : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span><br/><strong>HPO term(s): </strong>{evidence.diseasePhenotypes.join(', ')}</span> : null)
+                                : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span><br/><strong>HPO term(s): </strong><HpoTerms hpoIds={evidence.diseasePhenotypes} /></span> : null)
                             }
                             </span>
                         </span>
@@ -79,7 +80,10 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                                         <div className="hpo-term-summary" key={i}>{term}</div>
                                     );
                                 })}
-                                </span> 
+                                </span>
+                                : null}
+                            {this.props.hpoTerms.length ?
+                                <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} hpoTerms={this.props.hpoTerms} />
                                 : null}
                             {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
                         </span>
@@ -232,7 +236,8 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
 }
 
 GeneDiseaseEvidenceSummaryCaseControl.propTypes = {
-    caseControlEvidenceList: PropTypes.array
+    caseControlEvidenceList: PropTypes.array,
+    hpoTerms: PropTypes.object
 };
 
 export default GeneDiseaseEvidenceSummaryCaseControl;

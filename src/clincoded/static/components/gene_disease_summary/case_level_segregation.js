@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { external_url_map } from '../globals';
+import HpoTerms from '../../libs/get_hpo_term';
 
 class GeneDiseaseEvidenceSummarySegregation extends Component {
     constructor(props) {
@@ -74,6 +75,9 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
                             );
                         })}
                         </span> 
+                        : null}
+                    {this.props.hpoTerms.length ?
+                        <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} hpoTerms={this.props.hpoTerms} />
                         : null}
                     {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
                 </td>
@@ -209,7 +213,8 @@ class GeneDiseaseEvidenceSummarySegregation extends Component {
 }
 
 GeneDiseaseEvidenceSummarySegregation.propTypes = {
-    segregationEvidenceList: PropTypes.array
+    segregationEvidenceList: PropTypes.array,
+    hpoTerms: PropTypes.object
 };
 
 export default GeneDiseaseEvidenceSummarySegregation;
