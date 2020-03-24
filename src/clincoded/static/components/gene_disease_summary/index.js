@@ -646,7 +646,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
         let hpoTermsCollection = this.state.hpoTermsCollection;
         uniqueHpoIds.forEach(id => {
             if (id.match(/\HP:\d{7}/g)) {
-                let url = external_url_map['HPOApi'] + id.replace(':', '_');
+                let url = external_url_map['HPOApi'] + id;
                 // Make the OLS REST API call
                 this.getRestData(url).then(result => {
                     let termLabel = result['_embedded']['terms'][0]['label'];
