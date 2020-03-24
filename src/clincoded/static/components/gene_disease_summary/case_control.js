@@ -75,15 +75,8 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                         <span>
                             {evidence.hpoIdInDiagnosis.length ?
                                 <span><strong>HPO term(s):</strong>
-                                {evidence.hpoIdInDiagnosis.map((term, i) => {
-                                    return (
-                                        <div className="hpo-term-summary" key={i}>{term}</div>
-                                    );
-                                })}
+                                    <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} hpoTerms={this.props.hpoTerms} />
                                 </span>
-                                : null}
-                            {this.props.hpoTerms.length ?
-                                <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} hpoTerms={this.props.hpoTerms} />
                                 : null}
                             {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
                         </span>
