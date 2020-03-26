@@ -187,6 +187,7 @@ def main(global_config, **local_config):
     config.include('.batch_download')
     config.include('.visualization')
     config.include('.ldh')
+    config.include('.bulk_export_vci')
     # config.include('.messaging')
 
     if 'elasticsearch.server' in config.registry.settings:
