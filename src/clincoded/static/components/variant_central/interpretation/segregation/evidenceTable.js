@@ -29,7 +29,7 @@ let EvidenceTable = createReactClass({
         session: PropTypes.object,                  // Session object
         affiliation: PropTypes.object,              // User's affiliation
         viewOnly: PropTypes.bool,                   // If the page is in read-only mode
-        canCurrUserModifyEvidence: PropTypes.func   // Funcition to check if current logged in user can modify the given evidence
+        canCurrUserModifyEvidence: PropTypes.func   // Function to check if current logged in user can modify the given evidence
     },
 
     getInitialState() {
@@ -444,7 +444,7 @@ let EvidenceTable = createReactClass({
     /**
      * Check if any of the columns in given row has value to be displayed
      * 
-     * @param {object} row The evidecne row
+     * @param {object} row The evidence row
      */
     showRow(row) {
         let cols = this.getSubcategoryPanelColumns();

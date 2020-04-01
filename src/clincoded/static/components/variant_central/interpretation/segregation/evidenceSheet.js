@@ -91,13 +91,13 @@ let EvidenceSheet = createReactClass({
 
         var formError = false;
         if (this.validateDefault()) {
-            // Check HPO ID format
-            var hpoids = curator.capture.hpoids(this.getFormValue('proband_hpo_ids'));
-            if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
-                // HPOID list is bad
-                formError = true;
-                this.setFormErrors('proband_hpo_ids', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
-              }
+            // // Check HPO ID format
+            // var hpoids = curator.capture.hpoids(this.getFormValue('proband_hpo_ids'));
+            // if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
+            //     // HPOID list is bad
+            //     formError = true;
+            //     this.setFormErrors('proband_hpo_ids', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            //   }
 
             if (!formError) {
                 let allData = null;
@@ -190,19 +190,18 @@ let EvidenceSheet = createReactClass({
                         fieldStyle = {fields.indexOf(col.name) == -1 || this.props.isFromMaster ? null : {backgroundColor: this.state.backgroundGreen}}
                     />
                 </div>]
-                // if ('lookup' in col) {
-                //     node.push(<div className="col-md-1">
-                //         <Input 
-                //             type = "button"
-                //             inputClassName="btn-default btn-inline-spacer"
-                //             title="Lookup"
-                //             clickHandler={() => this.lookupTerm(col.lookup, col.name)}
-                //             style={{'alignSelf': 'center'}}
-                //         >
-                //         </Input>
-                //         {this.renderLookupResult()}
-                //     </div>);
-                // }
+                if ('lookup' in col) {
+                    node.push(<div className="col-md-1">
+                        <Input 
+                            type="button"
+                            inputClassName="btn-default btn-inline-spacer"
+                            title="Get Terms"
+                            clickHandler={() => this.lookupTerm()}
+                            style={{'alignSelf': 'center'}}
+                        >
+                        </Input>
+                    </div>);
+                }
                 rowTDs.push(node);
                 // if field needs to be put in its own row, add it here.
                 if (col.width === 12) {
@@ -225,36 +224,38 @@ let EvidenceSheet = createReactClass({
         return jsx;
     },
 
-    renderLookupResult() {
-        if (this.state.hpo == null) {
-            return null;
+    validateHpo(hpoIds) {
+        const checkIds = curator.capture.hpoids(hpoIds);
+        // Check HPO ID format
+        if (checkIds && checkIds.length && _(checkIds).any(id => id === null)) {
+            // HPOID list is bad
+            this.setFormErrors('proband_hpo_ids', 'For term lookup, use HPO IDs (e.g. HP:0000001) separated by commas');
         }
-        let node = <div className="row">
-            <p>
-                <strong>{this.state.hpo.label}</strong>
-                {this.state.hpo.description[0]}
-            </p>
-            <a 
-                href={this.state.hpo.iri} 
-                title={"Open HPO term " + this.state.hpo.short_form + " in new tab"}
-                target="_blank"
-            >
-                {this.state.hpo.short_form}
-            </a>
-        </div>
-        return node;
+        else if (checkIds && checkIds.length && !_(checkIds).any(id => id === null)) {
+            const hpoIdList = _.without(checkIds, null);
+            return hpoIdList;
+        }
     },
 
-    lookupTerm(termType, fieldName) {
-        let uri = external_url_map[termType];
+    lookupTerm() {
         this.saveAllFormValues();
-        const formValues = this.getAllFormValues();
-        if (termType === 'HPOApi') {
-            uri += formValues[fieldName].replace(':', '_');
-            this.getRestData(uri).then(result => {
-                let term = result['_embedded']['terms'][0];
-                this.setState({
-                    hpo: term
+        const hpoIds = this.getFormValue('proband_hpo_ids');
+        const validatedHpoList = this.validateHpo(hpoIds);
+        const hpoWithTerms = [];
+        if (validatedHpoList) {
+            validatedHpoList.forEach(id => {
+                let url = external_url_map['HPOApi'] + id;
+                this.getRestData(url).then(result => {
+                    const term = result['details']['name'];
+                    const hpoWithTerm = `${term} (${id})`;
+                    hpoWithTerms.push(hpoWithTerm);
+                    this.refs['proband_hpo_ids'].setValue(hpoWithTerms.join(', '));
+                }).catch(err => {
+                    // Unsuccessful retrieval
+                    console.warn('Error in fetching HPO data =: %o', err);
+                    const hpo = id + ' (note: term not found)';
+                    hpoWithTerms.push(hpo);
+                    this.refs['proband_hpo_ids'].setValue(hpoWithTerms.join(', '));
                 });
             });
         }
