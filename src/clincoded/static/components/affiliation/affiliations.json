@@ -282,6 +282,12 @@
         "affiliation_id": "10018",
         "affiliation_fullname": "UNC Biocuration Core",
         "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40018",
+                "fullname": "UNC Biocuration Core GCEP"
+            }
+        },
         "approver": [
             "Jenny Goldstein",
             "Shruthi Mohan",
@@ -292,7 +298,13 @@
     {
         "affiliation_id": "10019",
         "affiliation_fullname": "Harvard/Geisinger Biocuration Core",
-        "publish_approval": true
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40019",
+                "fullname": "Harvard/Geisinger Biocuration Core GCEP"
+            }
+        }
     },
     {
         "affiliation_id": "10020",
@@ -772,12 +784,12 @@
     },
     {
         "affiliation_id": "10060",
-        "affiliation_fullname": "Orphan Diseases",
+        "affiliation_fullname": "Syndromic Disorders",
         "publish_approval": true,
         "subgroups": {
             "gcep": {
                 "id": "40060",
-                "fullname": "Orphan Diseases GCEP"
+                "fullname": "Syndromic Disorders GCEP"
             }
         }
     },

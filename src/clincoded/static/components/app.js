@@ -39,6 +39,12 @@ const demoAffiliations = [
         "affiliation_abbreviation": "",
         "affiliation_fullname": "ClinGen Curator Test Affiliation 1",
         "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "48888",
+                "fullname": "ClinGen Curator Test Affiliation 1 GCEP"
+            }
+        },
         "approver": [
             "Person A",
             "Person B"
@@ -49,6 +55,12 @@ const demoAffiliations = [
         "affiliation_abbreviation": "",
         "affiliation_fullname": "ClinGen Curator Test Affiliation 2",
         "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "59999",
+                "fullname": "ClinGen Curator Test Affiliation 2 VCEP"
+            }
+        },
         "approver": [
             "Person X",
             "Person Y"
