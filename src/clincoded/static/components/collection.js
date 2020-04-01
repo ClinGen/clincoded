@@ -234,7 +234,7 @@ const Table = module.exports.Table = createReactClass({
         });
         const { href_url } = this.props;
         const sortedRows = href_url && href_url.path && href_url.path.includes('/users/')
-            ? this.sortRows(rows, 6, true)
+            ? this.sortRows(rows, 5, true)
             : this.sortRows(rows, props.defaultSortOn, false);
         this.setState({ rows: sortedRows });
     },

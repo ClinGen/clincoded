@@ -141,16 +141,12 @@
         }
     },
     "columns": {
-        "title": {
-            "title": "Full Name",
+        "email": {
+            "title": "Email",
             "type": "string"
         },
         "affiliation": {
             "title": "Affiliation",
-            "type": "string"
-        },
-        "email": {
-            "title": "Email",
             "type": "string"
         },
         "first_name": {

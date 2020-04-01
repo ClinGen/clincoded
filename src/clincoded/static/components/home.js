@@ -47,7 +47,7 @@ var Home = module.exports.Home = createReactClass({
                                 <p className="lead">ClinGen is a National Institutes of Health (NIH)-funded resource dedicated to building an authoritative central resource that defines the clinical relevance of genes and variants for use in precision medicine and research. One of the key goals of ClinGen is to implement an evidence-based consensus for curating genes and variants. For more information on the ClinGen and how to get involved, please visit the ClinGen portal at <a href="https://www.clinicalgenome.org" target="_blank" rel="noopener noreferrer">clinicalgenome.org</a></p>
                                 <p className="lead">
                                     ClinGen&apos;s <strong>Variant Curation Interface</strong> and <strong>Gene Curation Interface</strong> support the curation process.
-                                    To view approved ClinGen Expert Panel variant and gene curations, please go to <a href="clinicalgenome.org" target="_blank" rel="noopener noreferrer">clinicalgenome.org</a>.
+                                    To view approved ClinGen Expert Panel variant and gene curations, please go to <a href="https://www.clinicalgenome.org" target="_blank" rel="noopener noreferrer">clinicalgenome.org</a>.
                                     To request a <strong>Variant Curation Interface</strong> account, select &quot;Login/Sign Up&quot; from the top of the page and fill out the sign up form.
                                 </p>
                                 <p className="lead">
