@@ -156,6 +156,7 @@ def session(config):
 def main(global_config, **local_config):
     """ This function returns a Pyramid WSGI application.
     """
+    print('HEY >>> pyramid main() entry point!')
     settings = global_config
     settings.update(local_config)
 
@@ -191,7 +192,7 @@ def main(global_config, **local_config):
     # config.include('.messaging')
 
     if 'elasticsearch.server' in config.registry.settings:
-        config.include('contentbase.elasticsearch')
+        config.include('contentbase.elasticsearch') # <- imports elasticsearch/__init__.py
         config.include('.search')
 
     config.include(static_resources)

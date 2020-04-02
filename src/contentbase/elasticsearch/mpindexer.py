@@ -20,6 +20,7 @@ log = logging.getLogger(__name__)
 
 
 def includeme(config):
+    print('HEY >>> mpindexer includeme()')
     if config.registry.settings.get('indexer_worker'):
         return
     processes = config.registry.settings.get('indexer.processes')

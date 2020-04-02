@@ -20,6 +20,7 @@ SEARCH_MAX = 99999  # OutOfMemoryError if too high
 
 
 def includeme(config):
+    print('HEY >>> indexer includeme()')
     config.add_route('index', '/index')
     config.scan(__name__)
     registry = config.registry
@@ -195,7 +196,7 @@ class Indexer(object):
             self.es.index(
                 index=self.index, doc_type=doctype, body=result,
                 id=str(uuid), version=xmin, version_type='external_gte',
-                request_timeout=60,
+                request_timeout=999999,
             )
         except StatementError:
             # Can't reconnect until invalid transaction is rolled back

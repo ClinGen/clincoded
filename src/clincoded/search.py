@@ -79,10 +79,12 @@ def get_search_fields(request, doc_types):
     """
     Returns set of columns that are being searched and highlights
     """
+    print('=> in get_search_fields()')
     fields = set()
     highlights = {}
     for doc_type in (doc_types or request.root.by_item_type.keys()):
         collection = request.root[doc_type]
+        print('    doc_type={}, request.root[doc_type]={}'.format(doc_type, collection))
         for value in collection.type_info.schema.get('boost_values', ()):
             fields.add('embedded.' + value)
             highlights['embedded.' + value] = {}
@@ -271,6 +273,7 @@ def load_results(request, es_results, result):
 
 @view_config(route_name='search', request_method='GET', permission='search')
 def search(context, request, search_type=None):
+    print('/search, params', request.params)
     """
     Search view connects to ElasticSearch and returns the results
     """
@@ -295,12 +298,15 @@ def search(context, request, search_type=None):
     # handling limit
     size = request.params.get('limit', 25)
     if size in ('all', ''):
-        size = 99999
+        # size = 99999
+        size = 999
     else:
         try:
             size = int(size)
         except ValueError:
             size = 25
+    
+    print('/search size is', size)
 
     search_term = request.params.get('searchTerm', '*')
     if search_term != '*':
@@ -348,7 +354,19 @@ def search(context, request, search_type=None):
                 'remove': '{}?{}'.format(request.path, qs)
             })
 
+    # `doc_types` is ['interpretation']
     search_fields, highlights = get_search_fields(request, doc_types)
+
+    print('before:search_fields : : ', search_fields)
+    print('before:search_term : : ', search_term)
+
+    if doc_types == ['interpretation']:
+        print('== special config for interpretation search ==')
+        search_fields = ['embedded.affiliation']
+        # search_term = '10024'
+
+    print('search_fields', search_fields)
+    print('search_term', search_term)
 
     # Builds filtered query which supports multiple facet selection
     query = get_filtered_query(search_term,
@@ -390,11 +408,18 @@ def search(context, request, search_type=None):
     set_facets(facets, used_filters, query, principals)
 
     if doc_types == ['gdm'] or doc_types == ['interpretation']:
-        size = 99999
+        pass
+        # size = 99999
 
     # Execute the query
     es_results = es.search(body=query, index=es_index,
                            doc_type=doc_types or None, size=size)
+
+    print('\n\n\n\n es_index doc_types', es_index, doc_types)
+    with open('test_query_{}.json'.format(doc_types), 'w') as q_file, open('test_es_results_{}.json'.format(doc_types), 'w') as es_file:
+        import json
+        json.dump(query, q_file)
+        json.dump(es_results, es_file)
 
     # Loading facets in to the results
     if 'aggregations' in es_results:

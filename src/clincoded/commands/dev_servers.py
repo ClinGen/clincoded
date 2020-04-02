@@ -89,16 +89,25 @@ def main():
     stdouts = [p.stdout for p in processes]
 
     # Ugly should probably use threads instead
-    while True:
-        readable, writable, err = select.select(stdouts, [], stdouts, 5)
-        for stdout in readable:
-            for line in iter(stdout.readline, b''):
-                sys.stdout.write(line.decode('utf-8'))
-        if err:
-            for stdout in err:
-                for line in iter(stdout.readline, b''):
-                    sys.stdout.write(line.decode('utf-8'))
-            break
+    # while True:
+    #     readable, writable, err = select.select(stdouts, [], stdouts, 5)
+    #     for stdout in readable:
+    #         for line in iter(stdout.readline, b''):
+    #             sys.stdout.write(line.decode('utf-8'))
+    #     if err:
+    #         for stdout in err:
+    #             for line in iter(stdout.readline, b''):
+    #                 sys.stdout.write(line.decode('utf-8'))
+    #         break
+
+    with open('dev-servers.log', 'w') as dev_server_log_file:
+        while True:
+            line = stdouts[1].readline()
+            if not line:
+                print('')
+                break
+            print('ES >>>', line)
+            dev_server_log_file.write(str(line.rstrip()) + '\n')
 
 if __name__ == '__main__':
     main()

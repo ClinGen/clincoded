@@ -1,4 +1,5 @@
 import os.path
+from os import environ
 import sys
 try:
     import subprocess32 as subprocess
@@ -8,6 +9,7 @@ except ImportError:
 
 def server_process(datadir, host='127.0.0.1', port=9200, prefix='', echo=False):
     args = [
+        'stdbuf', '-o0',
         os.path.join(prefix, 'elasticsearch'),
         '-f',  # foreground
         '-Des.path.data="%s"' % os.path.join(datadir, 'data'),
@@ -18,20 +20,30 @@ def server_process(datadir, host='127.0.0.1', port=9200, prefix='', echo=False):
         '-Des.http.port=%d' % port,
         '-Des.index.number_of_shards=1',
         '-Des.index.number_of_replicas=0',
-        '-Des.index.store.type=memory',
-        '-Des.index.store.fs.memory.enabled=true',
+        # '-Des.index.store.type=memory',
+        '-Des.index.store.type=niofs',
+        # '-Des.index.store.fs.memory.enabled=true',
         '-Des.index.gateway.type=none',
         '-Des.gateway.type=none',
-        '-XX:MaxDirectMemorySize=4096m',
+        # '-Des.logger.level=TRACE',
+        # '-XX:MaxDirectMemorySize=4096m',
+        # '-Des.bootstrap.memory_lock=true', # not working; research into this only if raising heap size doesn't work and still get OOM
     ]
     # elasticsearch.deb setup
     if os.path.exists('/etc/elasticsearch'):
         args.append('-Des.path.conf=/etc/elasticsearch')
+    # if os.path.exists('/tmp/clincoded/elasticsearch_config'):
+    #     args.append('-Des.path.conf=/tmp/clincoded/elasticsearch_config')
+
+    custom_env = environ.copy()
+    custom_env['ES_HEAP_SIZE'] = '6g'
+
     process = subprocess.Popen(
         args,
         close_fds=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        env=custom_env
     )
 
     SUCCESS_LINE = b'started\n'

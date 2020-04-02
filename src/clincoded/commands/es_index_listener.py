@@ -26,7 +26,7 @@ from urllib.parse import parse_qsl
 log = logging.getLogger(__name__)
 
 EPILOG = __doc__
-DEFAULT_TIMEOUT = 60
+DEFAULT_TIMEOUT = 999999
 PY2 = sys.version_info[0] == 2
 
 # We need this because of MVCC visibility.
@@ -36,6 +36,9 @@ PY2 = sys.version_info[0] == 2
 
 def run(testapp, timeout=DEFAULT_TIMEOUT, dry_run=False, control=None, update_status=None):
     assert update_status is not None
+
+    print('es_index_listener run()  -- exit immediately')
+    return
 
     timestamp = datetime.datetime.now().isoformat()
     update_status(
@@ -189,6 +192,7 @@ class ErrorHandlingThread(threading.Thread):
 
 
 def composite(loader, global_conf, **settings):
+    print('HEY >>> es_index_listener composite()')
     listener = None
 
     # Register before testapp creation.

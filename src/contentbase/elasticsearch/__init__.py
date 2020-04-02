@@ -15,6 +15,7 @@ PY2 = sys.version_info.major == 2
 
 
 def includeme(config):
+    print('HEY >>> elasticsearch includeme()')
     settings = config.registry.settings
     settings.setdefault('contentbase.elasticsearch.index', 'contentbase')
 
@@ -26,6 +27,7 @@ def includeme(config):
         serializer=PyramidJSONSerializer(json_renderer),
         connection_class=TimedUrllib3HttpConnection,
         retry_on_timeout=True,
+        timeout=99999
     )
 
     config.include('.cached_views')
@@ -34,7 +36,7 @@ def includeme(config):
 
     config.include('.indexer')
     if asbool(settings.get('indexer')) and not PY2:
-        config.include('.mpindexer')
+        config.include('.mpindexer') # <- imports `mpindexer.py`
 
 
 def datastore(request):
