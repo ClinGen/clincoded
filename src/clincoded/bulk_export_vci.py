@@ -26,6 +26,9 @@ def bulk_export_vci(context, request):
         # collection_add is in src/contentbase/resources.py
 
         from pyramid.request import Request
+
+        # Test in the browser: 
+        # http://localhost:6543/bulk_export_vci?type=interpretation&limit=2&searchTerm=10007
         
         subreq = Request.blank(
             '/search?{}'.format(request.query_string),
