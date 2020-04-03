@@ -101,7 +101,7 @@ var AddCurator = createReactClass({
         return (
             <div className="container">
                 <h1>{this.props.context.title}</h1>
-                <div className="col-md-8 col-md-offset-2 col-sm-9 col-sm-offset-1 form-create-gene-disease">
+                <div className="col-md-8 col-md-offset-2 col-sm-9 col-sm-offset-1 form-create-user">
                     <Panel panelClassName="panel-create-gene-disease">
                         <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                             <div className="row">

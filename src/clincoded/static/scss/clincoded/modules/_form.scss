@@ -9,10 +9,14 @@
     }
 }
 
+.form-create-user,
+.form-create-disease,
 .form-create-gene-disease {
     margin-top: 30px;
     margin-bottom: 50px;
+}
 
+.form-create-gene-disease {
     .submit-err {
         margin-right: -15px;
     }
