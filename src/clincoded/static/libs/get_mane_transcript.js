@@ -2,6 +2,24 @@
 
 import { generateVariantPreferredTitle } from "./parse-resources";
 
+/**
+ * 
+ * @param {string} maneTranscriptId MANE transcript id
+ * @param {object} maneTranscriptFromEnsembl The transcript object retreived from Ensembl
+ */
+export const getManeTranscriptTitleFromClinvar = (maneTranscriptId, maneTranscriptFromEnsembl) => {
+    const { hgvsc, hgvsp, gene_symbol } = maneTranscriptFromEnsembl;
+
+    const [, nucleotideChange] = hgvsc.split(':');
+    const [, aminoAcidChangeName] = hgvsp.split(':');
+
+    return generateVariantPreferredTitle({
+        geneName: gene_symbol,
+        transcriptId: maneTranscriptId,
+        nucleotideChange,
+        aminoAcidChangeName
+    });
+}
 
 /**
  * Method to return the MANE transcript object given the MANE trnascript id and the json fetched from variant CAR.
@@ -21,11 +39,22 @@ export const getManeTranscriptTitleFromCar = (maneTranscriptId, carJson) => {
             continue;
         }
         
-        const transcriptId = hgvsValue.split(':')[0]
+        const [transcriptId, nucleotideChange] = hgvsValue.split(':')
+        const {
+            proteinEffect: {
+                hgvs = ''
+            } = {}
+        }= transcript;
+        const [, aminoAcidChangeName] =  hgvs.split(':');
         if (transcriptId === maneTranscriptId) {
             // Only return the transcript preferred title for now.
             // Can add more transcript info here if needed in the future.
-            return generateVariantPreferredTitle(transcript.geneSymbol, hgvsValue, transcript.proteinEffect);
+            return generateVariantPreferredTitle({
+                geneName: transcript.geneSymbol,
+                transcriptId,
+                nucleotideChange,
+                aminoAcidChangeName
+            });
         }
     }
 

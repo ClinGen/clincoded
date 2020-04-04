@@ -504,6 +504,15 @@ function parseCarHgvsHandler(hgvs_temp, variant) {
 /**
  * Method to return the variant preferred title. Examples given as below.
  * 
+ * `NM_015506.3(MMACHC):c.436_450del (p.Ser146_Ile150del)`
+ *  NM: Chromosome
+ *  015506: Gene on chromosome (a gene produces certain protein)
+ *  MMACHC: Symbol represent the gene
+ *  c.436_450del: Nucleotide change
+ *  p.Ser146_Ile150del: Name of the amino acid (protein) change
+ *  
+ * Regarding the title format, below gives another example:
+ * 
  * When both gene name and protein effect information are available, the format will be `NM_002496.4(Gene):c.64C>T (Amino-acid change)`.
  * 
  * When protein effect is unavailable, the format will be `NM_002496.4(Gene):c.64C>T`.
@@ -511,40 +520,42 @@ function parseCarHgvsHandler(hgvs_temp, variant) {
  * When both gene and protein effect not available, will fall back to hgvs format `NM_002496.4:c.64C>T`.
  * 
  * When gene name is unavailable, amino-acid change is unavailable as well, so the format will fallback to hgvs as above.
- * @param {string} geneName - Gene name, or gene symbol.
- * @param {string} hgvs - A HGVS representation of the variant.
- * @param {object} proteinEffect - An object containing the amino acid change hgvs information.
+ * @param {string} props - The argument object for this method
+ * @param {string} props.geneName - Gene name, or gene symbol.
+ * @param {string} props.transcriptId - (required) The transcript id, see example above
+ * @param {string} props.nucleotideChange - (required) The nucleotide change, see example above
+ * @param {object} props.aminoAcidChangeName - The name of amino acid change, see example above.
  * @returns {string} Preferred title of the variant.
  */
-export const generateVariantPreferredTitle = (geneName, hgvs, proteinEffect) => {
-    if (!hgvs.includes(':') || !geneName) {
-        // when gene name is unavailable, then there will be no amino-acid change, where title will fall back to hgvs
-        return hgvs;
+export const generateVariantPreferredTitle = ({geneName, transcriptId, nucleotideChange, aminoAcidChangeName}) => {
+    console.log('generateVariantPreferredTitle: ', geneName, transcriptId, nucleotideChange, aminoAcidChangeName);
+
+    // required fields
+    if (!(transcriptId && nucleotideChange)) {
+        return null;
     }
 
-    const [transcriptId, aminoAcidChange] = hgvs.split(':');
-    
-    let aminoAcidChangeName = '';
-    if (proteinEffect && proteinEffect.hgvs && proteinEffect.hgvs.includes(':')) {
-        aminoAcidChangeName = proteinEffect.hgvs.split(':')[1];
+    if (!geneName) {
+        // when gene name is unavailable, then there will be no amino-acid change, where title will fall back to hgvs form, i.e. transcriptId:nucleotideChange
+        return `${transcriptId}:${nucleotideChange}`;
     }
 
-    return `${transcriptId}(${geneName}):${aminoAcidChange}${aminoAcidChangeName ? ` (${aminoAcidChangeName})` : ''}`;
+    return `${transcriptId}(${geneName}):${nucleotideChange}${aminoAcidChangeName ? ` (${aminoAcidChangeName})` : ''}`;
 }
 
 
 /**
- * Method to extract the unique, non-duplicated set of gene urls in genomic CAR from an array of transcripts for a variant in CAR (Clingen Allele Registry).
+ * Method to extract the unique, non-duplicated set of gene symbols in genomic CAR from an array of transcripts for a variant in CAR (Clingen Allele Registry).
  * @param {Array} transcriptAlleles - Transcripts associated with a variant from CAR.
  * @returns {Set<string>} A set of genomic CAR gene urls.
  */
-export const getTranscriptAllelesGeneUrlSet = (transcriptAlleles) => {
-    let geneUrls = new Set();
+export const getTranscriptAllelesGeneSymbolSet = (transcriptAlleles) => {
+    let geneSymbols = new Set();
     transcriptAlleles.forEach(transcript => {
-        if (transcript.gene) {
-            geneUrls.add(transcript.gene);
+        if (transcript.geneSymbol) {
+            geneSymbols.add(transcript.geneSymbol);
         }
     })
 
-    return geneUrls;
+    return geneSymbols;
 }
