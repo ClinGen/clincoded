@@ -305,9 +305,19 @@ let EvidenceTable = createReactClass({
                     colNames.forEach(col => {
                         let node = <td key={`empty_cell_${i++}`}></td>;
                         if (col in sourceData) {
-                            node = <td key={`cell_${i++}`}>
-                                {sourceData[col]}
-                            </td>
+                            if (sourceData.hpoData.length && col === 'proband_hpo_ids') {
+                                let hpoData = sourceData.hpoData.map((hpo, i) => {
+                                    let hpoWithTerm = <p key={i}>{hpo.hpoTerm} ({hpo.hpoId})</p>
+                                    return (hpoWithTerm);
+                                });
+                                node = <td key={`cell_${i++}`}>
+                                    {hpoData}
+                                </td>
+                            } else {
+                                node = <td key={`cell_${i++}`}>
+                                    {sourceData[col]}
+                                </td>
+                            }
                         }
                         if (col === 'comments') {
                             // Display the HPO comment
