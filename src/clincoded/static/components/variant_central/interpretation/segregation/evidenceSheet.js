@@ -226,10 +226,10 @@ let EvidenceSheet = createReactClass({
                     node.push(
                         <div className="col-md-1">
                             <Input 
-                            type="button"
-                            inputClassName="btn btn-danger btn-default clear-terms-btn"
-                            title="Clear Terms"
-                            clickHandler={() => this.clearHpoTerms()}
+                                type="button"
+                                inputClassName="btn btn-danger btn-default clear-terms-btn"
+                                title="Clear Terms"
+                                clickHandler={() => this.clearHpoTerms()}
                             >
                             </Input>
                         </div>
