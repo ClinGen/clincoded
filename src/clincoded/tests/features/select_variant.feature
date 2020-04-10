@@ -65,7 +65,7 @@ Feature: Select Variant
         When I press the button "Save and View Evidence"
         And I wait for 5 seconds
         Then I should see "Evidence View"
-        Then I should see " rs566967979"
+        Then I should see "NC_000003.11:g.184675256G>A"
         When I press "Logout ClinGen Test Curator"
         And I wait for 10 seconds
         Then I should see "ClinGen is a National Institutes of Health (NIH)-funded resource"
