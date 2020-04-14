@@ -72,3 +72,30 @@ def provisionalClassification_8_9(value, system):
     # https://github.com/ClinGen/clincoded/issues/1796
     # Add several properties for the secondary approvers
     return
+
+@upgrade_step('provisionalClassification', '9', '10')
+def provisionalClassification_9_10(value, system):
+    # https://github.com/ClinGen/clincoded/issues/2132
+    # Remove existing provisional/snapshot nested data
+
+    try:
+        for snapshot in value['associatedClassificationSnapshots']:
+            try:
+                del snapshot['resource']['associatedClassificationSnapshots']
+
+            except KeyError:
+                pass
+
+    except KeyError:
+        pass
+
+    return
+
+@upgrade_step('provisionalClassification', '10', '11')
+def provisionalClassification_10_11(value, system):
+    # https://github.com/ClinGen/clincoded/issues/1913
+    # Renamed "No Reported Evidence" to "No Known Disease Relationship"
+    if 'alteredClassification' in value:
+        if value['alteredClassification'] == 'No Reported Evidence':
+            value['alteredClassification'] = 'No Known Disease Relationship'
+    return

@@ -2,8 +2,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { external_url_map } from '../globals';
-import HpoTerms from '../../libs/get_hpo_term';
 import { renderVariantTitle } from '../../libs/render_variant_title';
+import HpoTerms from '../../libs/get_hpo_term';
 
 class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
     constructor(props) {
@@ -87,7 +87,7 @@ class GeneDiseaseEvidenceSummaryCaseLevel extends Component {
                 </td>
                 <td className="evidence-phenotypes">
                     {evidence.hpoIdInDiagnosis.length ?
-                        <span><strong>HPO term(s):</strong>
+                        <span><strong>HPO term(s): </strong>
                             <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} hpoTerms={this.props.hpoTerms} />
                         </span> 
                         : null}

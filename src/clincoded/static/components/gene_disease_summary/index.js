@@ -38,10 +38,10 @@ const GeneDiseaseEvidenceSummary = createReactClass({
             experimentalEvidenceList: [],
             nonscorableEvidenceList: [],
             preview: queryKeyValue('preview', this.props.href),
-            hpoTermsCollection: {
-                caseLevel: {},
-                segregation: {},
-                caseControl: {}
+            hpoTermsCollection: {	
+                caseLevel: {},	
+                segregation: {},	
+                caseControl: {}	
             }
         };
     },
@@ -87,9 +87,9 @@ const GeneDiseaseEvidenceSummary = createReactClass({
                 }
             }
             // Allow logged-in user/affiliation to view classifications
-            // approved by other users/affiliations, or to view the
+            // approved|provisional by other users/affiliations (classifications owned by other users/affiliations), or to view the
             // approved classification owned by the logged-in user/affiliation
-            if (status === 'Approved' && (affiliationId || userId)) {
+            if ((status === 'Approved' || status === 'Provisional') && (affiliationId || userId)) {
                 if (affiliationId) {
                     curatorAffiliation = {};
                     curatorAffiliation['affiliation_id'] = affiliationId;
@@ -633,7 +633,7 @@ const GeneDiseaseEvidenceSummary = createReactClass({
         return explanation;
     },
 
-    fetchHpoTerms(evidenceList, evidenceType) {
+    fetchHpoTerms(evidenceList, evidenceType) {	
         let allHpoIds = [];
         if (evidenceList && evidenceList.length) {
             evidenceList.forEach(evidence => {
@@ -645,10 +645,11 @@ const GeneDiseaseEvidenceSummary = createReactClass({
         let uniqueHpoIds = allHpoIds.length ? [...(new Set(allHpoIds))] : [];
         let hpoTermsCollection = this.state.hpoTermsCollection;
         uniqueHpoIds.forEach(id => {
-            let url = external_url_map['HPOApi'] + id.replace(':', '_');
+            let checkedId = id.match(/\HP:\d{7}/g);
+            let url = external_url_map['HPOApi'] + checkedId;
             // Make the OLS REST API call
             this.getRestData(url).then(result => {
-                let termLabel = result['_embedded']['terms'][0]['label'];
+                let termLabel = result['details']['name'];
                 if (evidenceType === 'caseLevel') {
                     hpoTermsCollection['caseLevel'][id] = termLabel ? termLabel : id + ' (note: term not found)';
                 } else if (evidenceType === 'segregation') {

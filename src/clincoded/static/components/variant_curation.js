@@ -24,6 +24,7 @@ const AssessmentPanel = Assessments.AssessmentPanel;
 const AssessmentMixin = Assessments.AssessmentMixin;
 import { getAffiliationName } from '../libs/get_affiliation_name';
 import { renderVariantLabelAndTitle } from '../libs/render_variant_label_title';
+import { renderVariantTitle } from '../libs/render_variant_title';
 
 var VariantCuration = createReactClass({
     mixins: [FormMixin, RestMixin, CurationMixin, AssessmentMixin, CuratorHistory],

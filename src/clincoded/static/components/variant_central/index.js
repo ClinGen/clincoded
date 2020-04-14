@@ -11,7 +11,7 @@ import { parsePubmed } from '../../libs/parse-pubmed';
 import { parseClinvar } from '../../libs/parse-resources';
 import { getHgvsNotation } from './helpers/hgvs_notation';
 import { setPrimaryTranscript } from './helpers/primary_transcript';
-import { getClinvarInterpretations, parseClinvarSCVs } from './helpers/clinvar_interpretations';
+import { parseClinvarInterpretations } from './helpers/clinvar_interpretations';
 import { CurationInterpretationCriteria } from './interpretation/criteria';
 import { EvaluationSummary } from './interpretation/summary';
 import { curator_page, queryKeyValue, dbxref_prefix_map, external_url_map } from '../globals';
@@ -224,21 +224,13 @@ var VariantCurationHub = createReactClass({
                         this.setState({loading_myGeneInfo: false});
                     }
                     this.handleCodonEsearch(variantData);
-                    // Retrieve data (in non-VCV format) for interpretations submitted to ClinVar
-                    this.getRestDataXml(external_url_map['ClinVarEutils'] + variant.clinvarVariantId).then(xmlClinVar => {
-                        this.setState({
-                            ext_clinvarInterpretationSummary: getClinvarInterpretations(xmlClinVar),
-                            ext_clinVarSCV: parseClinvarSCVs(xmlClinVar),
-                            loading_clinvarEutils: false,
-                            loading_clinvarSCV: false
-                        });
-                    }).catch(err => {
-                        this.setState({
-                            loading_clinvarEutils: false,
-                            loading_clinvarSCV: false,
-                            loading_clinvarEsearch: false
-                        });
-                        console.log('ClinVarEutils Fetch Error=: %o', err);
+                    // Extract data for interpretations submitted to ClinVar
+                    const {clinvarInterpretationSummary, clinvarInterpretationSCVs} = parseClinvarInterpretations(xmlClinVarVCV);
+                    this.setState({
+                        ext_clinvarInterpretationSummary: clinvarInterpretationSummary,
+                        ext_clinVarSCV: clinvarInterpretationSCVs,
+                        loading_clinvarEutils: false,
+                        loading_clinvarSCV: false
                     });
                 }).catch(err => {
                     this.setState({

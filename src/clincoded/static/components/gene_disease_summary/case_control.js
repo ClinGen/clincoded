@@ -66,8 +66,8 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                 <td className="evidence-disease">
                     {evidence.diseaseId && evidence.diseaseTerm ?
                         <span>{evidence.diseaseTerm}
-                            <span> {!evidence.diseaseFreetext ? <span>({evidence.diseaseId.replace('_', ':')})</span>
-                                : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span><br /><strong>HPO term(s):</strong><HpoTerms hpoIds={evidence.diseasePhenotypes} /></span> : null)
+                            <span> {!evidence.diseaseFreetext ? (<span>({evidence.diseaseId.replace('_', ':')})</span>)
+                                : (evidence.diseasePhenotypes && evidence.diseasePhenotypes.length ? <span><br/><strong>HPO term(s): </strong><HpoTerms hpoIds={evidence.diseasePhenotypes} /></span> : null)
                             }
                             </span>
                         </span>
@@ -76,7 +76,7 @@ class GeneDiseaseEvidenceSummaryCaseControl extends Component {
                             {evidence.hpoIdInDiagnosis.length ?
                                 <span><strong>HPO term(s):</strong>
                                     <HpoTerms hpoIds={evidence.hpoIdInDiagnosis} hpoTerms={this.props.hpoTerms} />
-                                </span> 
+                                </span>
                                 : null}
                             {evidence.termsInDiagnosis.length ? <span><strong>free text:</strong><br />{evidence.termsInDiagnosis}</span> : null}
                         </span>

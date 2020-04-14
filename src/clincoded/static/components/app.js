@@ -9,6 +9,7 @@ import { NavbarMixin, Nav, Navbar, NavItem } from '../libs/bootstrap/navigation'
 import jsonScriptEscape from '../libs/jsonScriptEscape';
 import { RestMixin } from './rest';
 import AffiliationModal from './affiliation/modal';
+import { isUserAllowedToCreateGdm } from '../libs/allow_create_gdm';
 const AffiliationsList = require('./affiliation/affiliations.json');
 
 var routes = {
@@ -38,6 +39,12 @@ const demoAffiliations = [
         "affiliation_abbreviation": "",
         "affiliation_fullname": "ClinGen Curator Test Affiliation 1",
         "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "48888",
+                "fullname": "ClinGen Curator Test Affiliation 1 GCEP"
+            }
+        },
         "approver": [
             "Person A",
             "Person B"
@@ -48,6 +55,12 @@ const demoAffiliations = [
         "affiliation_abbreviation": "",
         "affiliation_fullname": "ClinGen Curator Test Affiliation 2",
         "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "59999",
+                "fullname": "ClinGen Curator Test Affiliation 2 VCEP"
+            }
+        },
         "approver": [
             "Person X",
             "Person Y"
@@ -335,7 +348,7 @@ var Header = createReactClass({
     render: function() {
         return (
             <header className="site-header">
-                <NavbarMain portal={portal} session={this.props.session} href={this.props.href} />
+                <NavbarMain portal={portal} session={this.props.session} href={this.props.href} affiliation={this.props.affiliation}/>
             </header>
         );
     }
@@ -376,7 +389,8 @@ var NavbarMain = createReactClass({
 
     propTypes: {
         portal: PropTypes.object.isRequired,
-        href: PropTypes.string.isRequired
+        href: PropTypes.string.isRequired,
+        affiliation: PropTypes.object
     },
 
     render: function() {
@@ -385,7 +399,7 @@ var NavbarMain = createReactClass({
         return (
             <div>
                 <div className="container">
-                    <NavbarUser portal={this.props.portal} session={this.props.session} href={this.props.href} />
+                    <NavbarUser portal={this.props.portal} session={this.props.session} href={this.props.href} affiliation={this.props.affiliation}/>
                     <a href={headerUrl} className='navbar-brand'>ClinGen Dashboard</a>
                 </div>
             </div>
@@ -397,6 +411,7 @@ var NavbarMain = createReactClass({
 var NavbarUser = createReactClass({
     render: function() {
         var session = this.props.session;
+        const allowToCreateGDM = isUserAllowedToCreateGdm(session, this.props.affiliation);
         var demoLoginEnabled = true;
         if (/curation.clinicalgenome.org/.test(url.parse(this.props.href).hostname) || /production.clinicalgenome.org/.test(url.parse(this.props.href).hostname)) {
             // check if production or curation URL. Disable demo login if true
@@ -412,7 +427,12 @@ var NavbarUser = createReactClass({
                         }
                         // Normal menu item; disabled if user is not logged in
                         if (session && session['auth.userid']) {
-                            return <NavItem key={menu.id} href={menu.url} icon={menu.icon} title={menu.title} target={menu.target}>{menu.title}</NavItem>;
+                            // Disable GDM creation link if user is not allowed to create new GDMs
+                            if (menu.id === 'gene') {
+                                return <NavItem key={menu.id} href={allowToCreateGDM ? menu.url : ''} icon={menu.icon} title={menu.title} target={menu.target} disabled={allowToCreateGDM ? false : true}>{menu.title}</NavItem>;
+                            } else {
+                                return <NavItem key={menu.id} href={menu.url} icon={menu.icon} title={menu.title} target={menu.target}>{menu.title}</NavItem>;
+                            }
                         }
                     } else {
                         // Trigger menu item; set <a> data attribute to login or logout

@@ -103,13 +103,15 @@ var NavItem = module.exports.NavItem = createReactClass({
         styles: PropTypes.string, // CSS classes to add to <li> elements
         href: PropTypes.string, // URL to link this item to
         icon: PropTypes.string, // CSS class for fontawesome icon (e.g. 'icon-home')
-        target: PropTypes.string // target attribute
+        target: PropTypes.string, // target attribute
+        disabled: PropTypes.bool // disable the <a> link for the item
         // Additional properties (data attributes) set on <a> for the item
     },
 
     getInitialState() {
         return {
-            dropdownActive: false
+            dropdownActive: false,
+            disabled: false
         };
     },
 
@@ -147,6 +149,9 @@ var NavItem = module.exports.NavItem = createReactClass({
         } else if (e.target === this.refs.menu_item_gene_tracking_system) {
             this.setState({dropdownActive: false});
             window.open('http://clingen.sirs.unc.edu');
+        } else if (e.target === this.refs.menu_item_terms_of_use) {
+            this.setState({dropdownActive: false});
+            window.open('/terms-of-use');
         } else {
             this.setState({dropdownActive: false});
         }
@@ -173,6 +178,7 @@ var NavItem = module.exports.NavItem = createReactClass({
                             <li><a href="#" ref="menu_item_sop_gci">SOP - GCI</a></li>
                             <li><a href="#" ref="menu_item_sop_vci">SOP - VCI</a></li>
                             <li><a href="#" ref="menu_item_gene_tracking_system">Gene Tracking System</a></li>
+                            <li><a href="#" ref="menu_item_terms_of_use">Interface Terms of Use</a></li>
                         </ul>
                         : null}
                 </div>
@@ -191,6 +197,7 @@ var NavItem = module.exports.NavItem = createReactClass({
         var iconClass = this.props.icon ? this.props.icon + ' icon icon-alt' : '';
         var contentClass = iconClass ? 'sr-only' : '';
         var title = this.props.title;
+        iconClass = this.props.disabled ? iconClass + ' disabled' : iconClass;
 
         return (
             <li className={title === 'space' ? 'white-space' : 'link'}>
