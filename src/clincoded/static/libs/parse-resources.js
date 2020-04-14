@@ -559,3 +559,68 @@ export const getTranscriptAllelesGeneSymbolSet = (transcriptAlleles) => {
 
     return geneSymbols;
 }
+
+/**
+ * This method returns the preferred variant title using Ensembl API data.
+ * Note that this method does not try to match a transcript id; instead will just use the `transcriptId` provided
+ * 
+ * @param {string} transcriptId The first portion of the hgvs of a transcript, which is the part before ':', but without the gene symbol (gene name)
+ * @param {object} transcriptFromEnsembl The transcript object retreived from Ensembl
+ */
+export const getPreferredTitleFromEnsemblTranscriptsNoMatch = (transcriptId, transcriptFromEnsembl) => {
+    const { hgvsc, hgvsp, gene_symbol } = transcriptFromEnsembl;
+
+    const [, nucleotideChange] = hgvsc.split(':');
+    const [, aminoAcidChangeName] = hgvsp.split(':');
+
+    return generateVariantPreferredTitle({
+        geneName: gene_symbol,
+        transcriptId,
+        nucleotideChange,
+        aminoAcidChangeName
+    });
+}
+
+/**
+ * Method to return the transcript title given the trnascript id and the json fetched from variant CAR.
+ * This method uses the CAR data to match the transcript id in order to generate the full perferred transcript title
+ * 
+ * @param {string} transcriptIdToMatch - The first portion of the hgvs of a transcript, which is the part before ':', but without the gene symbol (gene name).
+ * @param {object} carJson - Variant CAR json response object.
+ * @returns {(string|null)} Variant title for the MANE transcript.
+ */
+export const getPreferredTitleFromEnsemblTranscriptsMatchByCar = (transcriptIdToMatch, carJson) => {
+    // given the id of MANE transcript, reverse lookup in CAR to obtain complete transcript info
+    const {
+        transcriptAlleles = []
+    } = carJson;
+
+    for (let transcript of transcriptAlleles) {
+        const { hgvs: [ hgvsValue = '' ] = [] } = transcript;
+        if (!hgvsValue) {
+            continue;
+        }
+        
+        const [transcriptId, nucleotideChange] = hgvsValue.split(':')
+        const {
+            proteinEffect: {
+                hgvs = ''
+            } = {}
+        }= transcript;
+        const [, aminoAcidChangeName] =  hgvs.split(':');
+        if (transcriptId === transcriptIdToMatch) {
+            // Only return the transcript preferred title for now.
+            // Can add more transcript info here if needed in the future.
+            return generateVariantPreferredTitle({
+                geneName: transcript.geneSymbol,
+                transcriptId,
+                nucleotideChange,
+                aminoAcidChangeName
+            });
+        }
+    }
+
+    // in case there's a inconsistency between LDH and CAR (MANE transcript found in LDH, but no such transcript in CAR, which shouldn't happen), just fall back to no MANE transcript result in CAR
+    return null;
+}
+

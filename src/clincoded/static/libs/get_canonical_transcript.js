@@ -1,16 +1,159 @@
 'use strict';
 
+import { getPreferredTitleFromEnsemblTranscriptsNoMatch } from "./parse-resources";
+
 /**
- * Method to return the canonical transcript given an array of Ensembl transcripts
+ * Method to return the canonical transcript given the Ensembl transcripts.
+ * Note that there are possibly multiple canonical transcript(s) in Ensembl
+ * transcripts, this method only picks the representative one, since this method
+ * is intended to be used for getting a single canonical transcript title for a variant.
+ * 
+ * Among the canonical transcripts, whether or not one qualifies as the representative 
+ * canonical transcript, is determined by algorithm below:
+ * 
+ * 1. [**General Singularity Test**] - If only one canonical transcript exists in Ensembl transcripts, return it
+ * 2. [**NM Singularity Test**] - If there're multiple canonical transcripts, and only one of them whose 
+ *      c. nomenclature (i.e. `hgvsc`) starts with NM, return it
+ * 3. [**NM Singularity Test**] - If there're multiple canonical transcripts whose `hgvsc` starts with NM, 
+ *      return null, which also means we don't use canonical transcripts for variant title
+ * 4, [**NR Singularity Test**] - If there're no canonical transcript with `NM` prefix, look for canonical transcripts 
+ *      with `NR` prefix; if there's exactly one with `NR` prefix, return it
+ * 5. Otherwise return null; this includes cases of multiple caonical transcripts with NR prefix
+ * 
+ * 
+ * Examples:
+ * 
+ * e.g. 1: `NR_1, XR_1, XR_2, XM_1, XM_2 ...`: in this case there is no NM but there is one NR_1 so use that
+ * 
+ * e.g. 2: `NR_1, NR_2, XR_1, XR_2, XM_1, XM_2 ...`: in this case skip because there is no NM and there is more than one NR
+ * 
+ * e.g. 3: `NM_1, NR_1, NR_2, XR_1, XR_2, XM_1, XM_2 ...`: in this case use NM_1
+ * 
+ * e.g. 4: `NM_1, NM_2_ NR_1, XR_1, XR_2, XM_1, XM_2 ...`: in this case skip because there is more than one NM
+ * 
+ * @see {@link https://github.com/ClinGen/clincoded/issues/2176|Issue 2176}
+ * @see getCanonicalTranscriptTitleFromEnsemblTranscripts
+ * 
  * @param {array} transcripts - Ensembl transcripts
+ * @param {boolean} extended - If `true`, will return an transcript object; otherwise, will just return the hgvsc string of the transcript
+ * 
+ * @returns {(string|object|null|undefined)} Returns the hgvs string of canonical transcript, or the entire transcript object from Ensembl API, depending on argument `extended`.
+ *      Will return `null` if no canonical transcript found, or found but no `hgvsc` field on it.
  */
-export function getCanonicalTranscript(transcripts) {
-    let transcript;
+export function getCanonicalTranscript(transcripts, extended = false) {
+
+    // Filter all ensembl transcripts marked as canonical
+
+    const canonicalTranscriptsFromEnsembl = transcripts.filter((transcript) => (
+        transcript.hgvsc && 
+        // transcript.source === 'RefSeq' &&
+        transcript.canonical
+    ));
+
+    if (canonicalTranscriptsFromEnsembl.length === 0) {
+        return null;
+    }
+    
+    // General Singularity Test
+
+    if (canonicalTranscriptsFromEnsembl.length === 1) {
+        return extended ? canonicalTranscriptsFromEnsembl[0] : canonicalTranscriptsFromEnsembl[0].hgvsc;
+    }
+
+    // NM Singularity Test
+
+    const canonicalTranscriptsStartByNM = canonicalTranscriptsFromEnsembl.filter(({hgvsc = ''}) => (typeof hgvsc === 'string' && hgvsc.trim().startsWith('NM')))
+
+    if (canonicalTranscriptsStartByNM.length === 1) {
+        return extended ? canonicalTranscriptsStartByNM[0] : canonicalTranscriptsStartByNM[0].hgvsc;
+    }
+
+    // NR Singularity Test
+
+    const canonicalTranscriptsStartByNR = canonicalTranscriptsFromEnsembl.filter(({hgvsc = ''}) => (typeof hgvsc === 'string' && hgvsc.trim().startsWith('NR')))
+
+    if (canonicalTranscriptsStartByNR.length === 1) {
+        return extended ? canonicalTranscriptsStartByNR[0] : canonicalTranscriptsStartByNR[0].hgvsc;
+    }
+
+    console.log('debug: did not find qualifying canonical transcript title');
+
+    return null;
+
+    let transcript = null;
     for (let item of transcripts) {
         // Only if nucleotide transcripts exist
         if (item.hgvsc && item.source === 'RefSeq' && item.canonical && item.canonical === 1) {
-            transcript = item.hgvsc;
+            transcript = extended ? item : item.hgvsc;
+            // only take the first matching transcript
         }
     }
+    if (!transcript) {
+        console.log('did not find canonical transcirpt in ensembl')
+    }
     return transcript;
+}
+
+/**
+ * @param {Object} props The argument object of this method
+ * @param {Array<object>} props.transcript_consequences The transcripts in Ensembl API response data
+ * @param {'clinvar'|'car'} props.matchBySource Either 'clinvar' or 'car'
+ * @param {object} props.parsedData The parsed data originated from either Clinvar or CAR.
+ * 
+ * @returns {?string} The MANE transcript title
+ */
+export const getCanonicalTranscriptTitleFromEnsemblTranscripts = ({
+    matchBySource,
+    transcript_consequences: ensemblTranscripts,
+    parsedData
+}) => {
+    if (matchBySource === 'car') {
+        const canonicalTranscript = getCanonicalTranscript(ensemblTranscripts);
+        if (canonicalTranscript && canonicalTranscript.length && parsedData.tempAlleles && parsedData.tempAlleles.length) {
+            for (const item of parsedData.tempAlleles) {
+                /** shape of `item` example:
+                 * {
+                        "geneSymbol": "RAD51",
+                        "hgvs": [
+                            "NM_001164269.1:c.140A>T" <-
+                        ],
+                        "proteinEffect": {
+                            "hgvs": "NP_001157741.1:p.His47Leu", <-
+                            "hgvsWellDefined": "NP_001157741.1:p.His47Leu"
+                        }
+                    }
+                */
+                if (item.hgvs && item.hgvs.length) {
+                    for (const transcript of item.hgvs) {
+                        if (transcript === canonicalTranscript) {
+                            let proteinChange;
+                            const transcriptStart = transcript.split(':')[0];
+                            const transcriptEnd = transcript.split(':')[1];
+                            if (item.proteinEffect && item.proteinEffect.hgvs) {
+                                proteinChange = item.proteinEffect.hgvs.split(':')[1];
+                            }
+                            return `${transcriptStart}(${item.geneSymbol}):${transcriptEnd}${proteinChange ? ` (${proteinChange})` : ''}`;
+                        }
+                    }
+                }
+            };
+        }
+    } else if (matchBySource === 'clinvar') {
+        const canonicalTranscriptInEnsembl = getCanonicalTranscript(ensemblTranscripts, true);
+
+        const {
+            hgvsc
+        } = canonicalTranscriptInEnsembl;
+
+        if (!hgvsc) {
+            console.warn(`Cannot gather sufficient information to generate canonical transcript title, even if we found a canonical transcript in ensembl`, canonicalTranscriptInEnsembl);
+            return null;
+        }
+
+        const [canonicalTranscriptId, ] = hgvsc.split(':');
+
+        return getPreferredTitleFromEnsemblTranscriptsNoMatch(canonicalTranscriptId, canonicalTranscriptInEnsembl) || null;
+    }
+
+    return null;
 }

@@ -1,66 +1,61 @@
 'use strict';
 
-import { generateVariantPreferredTitle } from "./parse-resources";
+import { getPreferredTitleFromEnsemblTranscriptsNoMatch, getPreferredTitleFromEnsemblTranscriptsMatchByCar } from "./parse-resources";
+
 
 /**
+ * Retrieve MANE transcript from Ensembl API response data
+ * @param {object} props The argument object of this method
+ * @param {Array<object>} props.transcript_consequences The transcripts in Ensembl API response data
+ * @param {string} props.geneSymbol The gene symbol of the variant. You can only pass in one gene symbol. If there's multiple genes associated with the variant, we currently don't query MANE for such case.
+ * @param {'clinvar'|'car'} props.matchBySource Source of the variant data
+ * @param {object} props.carRawJson The response object returned by CAR. Only used when matchBySource is 'car'
  * 
- * @param {string} maneTranscriptId MANE transcript id
- * @param {object} maneTranscriptFromEnsembl The transcript object retreived from Ensembl
+ * @returns {?string} The MANE transcript title
  */
-export const getManeTranscriptTitleFromClinvar = (maneTranscriptId, maneTranscriptFromEnsembl) => {
-    const { hgvsc, hgvsp, gene_symbol } = maneTranscriptFromEnsembl;
+export const getManeTranscriptTitleFromEnsemblTranscripts = ({
+    transcript_consequences, geneSymbol, matchBySource, carRawJson
+}) => {
+    // Match a MANE transcript in Ensembl transcripts
 
-    const [, nucleotideChange] = hgvsc.split(':');
-    const [, aminoAcidChangeName] = hgvsp.split(':');
+    let maneTranscriptInEnsembl;
 
-    return generateVariantPreferredTitle({
-        geneName: gene_symbol,
-        transcriptId: maneTranscriptId,
-        nucleotideChange,
-        aminoAcidChangeName
-    });
-}
-
-/**
- * Method to return the MANE transcript object given the MANE trnascript id and the json fetched from variant CAR.
- * @param {string} maneTranscriptId - MANE transcript id.
- * @param {object} carJson - Variant CAR json response object.
- * @returns {(string|null)} Variant title for the MANE transcript.
- */
-export const getManeTranscriptTitleFromCar = (maneTranscriptId, carJson) => {
-    // given the id of MANE transcript, reverse lookup in CAR to obtain complete transcript info
-    const {
-        transcriptAlleles = []
-    } = carJson;
-
-    for (let transcript of transcriptAlleles) {
-        const { hgvs: [ hgvsValue = '' ] = [] } = transcript;
-        if (!hgvsValue) {
-            continue;
-        }
-        
-        const [transcriptId, nucleotideChange] = hgvsValue.split(':')
-        const {
-            proteinEffect: {
-                hgvs = ''
-            } = {}
-        }= transcript;
-        const [, aminoAcidChangeName] =  hgvs.split(':');
-        if (transcriptId === maneTranscriptId) {
-            // Only return the transcript preferred title for now.
-            // Can add more transcript info here if needed in the future.
-            return generateVariantPreferredTitle({
-                geneName: transcript.geneSymbol,
-                transcriptId,
-                nucleotideChange,
-                aminoAcidChangeName
-            });
-        }
+    const maneTranscriptCandidate = transcript_consequences.filter(({
+        mane, gene_symbol
+    }) => (
+        mane && gene_symbol === geneSymbol
+    ));
+    
+    // should only have one transcript matching
+    // otherwise there's something wrong in ensembl data and we'll handle that
+    if (maneTranscriptCandidate.length === 0) {
+        // no MANE transcrpit found for the variant
+        console.log('no mane found in emsembl', transcript_consequences);
+        return null;
+    } else if (maneTranscriptCandidate.length === 1) {
+        maneTranscriptInEnsembl = maneTranscriptCandidate[0];
+    } else if (maneTranscriptCandidate.length >= 2) {
+        console.warn(`There should only be one MANE transcript but ${maneTranscriptCandidate.length} found in Emsembl data when querying by hgvs notation ${hgvs_notation}; will use the first one anyway.`);
+        maneTranscriptInEnsembl = maneTranscriptCandidate[0];
     }
 
-    // in case there's a inconsistency between LDH and CAR (MANE transcript found in LDH, but no such transcript in CAR, which shouldn't happen), just fall back to no MANE transcript result in CAR
+    console.log('maneTranscript', maneTranscriptInEnsembl);
+
+    // Assemble variant title by gathering hgvs, gene and amino acid change info
+
+    if (matchBySource === 'car') {
+        return getPreferredTitleFromEnsemblTranscriptsMatchByCar(maneTranscriptInEnsembl.mane, carRawJson);
+    } else if (matchBySource === 'clinvar') {
+        // in case the `maneTranscriptInEnsembl` (Ensembl data) does not provide sufficient data
+        // to gereate a preferred title, we will not generate MANE transcript title
+        // after all since variant comes from clinvar, we will have clinvarVariantTitle available
+        // and it will be always favored for variant title use
+        return getPreferredTitleFromEnsemblTranscriptsNoMatch(maneTranscriptInEnsembl.mane, maneTranscriptInEnsembl);
+    }
+
     return null;
 }
+
 
 
 /**
@@ -68,29 +63,29 @@ export const getManeTranscriptTitleFromCar = (maneTranscriptId, carJson) => {
  * @param {object} ldhJson - LDH json response object.
  * @returns {(string|null)} MANE transcript id.
  */
-export const parseManeTranscriptIdFromLdh = (ldhJson) => {
-    // best effort to retrieve `preferredTranscripts`
-    const {
-        ld: {
-            AlleleMolecularConsequenceStatement: [
-                {
-                    entContent: {
-                        preferredTranscripts = []
-                    } = {}
-                } = {}
-            ] = []
-        } = {}
-    } = ldhJson;
+// export const parseManeTranscriptIdFromLdh = (ldhJson) => {
+//     // best effort to retrieve `preferredTranscripts`
+//     const {
+//         ld: {
+//             AlleleMolecularConsequenceStatement: [
+//                 {
+//                     entContent: {
+//                         preferredTranscripts = []
+//                     } = {}
+//                 } = {}
+//             ] = []
+//         } = {}
+//     } = ldhJson;
 
-    // best effort to find a transcript marked as MANE
-    for (let transcript of preferredTranscripts) {
-        if (transcript.manePreferredRefSeq) {
-            return transcript.id;
-        }
-    }
+//     // best effort to find a transcript marked as MANE
+//     for (let transcript of preferredTranscripts) {
+//         if (transcript.manePreferredRefSeq) {
+//             return transcript.id;
+//         }
+//     }
     
-    return null;
-}
+//     return null;
+// }
 
 
 /**
@@ -98,14 +93,14 @@ export const parseManeTranscriptIdFromLdh = (ldhJson) => {
  * @param {object} genomicCarJson - Genomic CAR json response object.
  * @returns {(string|null)} MANE transcript id. If cannot parse MANE transcript id, returns null.
  */
-export const parseManeTranscriptIdFromGenomicCar = (genomicCarJson) => {
-    const {
-        externalRecords: {
-            MANEPrefRefSeq: {
-                id = null
-            } = {}
-        } = {}
-    } = genomicCarJson;
+// export const parseManeTranscriptIdFromGenomicCar = (genomicCarJson) => {
+//     const {
+//         externalRecords: {
+//             MANEPrefRefSeq: {
+//                 id = null
+//             } = {}
+//         } = {}
+//     } = genomicCarJson;
 
-    return id;
-}
+//     return id;
+// }
