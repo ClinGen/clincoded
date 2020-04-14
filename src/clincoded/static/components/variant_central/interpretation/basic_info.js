@@ -208,18 +208,18 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     },
 
     //Render RefSeq or Ensembl transcripts table rows
-    renderRefSeqEnsemblTranscripts: function(item, key, source, maneTranscriptRefSeq) {
+    renderRefSeqEnsemblTranscripts: function(item, key, source) {
         // Only if nucleotide transcripts exist
         if (item.hgvsc && item.source === source) {
             const isCanonicalTranscript = item.canonical && item.canonical === 1;
             
             // only enable MANE transcript label in RefSeq Transcripts section
-            const isMANETranscript = (source == "RefSeq") && (item.hgvsc === maneTranscriptRefSeq);
+            const isMANETranscript = !!item.mane;
 
             return (
                 <tr key={key} className={isCanonicalTranscript || isMANETranscript ? "marked-transcript" : null}>
                     <td className="hgvs-term">
-            <span className="title-ellipsis">{item.hgvsc} {item.gene_symbol && `(${item.gene_symbol})`}</span>
+            <span className="title-ellipsis">{item.hgvsc} {item.gene_symbol && `(${item.gene_symbol})`} </span>
                         {/* show label for canonical transcript */}
                         {isCanonicalTranscript && <span className="label label-primary" data-toggle="tooltip" data-placement="top" data-tooltip="Canonical Transcript">C</span>}
 
@@ -543,13 +543,6 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
         const clinVarInterpretationSummary = this.state.clinVarInterpretationSummary;
         const self = this;
 
-        // generate RefSeq for MANE transcript so that it can be used to label MANE transcript in RefSeq transcript section
-        let maneTranscriptRefSeq = "";
-        if (variant && variant.maneTranscriptTitle) {
-            const {transcriptId, aminoAcidChange} = parseVariantPreferredTitle(variant.maneTranscriptTitle);
-            maneTranscriptRefSeq = `${transcriptId}:${aminoAcidChange}`;
-        }
-
         let links_38 = null;
         let links_37 = null;
         if (GRCh38) {
@@ -727,7 +720,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                 </thead>
                                 <tbody>
                                     {ensembl_data.map(function(item, i) {
-                                        return (self.renderRefSeqEnsemblTranscripts(item, i, 'RefSeq', maneTranscriptRefSeq));
+                                        return (self.renderRefSeqEnsemblTranscripts(item, i, 'RefSeq'));
                                     })}
                                 </tbody>
                             </table>
