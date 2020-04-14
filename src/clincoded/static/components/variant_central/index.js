@@ -321,7 +321,7 @@ var VariantCurationHub = createReactClass({
     fetchEnsemblHGVSVEP: function(variant) {
         if (variant) {
             let hgvs_notation = getHgvsNotation(variant, 'GRCh38', true);
-            let request_params = '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&ExAC=1&MaxEntScan=1&GeneSplicer=1&Conservation=1&numbers=1&domains=1&canonical=1&merged=1';
+            let request_params = '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&ExAC=1&MaxEntScan=1&GeneSplicer=1&Conservation=1&numbers=1&domains=1&mane=1&canonical=1&merged=1';
             if (hgvs_notation) {
                 this.getRestData(this.props.href_url.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params).then(response => {
                     this.setState({ext_ensemblHgvsVEP: response, loading_ensemblHgvsVEP: false});
