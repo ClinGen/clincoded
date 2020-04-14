@@ -219,7 +219,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             return (
                 <tr key={key} className={isCanonicalTranscript || isMANETranscript ? "marked-transcript" : null}>
                     <td className="hgvs-term">
-                        <span className="title-ellipsis">{item.hgvsc}</span>
+            <span className="title-ellipsis">{item.hgvsc} {item.gene_symbol && `(${item.gene_symbol})`}</span>
                         {/* show label for canonical transcript */}
                         {isCanonicalTranscript && <span className="label label-primary" data-toggle="tooltip" data-placement="top" data-tooltip="Canonical Transcript">C</span>}
 
