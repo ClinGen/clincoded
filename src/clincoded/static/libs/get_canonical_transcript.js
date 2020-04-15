@@ -141,14 +141,19 @@ export const getCanonicalTranscriptTitleFromEnsemblTranscripts = ({
     } else if (matchBySource === 'clinvar') {
         const canonicalTranscriptInEnsembl = getCanonicalTranscript(ensemblTranscripts, true);
 
-        const {
-            hgvsc
-        } = canonicalTranscriptInEnsembl;
+        if (!canonicalTranscriptInEnsembl) {
+            console.warn(`No qualified canonical transcript found for assgining a canonical transcript title`);
+            return null;
+        }
 
-        if (!hgvsc) {
+        if (!canonicalTranscriptInEnsembl.hgvsc) {
             console.warn(`Cannot gather sufficient information to generate canonical transcript title, even if we found a canonical transcript in ensembl`, canonicalTranscriptInEnsembl);
             return null;
         }
+
+        const {
+            hgvsc
+        } = canonicalTranscriptInEnsembl;
 
         const [canonicalTranscriptId, ] = hgvsc.split(':');
 
