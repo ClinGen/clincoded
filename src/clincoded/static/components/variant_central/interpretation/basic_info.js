@@ -15,7 +15,6 @@ import { getAffiliationName } from '../../../libs/get_affiliation_name';
 import { renderInterpretationStatus } from '../../../libs/render_interpretation_status';
 import { renderInProgressStatus } from '../../../libs/render_in_progress_status';
 import { renderStatusExplanation } from '../../../libs/render_status_explanation';
-import { parseVariantPreferredTitle } from '../../../libs/parse-resources';
 
 const SO_terms = require('./mapping/SO_term.json');
 
@@ -210,7 +209,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     //Render RefSeq or Ensembl transcripts table rows
     renderRefSeqEnsemblTranscripts: function(item, key, source) {
         // Only if nucleotide transcripts exist
-        if (item.hgvsc && item.source === source) {
+        if (item.source === source) {
             const isCanonicalTranscript = item.canonical && item.canonical === 1;
             
             // only enable MANE transcript label in RefSeq Transcripts section
@@ -219,7 +218,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             return (
                 <tr key={key} className={isCanonicalTranscript || isMANETranscript ? "marked-transcript" : null}>
                     <td className="hgvs-term">
-            <span className="title-ellipsis">{item.hgvsc} {item.gene_symbol && `(${item.gene_symbol})`} </span>
+            <span className="title-ellipsis">{item.hgvsc || item.transcript_id} {item.gene_symbol && `(${item.gene_symbol})`}</span>
                         {/* show label for canonical transcript */}
                         {isCanonicalTranscript && <span className="label label-primary" data-toggle="tooltip" data-placement="top" data-tooltip="Canonical Transcript">C</span>}
 
