@@ -112,10 +112,10 @@ const Table = module.exports.Table = createReactClass({
     },
 
     componentWillUnmount: function () {
-        if (typeof this.submitTimer != 'undefined') {
+        if (typeof this.submitTimer !== 'undefined') {
             clearTimeout(this.submitTimer);
         }
-        var request = this.state.allRequest;
+        const request = this.state.allRequest;
         if (request) request.abort();
     },
 
@@ -247,7 +247,7 @@ const Table = module.exports.Table = createReactClass({
      * @param {boolean} reverse Used to set in ascending or descending order
      */
     sortRows: function (rows, sortColumn, reverse) {
-        const reversed = !!reverse;
+        const reversed = reverse;
         const rowsCopy = rows ? JSON.parse(JSON.stringify(rows)) : [];
         if (Array.isArray(rowsCopy)) {
             rowsCopy.sort((rowA, rowB) => {
@@ -271,7 +271,7 @@ const Table = module.exports.Table = createReactClass({
     },
 
     handleKeyUp: function (event) {
-        if (typeof this.submitTimer != 'undefined') {
+        if (typeof this.submitTimer !== 'undefined') {
             clearTimeout(this.submitTimer);
         }
         // Skip when enter key is pressed
@@ -547,7 +547,7 @@ const Table = module.exports.Table = createReactClass({
                                     </form>
                                 </div>
                                 <input ref="sorton" type="hidden" name="sorton" defaultValue={sortColumn !== defaultSortOn ? sortColumn : ''} />
-                                <input ref="reversed" type="hidden" name="reversed" defaultValue={!!reversed || ''} />
+                                <input ref="reversed" type="hidden" name="reversed" defaultValue={reversed || ''} />
                             </div>
                         </div>
                     </div>

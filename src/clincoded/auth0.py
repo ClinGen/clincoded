@@ -213,7 +213,7 @@ def create_user(request, body):
     
     registry = request.registry
     context = registry[COLLECTIONS]['users']
-    request.body =json.dumps(properties).encode('utf-8')
+    request.body = json.dumps(properties).encode('utf-8')
     data = request.json
     validate_request(context.type_info.schema, request, data)
     collection_add(context, request)
