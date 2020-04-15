@@ -53,6 +53,8 @@ export function getCanonicalTranscript(transcripts, extended = false) {
     if (canonicalTranscriptsFromEnsembl.length === 0) {
         return null;
     }
+
+    console.log('canonical transcripts', canonicalTranscriptsFromEnsembl);
     
     // General Singularity Test
 
