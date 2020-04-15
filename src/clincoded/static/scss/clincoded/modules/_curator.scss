@@ -1563,13 +1563,8 @@
 
             .basic-info .table th,
             .basic-info .table td {
-                /* default table accomodates 5 columns but customize this below for different column number */
+                /* by default, table accomodates 5 columns, but you can customize this below if the table has different column number */
                 width: 20%;                
-                word-break: break-all;
-
-                .title-ellipsis {
-                    max-width: 250px;
-                }
             }
 
             .basic-info .table.clinvar-primary-transcript th,
