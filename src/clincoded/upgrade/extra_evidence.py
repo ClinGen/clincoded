@@ -1,5 +1,5 @@
+import requests
 from contentbase.upgrader import upgrade_step
-
 
 @upgrade_step('extra_evidence', '1', '2')
 def extra_evidence_1_2(value, system):
@@ -31,3 +31,23 @@ def extra_evidence_4_5(value, system):
             if 'source' in value:
                 value['sourceInfo'] = value['source']
                 value.pop('source', None)
+
+@upgrade_step('extra_evidence', '5', '6')
+def extra_evidence_5_6(value, system):
+    if 'category' in value:
+        if value['category'] == 'case-segregation':
+            if 'sourceInfo' in value:
+                if value['sourceInfo']['data']['proband_hpo_ids']:
+                    proband_hpo_ids = value['sourceInfo']['data']['proband_hpo_ids']
+                    ids = proband_hpo_ids.split(', ')
+                    hpoData = []
+                    for id in ids:
+                        try:
+                            response = requests.get('https://hpo.jax.org/api/hpo/term/'+ id)
+                            json_response = response.json()
+                            hpo_term = json_response['details']['name']
+                            hpoData.append({'hpoId': id, 'hpoTerm': hpo_term})
+                        except:
+                            hpoData.append({'hpoId': id, 'hpoTerm': 'Term not found'})
+                        finally:
+                            value['sourceInfo']['data']['hpoData'] = hpoData
