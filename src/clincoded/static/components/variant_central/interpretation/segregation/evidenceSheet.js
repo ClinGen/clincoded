@@ -78,6 +78,10 @@ let EvidenceSheet = createReactClass({
         });
     },
 
+    clearHpoTerms() {	
+        this.setState({ hpoData: [] });	
+    },
+
     /**
      * Submit button is clicked.  Save all form data and call function to save in db.
      * Close the modal.
@@ -202,6 +206,17 @@ let EvidenceSheet = createReactClass({
                                 inputClassName="btn btn-primary btn-default get-terms-btn"
                                 title="Get Terms"
                                 clickHandler={() => this.lookupTerm()}
+                            >
+                            </Input>
+                        </div>
+                    );
+                    node.push(	
+                        <div className="col-md-1">	
+                            <Input 	
+                                type="button"	
+                                inputClassName="btn btn-danger btn-default clear-terms-btn"	
+                                title="Clear Terms"	
+                                clickHandler={() => this.clearHpoTerms()}	
                             >
                             </Input>
                         </div>
