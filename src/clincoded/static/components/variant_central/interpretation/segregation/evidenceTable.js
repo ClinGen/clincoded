@@ -305,7 +305,7 @@ let EvidenceTable = createReactClass({
                     colNames.forEach(col => {
                         let node = <td key={`empty_cell_${i++}`}></td>;
                         if (col in sourceData) {
-                            if (sourceData.hpoData.length && col === 'proband_hpo_ids') {
+                            if (sourceData.hpoData && sourceData.hpoData.length && col === 'proband_hpo_ids') {
                                 let hpoData = sourceData.hpoData.map((hpo, i) => {
                                     return <p key={i}>{hpo.hpoTerm} ({hpo.hpoId})</p>
                                 });
