@@ -45,7 +45,7 @@ let EvidenceSheet = createReactClass({
             hpoUnaffected: hpoUnaffected,  // Flag for "Disease associated with proband(s) (HPO)" checkbox
             backgroundGreen: '#00FF0030',
             errorMsg: '',
-            enableSubmit: true,            // Flag to enable Submit button
+            enableSubmit: true             // Flag to enable Submit button
         };
     },
 
