@@ -16,14 +16,6 @@ import { external_url_map } from '../../../globals';
 import { RestMixin } from '../../../rest';
 import * as curator from '../../../curator';
 
-// Define an HPO class to save HPO data and pass to tables
-class Hpo {
-    constructor(id, term) {
-        this.hpoId = id;
-        this.hpoTerm = term;
-    }
-}
-
 let EvidenceSheet = createReactClass({
     mixins: [FormMixin, RestMixin],
 
@@ -54,15 +46,11 @@ let EvidenceSheet = createReactClass({
             backgroundGreen: '#00FF0030',
             errorMsg: '',
             enableSubmit: true,            // Flag to enable Submit button
-            getTermsDisabled: false
         };
     },
 
     componentDidMount() {
         this.props.onRef(this);
-        if (this.state.hpoData && this.state.hpoData.length) {
-            this.setState({ getTermsDisabled: true });
-        }
     },
 
     componentWillUnmount() {
@@ -76,10 +64,6 @@ let EvidenceSheet = createReactClass({
     cancel() {
         this.props.sheetDone(null);
         this.handleModalClose();
-    },
-
-    clearHpoTerms() {
-        this.setState({ hpoData: [], getTermsDisabled: false });
     },
 
     showError(msg) {
@@ -110,8 +94,8 @@ let EvidenceSheet = createReactClass({
         let formError = false;
         if (this.validateDefault()) {
             // Check HPO ID format
-            const hpoids = curator.capture.hpoids(this.getFormValue('proband_hpo_ids'));
-            if (hpoids && hpoids.length && _(hpoids).any(id => id === null)) {
+            const hpoIds = curator.capture.hpoids(this.getFormValue('proband_hpo_ids'));
+            if (hpoIds && hpoIds.length && _(hpoIds).any(id => id === null)) {
                 // HPOID list is bad
                 formError = true;
                 this.setFormErrors('proband_hpo_ids', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
@@ -218,18 +202,6 @@ let EvidenceSheet = createReactClass({
                                 inputClassName="btn btn-primary btn-default get-terms-btn"
                                 title="Get Terms"
                                 clickHandler={() => this.lookupTerm()}
-                                inputDisabled={this.state.getTermsDisabled}
-                            >
-                            </Input>
-                        </div>
-                    );
-                    node.push(
-                        <div className="col-md-1">
-                            <Input 
-                                type="button"
-                                inputClassName="btn btn-danger btn-default clear-terms-btn"
-                                title="Clear Terms"
-                                clickHandler={() => this.clearHpoTerms()}
                             >
                             </Input>
                         </div>
@@ -276,7 +248,7 @@ let EvidenceSheet = createReactClass({
             });
         
             let node = (
-                <div style={{textAlign: 'left'}}>
+                <div className="text-left">
                     <ul>
                         {hpo}
                     </ul>
@@ -310,22 +282,24 @@ let EvidenceSheet = createReactClass({
         this.saveAllFormValues();
         const hpoIds = this.getFormValue('proband_hpo_ids');
         const validatedHpoList = this.validateHpo(hpoIds);
+        const hpoWithTerms = [];
         if (validatedHpoList) {
             validatedHpoList.forEach(id => {
                 let url = external_url_map['HPOApi'] + id;
                 this.getRestData(url).then(result => {
                     const term = result['details']['name'];
-                    const hpo = new Hpo(id, term);
-                    this.setState({ hpoData: [...this.state.hpoData, hpo] });
+                    const hpo = {hpoId: id, hpoTerm: term};
+                    hpoWithTerms.push(hpo)
+                    this.setState({ hpoData: hpoWithTerms });
                 }).catch(err => {
                     // Unsuccessful retrieval
                     console.warn('Error in fetching HPO data =: %o', err);
                     const term = 'Term not found';
-                    const hpo = new Hpo(id, term);
-                    this.setState({ hpoData: [...this.state.hpoData, hpo] });
+                    const hpo = {hpoId: id, hpoTerm: term};
+                    hpoWithTerms.push(hpo)
+                    this.setState({ hpoData: hpoWithTerms });
                 });
             });
-            this.setState({ getTermsDisabled: true });
         }
     },
 
