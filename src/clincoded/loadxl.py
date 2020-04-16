@@ -24,6 +24,7 @@ ORDER = [
     'assessment',
     'evidenceScore',
     'variant',
+    'extra_evidence',
     'protein',
     'transcript',
     'individual',

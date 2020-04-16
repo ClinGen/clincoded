@@ -1,0 +1,34 @@
+[
+    {
+        "uuid": "6f69b3ae-60e3-47b3-863e-98dbc647a36d",
+        "affiliation": "88888",
+        "articles": [
+            "031d5b7a-1784-11e5-b51f-60f81dc5b05a"
+        ],
+        "category": "case-segregation",
+        "date_created": "2020-04-16T20:59:42.958241+00:00",
+        "evidenceCriteria": "",
+        "evidenceDescription": "Test",
+        "last_modified": "2020-04-16T20:59:42.958252+00:00",
+        "modified_by": "/users/efbea3d3-06e2-423d-a1b6-807456ed5fa4/",
+        "schema_version": "5",
+        "sourceInfo": {
+            "relevant_criteria": [
+                "BS2"
+            ],
+            "data": {
+                "proband_hpo_ids": "HP:0010011, HP:1110001, HP:0010704, HP:0030300",
+                "is_disease_associated_with_probands": false
+            },
+            "metadata": {
+                "_kind_title": "PubMed",
+                "_kind_key": "PMID",
+                "pmid": "1234"
+            }
+        },
+        "status": "in progress",
+        "subcategory": "observed-in-healthy",
+        "submitted_by": "/users/efbea3d3-06e2-423d-a1b6-807456ed5fa4/",
+        "variant": "35eedfdc-2685-11e5-b6a0-60f81dc5b05a"
+    }
+]
