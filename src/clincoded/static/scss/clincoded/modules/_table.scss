@@ -262,6 +262,10 @@ $status-types:
         padding: 2px 6px;
     }
 
+    .more-text-div {
+        cursor: default;
+    }
+
     .more-text {
         color: #337ab7;
         font-weight: bold;
@@ -324,11 +328,6 @@ $status-types:
 // For HPO with terms btns and label in Add Evidence Modal
 .get-terms-btn {
     margin-bottom: 17px;
-}
-
-.clear-terms-btn {
-    margin-bottom: 17px;
-    margin-left: -20px;
 }
 
 .terms-label {

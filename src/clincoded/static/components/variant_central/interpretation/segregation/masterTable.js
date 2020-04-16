@@ -287,7 +287,7 @@ let MasterEvidenceTable = createReactClass({
                             if (key.endsWith('_comment') || key.startsWith('proband') || key === 'comments' || key === 'label') {
                                 const comment = val && val.length > 25
                                                 ? <div>{val.substr(0,25) + ' ...'}
-                                                    <div data-toggle='tooltip' data-placement='top' data-tooltip={val}>
+                                                    <div className="more-text-div" data-toggle='tooltip' data-placement='top' data-tooltip={val}>
                                                         <span className='more-text'>more</span>
                                                     </div>
                                                   </div>
