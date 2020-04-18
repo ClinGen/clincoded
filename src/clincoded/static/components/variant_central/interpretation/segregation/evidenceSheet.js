@@ -78,7 +78,7 @@ let EvidenceSheet = createReactClass({
         });
     },
 
-    clearHpoTerms() {	
+    clearHpoTerms() {
         this.setState({ hpoData: [] });	
     },
 
@@ -99,6 +99,12 @@ let EvidenceSheet = createReactClass({
         if (this.validateDefault()) {
             // Check HPO ID format
             const hpoIds = curator.capture.hpoids(this.getFormValue('proband_hpo_ids'));
+            const filteredIds = this.filterOutExtraHpo(hpoIds);
+            if (filteredIds && filteredIds.length) {
+                // Input and hpoData don't match
+                formError = true;
+                this.setFormErrors('proband_hpo_ids', `The terms and IDs above do not match. Please remove or retrieve terms again. (${filteredIds.join(', ')})`)
+            }
             if (hpoIds && hpoIds.length && _(hpoIds).any(id => id === null)) {
                 // HPOID list is bad
                 formError = true;
@@ -148,6 +154,27 @@ let EvidenceSheet = createReactClass({
     handleCheckboxChange(ref, e) {
         if (ref === 'is_disease_associated_with_probands') {
             this.setState({hpoUnaffected: this.refs[ref].toggleValue()});
+        }
+    },
+
+    /**
+     * Check that hpoData and proband_hpo_ids are the same
+     * If not, returns array of rejected ids for form validation
+     * @param {array} inputIds
+     */
+
+    filterOutExtraHpo(inputIds) {
+        const hpoData = this.state.hpoData;
+        if (hpoData && hpoData.length) {
+            const idsFromHpoData = [];
+            hpoData.forEach(obj =>{
+                idsFromHpoData.push(obj.hpoId);
+            });
+            if (inputIds.length > idsFromHpoData.length) {
+                return inputIds.filter(id => !idsFromHpoData.includes(id));
+            } else if (idsFromHpoData.length > inputIds.length) {
+                return idsFromHpoData.filter(id => !inputIds.includes(id));
+            }
         }
     },
 
