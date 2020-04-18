@@ -6,7 +6,7 @@ import { getPreferredTitleFromEnsemblTranscriptsNoMatch, getPreferredTitleFromEn
 /**
  * Retrieve MANE transcript from Ensembl API response data
  * @param {object} props The argument object of this method
- * @param {Array<object>} props.transcript_consequences The transcripts in Ensembl API response data
+ * @param {Array<object>} props.ensemblTranscripts The transcripts in Ensembl API response data
  * @param {string} props.geneSymbol The gene symbol of the variant. You can only pass in one gene symbol. If there's multiple genes associated with the variant, we currently don't query MANE for such case.
  * @param {'clinvar'|'car'} props.matchBySource Source of the variant data
  * @param {object} props.carRawJson The response object returned by CAR. Only used when matchBySource is 'car'
@@ -14,13 +14,13 @@ import { getPreferredTitleFromEnsemblTranscriptsNoMatch, getPreferredTitleFromEn
  * @returns {?string} The MANE transcript title
  */
 export const getManeTranscriptTitleFromEnsemblTranscripts = ({
-    transcript_consequences, geneSymbol, matchBySource, carRawJson
+    ensemblTranscripts, geneSymbol, matchBySource, carRawJson
 }) => {
     // Match a MANE transcript in Ensembl transcripts
 
     let maneTranscriptInEnsembl;
 
-    const maneTranscriptCandidate = transcript_consequences.filter(({
+    const maneTranscriptCandidate = ensemblTranscripts.filter(({
         mane, gene_symbol
     }) => (
         mane && gene_symbol === geneSymbol
@@ -30,7 +30,7 @@ export const getManeTranscriptTitleFromEnsemblTranscripts = ({
     // otherwise there's something wrong in ensembl data and we'll handle that
     if (maneTranscriptCandidate.length === 0) {
         // no MANE transcrpit found for the variant
-        console.log('no mane found in emsembl', transcript_consequences);
+        console.warn('no mane found in emsembl', ensemblTranscripts);
         return null;
     } else if (maneTranscriptCandidate.length === 1) {
         maneTranscriptInEnsembl = maneTranscriptCandidate[0];

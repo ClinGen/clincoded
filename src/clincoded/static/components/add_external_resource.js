@@ -606,24 +606,30 @@ function clinvarQueryResource() {
             if (data.clinvarVariantId) {
                 // found the result we want
 
-                // try to query MANE transcript title as well (based on CAR), even if ClinVar title will always be favored for displaying variant title; MANE transcript title will have other use due to unique status of MANE.
+                // Only if Clinvar Variant Title is not available,
+                // we turn to MANE or canonical transcript for trying to get a preferred title
+                return new Promise((res) => {
+                    if (!data.clinvarVariantTitle) {
+                        return queryAdditionalTranscriptTitles({
+                            getRestData: this.getRestData,
+                            matchBySource: 'clinvar',
+                            parsedData: data
+                        })
+                            .then((additionalTranscriptTitles) => {
+                                Object.assign(data, additionalTranscriptTitles);
+                                console.log('store state (w/ mane)', data);
+                                return res(data);
+                            })
+                            .catch((error) => {
+                                console.warn('Error in querying MANE transcript data = %o', error);
+                                // best effort to get MANE so just move on
+                                return res(data);
+                            })
+                    }
 
-                return queryAdditionalTranscriptTitles({
-                    getRestData: this.getRestData,
-                    matchBySource: 'clinvar',
-                    parsedData: data
+                    return res(data);
                 })
-                    .then((additionalTranscriptTitles) => {
-                        Object.assign(data, additionalTranscriptTitles);
-                        console.log('store state (w/ mane)', data);
-                        return;
-                    })
-                    .catch((error) => {
-                        console.warn('Error in querying MANE transcript data = %o', error);
-                        // best effort to get MANE so just move on
-                        return Promise.resolve();
-                    })
-                .then(() => {
+                .then((data) => {
                     this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
                 });
             } else {
@@ -869,9 +875,9 @@ function carQueryResource() {
             return carApiCallResolve(finalState);
         })
             .then((finalState) => {
-                // If queried CAR successfully, always try to obtain MANE transcript info (best effort only)
-                // Looking up MANE requires CAR since LDH only has id of transcript at this point, so have to join detail data from CAR
-                if (finalState.resourceFetched) {
+                // Only if Clinvar Variant Title is not available,
+                // we turn to MANE or canonical transcript for trying to get a preferred title
+                if (finalState.tempResource && !finalState.tempResource.clinvarVariantTitle) {
                     return queryAdditionalTranscriptTitles({
                         getRestData: this.getRestData, 
                         matchBySource: 'car',
@@ -889,8 +895,6 @@ function carQueryResource() {
                     })
                 }
 
-                console.warn('CAR not available, will not fetch MANE');
-                
                 return finalState;
             })
         // update all the state once here to ensure state update occurs at the end
@@ -1060,10 +1064,18 @@ function queryAdditionalTranscriptTitles({
                 transcript_consequences = []
             } = {}] = ensemblResp;
 
+            if (!Array.isArray(transcript_consequences)) {
+                throw new Error('In Ensembl data, `transcript_consequences` is not an array') ;
+            }
+
+            // if a ensembl transcript has no hgvsc, it means it has no overlap to the variant
+            // hence it's not of our interest
+            const desiredEnsemblTranscripts = transcript_consequences.filter((transcript) => transcript.hgvsc);
+
             const resultTitles = {};
 
             const maneTranscriptTitle = getManeTranscriptTitleFromEnsemblTranscripts({
-                transcript_consequences,
+                ensemblTranscripts: desiredEnsemblTranscripts,
                 geneSymbol: geneList[0],
                 matchBySource,
                 carRawJson
@@ -1073,7 +1085,7 @@ function queryAdditionalTranscriptTitles({
             }
 
             const canonicalTranscriptTitle = getCanonicalTranscriptTitleFromEnsemblTranscripts({
-                transcript_consequences,
+                ensemblTranscripts: desiredEnsemblTranscripts,
                 matchBySource,
                 parsedData
             });

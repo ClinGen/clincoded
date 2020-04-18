@@ -51,6 +51,7 @@ export function getCanonicalTranscript(transcripts, extended = false) {
     ));
 
     if (canonicalTranscriptsFromEnsembl.length === 0) {
+        console.warn('no canonical transcript found in ensemb transcripts', transcripts);
         return null;
     }
 
@@ -78,7 +79,7 @@ export function getCanonicalTranscript(transcripts, extended = false) {
         return extended ? canonicalTranscriptsStartByNR[0] : canonicalTranscriptsStartByNR[0].hgvsc;
     }
 
-    console.log('debug: did not find qualifying canonical transcript title');
+    console.warn('Did not find qualifying canonical transcript title', canonicalTranscriptsFromEnsembl);
 
     return null;
 
@@ -98,7 +99,7 @@ export function getCanonicalTranscript(transcripts, extended = false) {
 
 /**
  * @param {Object} props The argument object of this method
- * @param {Array<object>} props.transcript_consequences The transcripts in Ensembl API response data
+ * @param {Array<object>} props.ensemblTranscripts The transcripts in Ensembl API response data
  * @param {'clinvar'|'car'} props.matchBySource Either 'clinvar' or 'car'
  * @param {object} props.parsedData The parsed data originated from either Clinvar or CAR.
  * 
@@ -106,7 +107,7 @@ export function getCanonicalTranscript(transcripts, extended = false) {
  */
 export const getCanonicalTranscriptTitleFromEnsemblTranscripts = ({
     matchBySource,
-    transcript_consequences: ensemblTranscripts,
+    ensemblTranscripts,
     parsedData
 }) => {
     if (matchBySource === 'car') {
