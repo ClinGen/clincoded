@@ -32,10 +32,7 @@ export const getManeTranscriptTitleFromEnsemblTranscripts = ({
         // no MANE transcrpit found for the variant
         console.warn('no mane found in emsembl', ensemblTranscripts);
         return null;
-    } else if (maneTranscriptCandidate.length === 1) {
-        maneTranscriptInEnsembl = maneTranscriptCandidate[0];
-    } else if (maneTranscriptCandidate.length >= 2) {
-        console.warn(`There should only be one MANE transcript but ${maneTranscriptCandidate.length} found in Emsembl data when querying by hgvs notation ${hgvs_notation}; will use the first one anyway.`);
+    } else {
         maneTranscriptInEnsembl = maneTranscriptCandidate[0];
     }
 
