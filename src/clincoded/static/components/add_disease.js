@@ -60,7 +60,6 @@ var AddDisease = createReactClass({
             let diseaseId = this.getFormValue('disease_id');
             let term = this.getFormValue('disease_term');
             let description = this.getFormValue('disease_description');
-            let ontology = diseaseId.substr(0, diseaseId.indexOf('_')).toUpperCase();
             let synonyms = [];
             synonyms = this.getFormValue('disease_synonyms') && this.getFormValue('disease_synonyms').length ? this.getFormValue('disease_synonyms').split(', ') : [];
 
@@ -78,7 +77,6 @@ var AddDisease = createReactClass({
                         "diseaseId": diseaseId,
                         "term": term,
                         "description": description && description.length ? description : '',
-                        "ontology": ontology,
                         "synonyms": synonyms
                     };
                     return this.postRestData('/diseases/', newDisease).then(data => {
@@ -113,7 +111,7 @@ var AddDisease = createReactClass({
         return (
             <div className="container">
                 <h1>{this.props.context.title}</h1>
-                <div className="col-md-8 col-md-offset-2 col-sm-9 col-sm-offset-1 form-create-gene-disease">
+                <div className="col-md-8 col-md-offset-2 col-sm-9 col-sm-offset-1 form-create-disease">
                     <Panel panelClassName="panel-add-disease">
                         <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
                             <div className="row">
