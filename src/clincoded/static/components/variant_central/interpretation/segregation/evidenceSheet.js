@@ -100,15 +100,18 @@ let EvidenceSheet = createReactClass({
             // Check HPO ID format
             const hpoIds = curator.capture.hpoids(this.getFormValue('proband_hpo_ids'));
             const filteredIds = this.filterOutExtraHpo(hpoIds);
-            if (filteredIds && filteredIds.length) {
-                // Input and hpoData don't match
-                formError = true;
-                this.setFormErrors('proband_hpo_ids', `The terms and IDs above do not match. Please remove or retrieve terms again. (${filteredIds.join(', ')})`)
-            }
+            const duplicateExists = this.checkForDuplicateHpo(hpoIds);
             if (hpoIds && hpoIds.length && _(hpoIds).any(id => id === null)) {
                 // HPOID list is bad
                 formError = true;
                 this.setFormErrors('proband_hpo_ids', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
+            } else if (duplicateExists) {
+                formError = true;
+                this.setFormErrors('proband_hpo_ids', 'Please remove duplicate IDs.')
+            } else if (filteredIds && filteredIds.length) {
+                // Input and hpoData don't match
+                formError = true;
+                this.setFormErrors('proband_hpo_ids', `The terms and IDs above do not match. Please remove or retrieve terms again. (${filteredIds.join(', ')})`)
             }
             if (!formError) {
                 let allData = null;
@@ -158,11 +161,18 @@ let EvidenceSheet = createReactClass({
     },
 
     /**
+     * Check for duplicates and return a boolean value accordingly
+     * @param {array} inputIds 
+     */
+    checkForDuplicateHpo(inputIds) {
+        return inputIds.some((id, index) => inputIds.indexOf(id) !== index)
+    },
+
+    /**
      * Check that hpoData and proband_hpo_ids are the same
      * If not, returns array of rejected ids for form validation
      * @param {array} inputIds
      */
-
     filterOutExtraHpo(inputIds) {
         const hpoData = this.state.hpoData;
         if (hpoData && hpoData.length) {
@@ -232,7 +242,10 @@ let EvidenceSheet = createReactClass({
                                 type="button"
                                 inputClassName="btn btn-primary btn-default get-terms-btn"
                                 title="Get Terms"
-                                clickHandler={() => this.lookupTerm()}
+                                clickHandler={() => {
+                                    this.lookupTerm();
+                                    this.clrFormErrors('proband_hpo_ids');
+                                }}
                             >
                             </Input>
                         </div>
@@ -243,7 +256,10 @@ let EvidenceSheet = createReactClass({
                                 type="button"	
                                 inputClassName="btn btn-danger btn-default clear-terms-btn"	
                                 title="Clear Terms"	
-                                clickHandler={() => this.clearHpoTerms()}	
+                                clickHandler={() => {
+                                    this.clearHpoTerms();
+                                    this.clrFormErrors('proband_hpo_ids');
+                                }}	
                             >
                             </Input>
                         </div>
