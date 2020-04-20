@@ -227,7 +227,7 @@ let EvidenceSheet = createReactClass({
                 if ('lookup' in col) {
                     // Push nodes separately so elements do not stack vertically
                     node.push(
-                        <div className="col-md-1">
+                        <div className="col-md-2">
                             <Input
                                 type="button"
                                 inputClassName="btn btn-primary btn-default get-terms-btn"
@@ -238,7 +238,7 @@ let EvidenceSheet = createReactClass({
                         </div>
                     );
                     node.push(	
-                        <div className="col-md-1">	
+                        <div className="col-md-2">	
                             <Input 	
                                 type="button"	
                                 inputClassName="btn btn-danger btn-default clear-terms-btn"	
