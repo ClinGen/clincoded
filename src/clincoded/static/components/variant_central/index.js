@@ -314,7 +314,6 @@ var VariantCurationHub = createReactClass({
     fetchEnsemblHGVSVEP: function(variant) {
         if (variant) {
             let hgvs_notation = getHgvsNotation(variant, 'GRCh38', true);
-            let request_params = '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&ExAC=1&MaxEntScan=1&GeneSplicer=1&Conservation=1&numbers=1&domains=1&mane=1&canonical=1&merged=1';
             if (hgvs_notation) {
                 getEnsemblHGVSVEP(this.getRestData, hgvs_notation).then(response => {
                     this.setState({ext_ensemblHgvsVEP: response, loading_ensemblHgvsVEP: false});
