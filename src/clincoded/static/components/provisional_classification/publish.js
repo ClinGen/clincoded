@@ -222,7 +222,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
     },
 
     /**
-     * Method to send full GDM data snapshot to Data Exchange when provisional classification is pubished
+     * Method to send full GDM data snapshot to Data Exchange when provisional classification is published
      */
     publishGDMToDataExchange(snapshot) {
         // Post published GDM data snapshot to Data Exchange
