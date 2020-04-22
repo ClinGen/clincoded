@@ -21,12 +21,12 @@ const typeMapping = {
             name: 'clinvar_gtr_labid',
             description: 'ClinVar/GTR LabID',
             required: false,
-            identifier: true
+            identifier: false
         }, {
             name: 'clinvar_scv',
             description: 'ClinVar Submission Accession (SCV)',
             required: false,
-            identifier: true
+            identifier: false
         }]
     },
     clinic: {
@@ -40,7 +40,7 @@ const typeMapping = {
             name: 'department_affiliation',
             description: 'Department Affiliation',
             required: false,
-            identifier: true
+            identifier: false
         }]
     },
     research_lab: {
@@ -54,7 +54,7 @@ const typeMapping = {
             name: 'department_affiliation',
             description: 'Department Affiliation',
             required: false,
-            identifier: true
+            identifier: false
         }]
     },
     public_database: {
@@ -69,12 +69,12 @@ const typeMapping = {
             name: 'url',
             description: 'Database URL',
             required: false,
-            identifier: true
+            identifier: false
         }, {
             name: 'variant_id',
             description: 'Database Variant ID',
             required: false,
-            identifier: true
+            identifier: false
         }]
     },
     other: {
