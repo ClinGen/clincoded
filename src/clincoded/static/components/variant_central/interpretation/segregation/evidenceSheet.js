@@ -80,6 +80,7 @@ let EvidenceSheet = createReactClass({
 
     clearHpoTerms() {
         this.setState({ hpoData: [] });	
+        this.clrFormErrors('proband_hpo_ids');
     },
 
     /**
@@ -242,10 +243,7 @@ let EvidenceSheet = createReactClass({
                                 type="button"
                                 inputClassName="btn btn-primary btn-default get-terms-btn"
                                 title="Get Terms"
-                                clickHandler={() => {
-                                    this.lookupTerm();
-                                    this.clrFormErrors('proband_hpo_ids');
-                                }}
+                                clickHandler={() => this.lookupTerm()}
                             >
                             </Input>
                         </div>
@@ -256,10 +254,7 @@ let EvidenceSheet = createReactClass({
                                 type="button"	
                                 inputClassName="btn btn-danger btn-default clear-terms-btn"	
                                 title="Clear Terms"	
-                                clickHandler={() => {
-                                    this.clearHpoTerms();
-                                    this.clrFormErrors('proband_hpo_ids');
-                                }}	
+                                clickHandler={() => this.clearHpoTerms()}	
                             >
                             </Input>
                         </div>
@@ -347,17 +342,18 @@ let EvidenceSheet = createReactClass({
                 this.getRestData(url).then(result => {
                     const term = result['details']['name'];
                     const hpo = {hpoId: id, hpoTerm: term};
-                    hpoWithTerms.push(hpo)
+                    hpoWithTerms.push(hpo);
                     this.setState({ hpoData: hpoWithTerms });
                 }).catch(err => {
                     // Unsuccessful retrieval
                     console.warn('Error in fetching HPO data =: %o', err);
                     const term = 'Term not found';
                     const hpo = {hpoId: id, hpoTerm: term};
-                    hpoWithTerms.push(hpo)
+                    hpoWithTerms.push(hpo);
                     this.setState({ hpoData: hpoWithTerms });
                 });
             });
+            this.clrFormErrors('proband_hpo_ids');
         }
     },
 
