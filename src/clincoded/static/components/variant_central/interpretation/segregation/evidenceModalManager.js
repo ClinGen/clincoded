@@ -119,21 +119,24 @@ let EvidenceModalManager = createReactClass({
      * @param {object} metadata  The metadata object
      */
     getExistingEvidence(metadata) {
-        let identifierCol = extraEvidence.typeMapping[this.props.evidenceType].fields
-            .filter(o => o.identifier === true)
-            .map(o => o.name);
-
-        // Determine if this is meant to be linked to an existing piece of evidence that current user can modify
-        let candidates = this.props.allData ? this.props.allData
-            .filter(o => identifierCol in o.sourceInfo.metadata
-                && o.sourceInfo.metadata[identifierCol] === metadata[identifierCol]) : [];
         let result = null;
-        if (candidates.length > 0) {
-            candidates.forEach(candidate => {
-                if (this.props.canCurrUserModifyEvidence(candidate)) {
-                    result = candidate;
-                }
-            });
+        // Only match pmid source, not other non-published sources which are just free text
+        if (metadata['_kind_key'] === 'PMID') {
+            let identifierCol = extraEvidence.typeMapping[this.props.evidenceType].fields
+                .filter(o => o.identifier === true)
+                .map(o => o.name);
+
+            // Determine if this is meant to be linked to an existing piece of evidence that current user can modify
+            let candidates = this.props.allData ? this.props.allData
+                .filter(o => identifierCol in o.sourceInfo.metadata
+                    && o.sourceInfo.metadata[identifierCol] === metadata[identifierCol]) : [];
+            if (candidates.length > 0) {
+                candidates.forEach(candidate => {
+                    if (this.props.canCurrUserModifyEvidence(candidate)) {
+                        result = candidate;
+                    }
+                });
+            }
         }
         return result;
     },

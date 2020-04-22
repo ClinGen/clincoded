@@ -11,78 +11,69 @@ const typeMapping = {
         }]
     },
     clinical_lab: {
-        name: 'Clinical lab',
+        name: 'Clinical Lab',
         fields: [{
             name: 'lab_name',
             description: 'Laboratory Name',
             required: true,
-            identifier: false
+            identifier: true
         }, {
             name: 'clinvar_gtr_labid',
             description: 'ClinVar/GTR LabID',
-            required: true,
+            required: false,
             identifier: true
         }, {
-            name: 'contact',
-            description: 'Data Contact',
+            name: 'clinvar_scv',
+            description: 'ClinVar Submission Accession (SCV)',
             required: false,
-            identifier: false
+            identifier: true
         }]
     },
     clinic: {
         name: 'Clinic',
         fields: [{
-            name: 'healthcare_provider',
-            description: 'Healthcare Provider',
-            required: true,
-            identifier: true
-        }, {
             name: 'institutional_affiliation',
             description: 'Institutional Affiliation',
             required: true,
-            identifier: false
+            identifier: true
         }, {
             name: 'department_affiliation',
             description: 'Department Affiliation',
             required: false,
-            identifier: false
-        }, {
-            name: 'orcid_id',
-            description: 'ORCID ID',
-            required: false,
-            identifier: false
+            identifier: true
         }]
     },
     research_lab: {
-        name: 'Research lab',
+        name: 'Research Lab',
         fields: [{
-            name: 'pi_lab_director',
-            description: 'Principal Investigator/Lab Director',
+            name: 'institutional_affiliation',
+            description: 'Institutional Affiliation',
             required: true,
             identifier: true
         }, {
-            name: 'institution',
-            description: 'Institution',
-            required: true,
-            identifier: false
-        }, {
-            name: 'orcid_id',
-            description: 'ORCID ID',
+            name: 'department_affiliation',
+            description: 'Department Affiliation',
             required: false,
-            identifier: false
+            identifier: true
         }]
     },
     public_database: {
         name: 'Public Database',
+        extra: '(Other than ClinVar, which should be added as \'Clinical Lab\' evidence.)',
         fields: [{
             name: 'name',
             description: 'Name of Database',
             required: true,
-            identifier: false
+            identifier: true
         }, {
             name: 'url',
             description: 'Database URL',
-            required: true,
+            required: false,
+            identifier: true
+        }, {
+            name: 'variant_id',
+            description: 'Database Variant ID',
+            required: false,
             identifier: true
         }]
     },
