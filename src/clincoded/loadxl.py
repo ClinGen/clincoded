@@ -22,7 +22,6 @@ ORDER = [
     'disease',
     'article',
     'assessment',
-    'evidenceScore',
     'variant',
     'extra_evidence',
     'protein',
