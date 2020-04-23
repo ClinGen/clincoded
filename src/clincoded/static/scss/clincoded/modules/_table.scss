@@ -262,6 +262,10 @@ $status-types:
         padding: 2px 6px;
     }
 
+    .more-text-div {
+        cursor: default;
+    }
+
     .more-text {
         color: #337ab7;
         font-weight: bold;
@@ -316,8 +320,22 @@ $status-types:
     font-weight: normal;
 }
 
-//style for the text displaying the number of entries for each gdm search and for each interpretation search
+// style for the text displaying the number of entries for each gdm search and for each interpretation search
 .number-of-entries {
     color: grey;
     font-size: 50%
+}
+
+// For HPO with terms btns and label in Add Evidence Modal
+.get-terms-btn {
+    margin-bottom: 17px;
+}
+
+.clear-terms-btn {	
+    margin-bottom: 17px;	
+    margin-left: -20px;
+}
+
+.terms-label {
+    padding-bottom: 40px;
 }

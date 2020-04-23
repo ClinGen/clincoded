@@ -33,17 +33,19 @@ let EvidenceSheet = createReactClass({
     getInitialState: function() {
         let data =  {};
         let hpoUnaffected = false;
+        let hpoData = [];
         if (this.props.data) {
             data = this.props.data;
             hpoUnaffected = this.props.data.is_disease_associated_with_probands;
+            hpoData = this.props.data.hpoData ? this.props.data.hpoData : [];
         }
         return {
             data: data,
-            hpo: null,
+            hpoData: hpoData,
             hpoUnaffected: hpoUnaffected,  // Flag for "Disease associated with proband(s) (HPO)" checkbox
             backgroundGreen: '#00FF0030',
             errorMsg: '',
-            enableSubmit: true               // Flag to enable Submit button
+            enableSubmit: true             // Flag to enable Submit button
         };
     },
 
@@ -76,6 +78,11 @@ let EvidenceSheet = createReactClass({
         });
     },
 
+    clearHpoTerms() {
+        this.setState({ hpoData: [] });	
+        this.clrFormErrors('proband_hpo_ids');
+    },
+
     /**
      * Submit button is clicked.  Save all form data and call function to save in db.
      * Close the modal.
@@ -87,30 +94,40 @@ let EvidenceSheet = createReactClass({
         e.stopPropagation();
 
         this.saveAllFormValues();
-        let formValues = this.getAllFormValues();
+        const formValues = this.getAllFormValues();
 
-        var formError = false;
+        let formError = false;
         if (this.validateDefault()) {
             // Check HPO ID format
-            var hpoids = curator.capture.hpoids(this.getFormValue('proband_hpo_ids'));
-            if (hpoids && hpoids.length && _(hpoids).any(function(id) { return id === null; })) {
+            const hpoIds = curator.capture.hpoids(this.getFormValue('proband_hpo_ids'));
+            const filteredIds = this.filterOutExtraHpo(hpoIds);
+            const duplicateExists = this.checkForDuplicateHpo(hpoIds);
+            if (hpoIds && hpoIds.length && _(hpoIds).any(id => id === null)) {
                 // HPOID list is bad
                 formError = true;
                 this.setFormErrors('proband_hpo_ids', 'Use HPO IDs (e.g. HP:0000001) separated by commas');
-              }
-
+            } else if (duplicateExists) {
+                formError = true;
+                this.setFormErrors('proband_hpo_ids', 'Please remove duplicate IDs.')
+            } else if (filteredIds && filteredIds.length) {
+                // Input and hpoData don't match
+                formError = true;
+                this.setFormErrors('proband_hpo_ids', `The terms and IDs above do not match. Please remove or retrieve terms again. (${filteredIds.join(', ')})`)
+            }
             if (!formError) {
                 let allData = null;
+                let hpoData = {hpoData: this.state.hpoData};
                 if (this.props.isNew) {
-                    allData = Object.assign(this.props.data, formValues);
+                    allData = Object.assign(this.props.data, formValues, hpoData);
                 } else {
                     allData = Object.assign({}, this.props.data);
-                    Object.assign(allData, formValues);
+                    Object.assign(allData, formValues, hpoData);
                 }
                 this.handleModalClose();
                 this.resetAllFormValues();
                 this.setState({
                     data: {},
+                    hpoData: [],
                     hpoUnaffected: false
                 });
                 this.props.sheetDone(allData);
@@ -135,12 +152,40 @@ let EvidenceSheet = createReactClass({
      * If the "Disease associated with proband(s) (HPO) (Check here if unaffected)"
      * checkbox is toggled, save its current state.
      * 
-     * @param {sting} ref 
+     * @param {string} ref 
      * @param {event} e 
      */
     handleCheckboxChange(ref, e) {
         if (ref === 'is_disease_associated_with_probands') {
             this.setState({hpoUnaffected: this.refs[ref].toggleValue()});
+        }
+    },
+
+    /**
+     * Check for duplicates and return a boolean value accordingly
+     * @param {array} inputIds 
+     */
+    checkForDuplicateHpo(inputIds) {
+        return inputIds.some((id, index) => inputIds.indexOf(id) !== index)
+    },
+
+    /**
+     * Check that hpoData and proband_hpo_ids are the same
+     * If not, returns array of rejected ids for form validation
+     * @param {array} inputIds
+     */
+    filterOutExtraHpo(inputIds) {
+        const hpoData = this.state.hpoData;
+        if (hpoData && hpoData.length) {
+            const idsFromHpoData = [];
+            hpoData.forEach(obj =>{
+                idsFromHpoData.push(obj.hpoId);
+            });
+            if (inputIds.length > idsFromHpoData.length) {
+                return inputIds.filter(id => !idsFromHpoData.includes(id));
+            } else if (idsFromHpoData.length > inputIds.length) {
+                return idsFromHpoData.filter(id => !inputIds.includes(id));
+            }
         }
     },
 
@@ -190,19 +235,37 @@ let EvidenceSheet = createReactClass({
                         fieldStyle = {fields.indexOf(col.name) == -1 || this.props.isFromMaster ? null : {backgroundColor: this.state.backgroundGreen}}
                     />
                 </div>]
-                // if ('lookup' in col) {
-                //     node.push(<div className="col-md-1">
-                //         <Input 
-                //             type = "button"
-                //             inputClassName="btn-default btn-inline-spacer"
-                //             title="Lookup"
-                //             clickHandler={() => this.lookupTerm(col.lookup, col.name)}
-                //             style={{'alignSelf': 'center'}}
-                //         >
-                //         </Input>
-                //         {this.renderLookupResult()}
-                //     </div>);
-                // }
+                if ('lookup' in col) {
+                    // Push nodes separately so elements do not stack vertically
+                    node.push(
+                        <div className="col-md-2">
+                            <Input
+                                type="button"
+                                inputClassName="btn btn-primary btn-default get-terms-btn"
+                                title="Get Terms"
+                                clickHandler={() => this.lookupTerm()}
+                            >
+                            </Input>
+                        </div>
+                    );
+                    node.push(	
+                        <div className="col-md-2">	
+                            <Input 	
+                                type="button"	
+                                inputClassName="btn btn-danger btn-default clear-terms-btn"	
+                                title="Clear Terms"	
+                                clickHandler={() => this.clearHpoTerms()}	
+                            >
+                            </Input>
+                        </div>
+                    );
+                    node.push(
+                        <div className="col-md-12">
+                            <label className={!this.state.hpoData.length ? 'terms-label' : ''}>Terms for phenotypic feature(s) associated with proband(s):</label>
+                            {this.renderLookupResult()}
+                        </div>
+                    );
+                }
                 rowTDs.push(node);
                 // if field needs to be put in its own row, add it here.
                 if (col.width === 12) {
@@ -225,38 +288,72 @@ let EvidenceSheet = createReactClass({
         return jsx;
     },
 
+    /**
+     * Renders list of saved HPO terms and their respective ids
+     */
     renderLookupResult() {
-        if (this.state.hpo == null) {
+        if (this.state.hpoData && !this.state.hpoData.length) {
             return null;
         }
-        let node = <div className="row">
-            <p>
-                <strong>{this.state.hpo.label}</strong>
-                {this.state.hpo.description[0]}
-            </p>
-            <a 
-                href={this.state.hpo.iri} 
-                title={"Open HPO term " + this.state.hpo.short_form + " in new tab"}
-                target="_blank"
-            >
-                {this.state.hpo.short_form}
-            </a>
-        </div>
-        return node;
+        if (this.state.hpoData && this.state.hpoData.length) {
+            let hpo = this.state.hpoData.map((obj, i) => {
+                return <li key={i}>{obj.hpoTerm} ({obj.hpoId})</li>
+            });
+        
+            let node = (
+                <div className="text-left">
+                    <ul>
+                        {hpo}
+                    </ul>
+                </div>
+            );
+            return node;
+        }
     },
 
-    lookupTerm(termType, fieldName) {
-        let uri = external_url_map[termType];
+    /**
+     * 
+     * @param {string} hpoIds
+     */
+    validateHpo(hpoIds) {
+        const checkIds = curator.capture.hpoids(hpoIds);
+        // Check HPO ID format
+        if (checkIds && checkIds.length && _(checkIds).any(id => id === null)) {
+            // HPOID list is bad
+            this.setFormErrors('proband_hpo_ids', 'For term lookup, use HPO IDs (e.g. HP:0000001) separated by commas');
+        }
+        else if (checkIds && checkIds.length && !_(checkIds).any(id => id === null)) {
+            const hpoIdList = _.without(checkIds, null);
+            return _.uniq(hpoIdList);
+        }
+    },
+
+    /**
+     * Fetch terms from proband_hpo_id form value, save to state as array of objects
+     */
+    lookupTerm() {
         this.saveAllFormValues();
-        const formValues = this.getAllFormValues();
-        if (termType === 'HPOApi') {
-            uri += formValues[fieldName].replace(':', '_');
-            this.getRestData(uri).then(result => {
-                let term = result['_embedded']['terms'][0];
-                this.setState({
-                    hpo: term
+        const hpoIds = this.getFormValue('proband_hpo_ids');
+        const validatedHpoList = this.validateHpo(hpoIds);
+        const hpoWithTerms = [];
+        if (validatedHpoList) {
+            validatedHpoList.forEach(id => {
+                let url = external_url_map['HPOApi'] + id;
+                this.getRestData(url).then(result => {
+                    const term = result['details']['name'];
+                    const hpo = {hpoId: id, hpoTerm: term};
+                    hpoWithTerms.push(hpo);
+                    this.setState({ hpoData: hpoWithTerms });
+                }).catch(err => {
+                    // Unsuccessful retrieval
+                    console.warn('Error in fetching HPO data =: %o', err);
+                    const term = 'Term not found';
+                    const hpo = {hpoId: id, hpoTerm: term};
+                    hpoWithTerms.push(hpo);
+                    this.setState({ hpoData: hpoWithTerms });
                 });
             });
+            this.clrFormErrors('proband_hpo_ids');
         }
     },
 

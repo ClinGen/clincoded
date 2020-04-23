@@ -29,7 +29,7 @@ let EvidenceTable = createReactClass({
         session: PropTypes.object,                  // Session object
         affiliation: PropTypes.object,              // User's affiliation
         viewOnly: PropTypes.bool,                   // If the page is in read-only mode
-        canCurrUserModifyEvidence: PropTypes.func   // Funcition to check if current logged in user can modify the given evidence
+        canCurrUserModifyEvidence: PropTypes.func   // Function to check if current logged in user can modify the given evidence
     },
 
     getInitialState() {
@@ -306,9 +306,18 @@ let EvidenceTable = createReactClass({
                     colNames.forEach(col => {
                         let node = <td key={`empty_cell_${i++}`}></td>;
                         if (col in sourceData) {
-                            node = <td key={`cell_${i++}`}>
-                                {sourceData[col]}
-                            </td>
+                            if (sourceData.hpoData && sourceData.hpoData.length && col === 'proband_hpo_ids') {
+                                let hpoData = sourceData.hpoData.map((hpo, i) => {
+                                    return <p key={i}>{hpo.hpoTerm} ({hpo.hpoId})</p>
+                                });
+                                node = <td key={`cell_${i++}`}>
+                                    {hpoData}
+                                </td>
+                            } else {
+                                node = <td key={`cell_${i++}`}>
+                                    {sourceData[col]}
+                                </td>
+                            }
                         }
                         if (col === 'comments') {
                             // Display the HPO comment
@@ -445,7 +454,7 @@ let EvidenceTable = createReactClass({
     /**
      * Check if any of the columns in given row has value to be displayed
      * 
-     * @param {object} row The evidecne row
+     * @param {object} row The evidence row
      */
     showRow(row) {
         let cols = this.getSubcategoryPanelColumns();
