@@ -41,6 +41,16 @@ const typeMapping = {
             description: 'Department Affiliation',
             required: false,
             identifier: false
+        }, {
+            name: 'clinvar_gtr_labid',
+            description: 'ClinVar/GTR LabID',
+            required: false,
+            identifier: false
+        }, {
+            name: 'clinvar_scv',
+            description: 'ClinVar Submission Accession (SCV)',
+            required: false,
+            identifier: false
         }]
     },
     research_lab: {
@@ -52,14 +62,24 @@ const typeMapping = {
             identifier: true
         }, {
             name: 'department_affiliation',
-            description: 'Department Affiliation',
+            description: 'Department Affiliation/Principal Investigator',
+            required: false,
+            identifier: false
+        }, {
+            name: 'clinvar_gtr_labid',
+            description: 'ClinVar/GTR LabID',
+            required: false,
+            identifier: false
+        }, {
+            name: 'clinvar_scv',
+            description: 'ClinVar Submission Accession (SCV)',
             required: false,
             identifier: false
         }]
     },
     public_database: {
         name: 'Public Database',
-        extra: '(Other than ClinVar, which should be added as \'Clinical Lab\' evidence.)',
+        extra: '(if data exists in multiple sources, e.g. clinical lab, PMID, and database, please choose the most detailed source)',
         fields: [{
             name: 'name',
             description: 'Name of Database',
@@ -73,6 +93,16 @@ const typeMapping = {
         }, {
             name: 'variant_id',
             description: 'Database Variant ID',
+            required: false,
+            identifier: false
+        }, {
+            name: 'clinvar_gtr_labid',
+            description: 'ClinVar/GTR LabID',
+            required: false,
+            identifier: false
+        }, {
+            name: 'clinvar_scv',
+            description: 'ClinVar Submission Accession (SCV)',
             required: false,
             identifier: false
         }]

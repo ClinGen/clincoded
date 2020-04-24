@@ -146,7 +146,7 @@ var ExtraEvidenceTable = module.exports.ExtraEvidenceTable = createReactClass({
                                                         <option value="clinical_lab">Clinical Lab</option>
                                                         <option value="clinic">Clinic</option>
                                                         <option value="research_lab">Research Lab</option>
-                                                        <option value="public_database">Public Database</option>
+                                                        <option value="public_database">Database (if data exists in multiple sources, e.g. clinical lab, PMID, and database, please choose the most detailed source)</option>
                                                         <option value="other">Other</option>
                                                     </Input>
                                                     <EvidenceModalManager

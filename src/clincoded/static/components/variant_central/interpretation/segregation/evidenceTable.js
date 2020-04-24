@@ -116,24 +116,39 @@ let EvidenceTable = createReactClass({
         } else {
             let content = null;
             let help = null;
+            const separator = ', ';
             switch (metadata['_kind_key']) {
                 case 'clinical_lab':
                     content = metadata.lab_name;
                     help = (metadata.clinvar_gtr_labid ? `Clinvar/GTR LabID: ${metadata.clinvar_gtr_labid}` : '') +
+                           (metadata.clinvar_gtr_labid && metadata.clinvar_scv ? `${separator}` : '') +
                            (metadata.clinvar_scv ? `ClinVar Submission Accession (SCV): ${metadata.clinvar_scv}` : '');
                     break;
                 case 'clinic':
                     content = metadata.institutional_affiliation;
-                    help = (metadata.department_affiliation ? `Department: ${metadata.department_affiliation}` : '');
+                    help = (metadata.department_affiliation ? `Department Affiliation: ${metadata.department_affiliation}` : '') +
+                           (metadata.department_affiliation && metadata.clinvar_gtr_labid ? `${separator}` : '') +
+                           (metadata.clinvar_gtr_labid ? `Clinvar/GTR LabID: ${metadata.clinvar_gtr_labid}` : '') +
+                           ((metadata.department_affiliation || metadata.clinvar_gtr_labid) && metadata.clinvar_scv ? `${separator}` : '') +
+                           (metadata.clinvar_scv ? ` ClinVar Submission Accession (SCV): ${metadata.clinvar_scv}` : '');
                     break;
                 case 'research_lab':
                     content = metadata.institutional_affiliation;
-                    help = (metadata.department_affiliation ? `Department: ${metadata.department_affiliation}` : '');
+                    help = (metadata.department_affiliation ? `Department Affiliation/Principal Investigator: ${metadata.department_affiliation}` : '') +
+                           (metadata.department_affiliation && metadata.clinvar_gtr_labid ? `${separator}` : '') +
+                           (metadata.clinvar_gtr_labid ? ` Clinvar/GTR LabID: ${metadata.clinvar_gtr_labid}` : '') +
+                           ((metadata.department_affiliation || metadata.clinvar_gtr_labid) && metadata.clinvar_scv ? `${separator}` : '') +
+                           (metadata.clinvar_scv ? ` ClinVar Submission Accession (SCV): ${metadata.clinvar_scv}` : '');
                     break;
                 case 'public_database':
                     content = metadata.name;
                     help = (metadata.url ? `URL: ${metadata.url}` : '') +
-                           (metadata.variant_id ? `Variant ID: ${metadata.variant_id}` : '');
+                           (metadata.url && metadata.variant_id ? `${separator}` : '') +
+                           (metadata.variant_id ? ` Variant ID: ${metadata.variant_id}` : '') +
+                           ((metadata.url || metadata.variant_id) && metadata.clinvar_gtr_labid ? `${separator}` : '') +
+                           (metadata.clinvar_gtr_labid ? ` Clinvar/GTR LabID: ${metadata.clinvar_gtr_labid}` : '') +
+                           ((metadata.url || metadata.variant_id || metadata.clinvar_gtr_labid) && metadata.clinvar_scv ? `${separator}` : '') +
+                           (metadata.clinvar_scv ? ` ClinVar Submission Accession (SCV): ${metadata.clinvar_scv}` : '');
                     break;
                 default:
                     content = Object.keys(metadata)
