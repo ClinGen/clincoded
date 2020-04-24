@@ -166,7 +166,9 @@ let EvidenceSheet = createReactClass({
      * @param {array} inputIds 
      */
     checkForDuplicateHpo(inputIds) {
-        return inputIds.some((id, index) => inputIds.indexOf(id) !== index)
+        if (inputIds && inputIds.length) {
+            return inputIds.some((id, index) => inputIds.indexOf(id) !== index)
+        }
     },
 
     /**
