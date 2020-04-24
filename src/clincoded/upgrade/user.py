@@ -1006,6 +1006,27 @@ def user_5_6(value, system):
         'heatherkharris1@gmail.com': '2020-03-13T07:00:00+00:00',
         'giordajc@gmail.com': '2020-03-16T07:00:00+00:00',
         'minhua.li@bcm.edu': '2020-03-17T07:00:00+00:00',
+        # R33
+        'catheriz@bcm.edu': '2020-03-19T07:00:00+00:00',
+        'zz4@bcm.edu': '2020-03-19T07:00:00+00:00',
+        'bing.xie@bcm.edu': '2020-03-19T07:00:00+00:00',
+        'lih2013@nyp.org': '2020-03-23T07:00:00+00:00',
+        'ziyue.yang@bcm.edu': '2020-03-23T07:00:00+00:00',
+        'alisha.kardian@bcm.edu': '2020-03-23T07:00:00+00:00',
+        'sofia.aramburu@bcm.edu': '2020-03-23T07:00:00+00:00',
+        'cvella@gmail.com': '2020-03-25T08:00:00+00:00',
+        'e.richardson@centenary.org.au': '2020-03-25T08:00:00+00:00',
+        'christelle.orlando@uzbrussel.be': '2020-03-25T08:00:00+00:00',
+        'david-alexandre.tregouet@u-bordeaux.fr': '2020-03-25T08:00:00+00:00',
+        'manrongw@bcm.edu': '2020-03-26T08:00:00+00:00',
+        'qd29@cornell.edu': '2020-03-26T08:00:00+00:00',
+        'yugen@ibiblio.org': '2020-04-03T08:00:00+00:00',
+        'cyoung@ambrygen.com': '2020-04-07T08:00:00+00:00',
+        'bsanderson18@students.kgi.edu': '2020-04-13T08:00:00+00:00',
+        'adeline.goudal@chu-nantes.fr': '2020-04-14T08:00:00+00:00',
+        'iain.forrest@icahn.mssm.edu': '2020-04-16T08:00:00+00:00',
+        'mdohrn@ukaachen.de': '2020-04-20T08:00:00+00:00',
+        'georgina.ryland@petermac.org': '2020-04-20T08:00:00+00:00',
         # Other
         'tsneddon@broadinstitute.org': '2016-11-04T07:00:00+00:00',
         'ronak.patel@bcm.edu': '2016-11-04T07:00:00+00:00',
@@ -1149,7 +1170,17 @@ def user_5_6(value, system):
         'saronson@partners.org': '2018-12-01T08:00:00+00:00',
         'catherinefletcher@nhs.net': '2018-12-01T08:00:00+00:00',
         'mariaisabel.achatz@nih.gov': '2018-12-01T08:00:00+00:00',
-        'lmadhavr@stanford.edu': '2019-12-16T08:00:00+00:00'
+        'lmadhavr@stanford.edu': '2019-12-16T08:00:00+00:00',
+        'miacocca@uwo.ca': '2016-11-10T08:00:00+00:00',
+        'yangwangcmg@gmail.com': '2020-02-25T08:00:00+00:00',
+        'mhughes@broadinstitute.org': '2018-07-12T07:00:00+00:00',
+        'rlassiter.ambry@gmail.com': '2019-09-03T07:00:00+00:00',
+        'tam.sneddon@unchealth.unc.edu': '2016-11-21T08:00:00+00:00',
+        'emily.qian@yale.edu': '2019-09-10T07:00:00+00:00',
+        'kgliu@stanford.edu': '2016-11-04T07:00:00+00:00',
+        'christinegpreston@gmail.com': '2019-01-17T08:00:00+00:00',
+        'josechinton@gmail.com': '2018-07-31T07:00:00+00:00',
+        'alt2172@cumc.columbia.edu': '2017-12-14T08:00:00+00:00'
     }
     email = value['email']
     email = email.lower()
