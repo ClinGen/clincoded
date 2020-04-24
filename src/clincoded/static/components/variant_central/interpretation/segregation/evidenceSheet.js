@@ -183,9 +183,9 @@ let EvidenceSheet = createReactClass({
             hpoData.forEach(obj =>{
                 idsFromHpoData.push(obj.hpoId);
             });
-            if (inputIds.length > idsFromHpoData.length) {
+            if (inputIds && (inputIds.length > idsFromHpoData.length)) {
                 return inputIds.filter(id => !idsFromHpoData.includes(id));
-            } else if (idsFromHpoData.length > inputIds.length) {
+            } else if (inputIds && (idsFromHpoData.length > inputIds.length)) {
                 return idsFromHpoData.filter(id => !inputIds.includes(id));
             }
         }
