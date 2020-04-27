@@ -187,6 +187,7 @@ const ProvisionalClassification = createReactClass({
      * Method to create necessary data object that needs to be sent to Data Exchange for UNC tracking
      * @param {object} provisional - provisional classification object
      * @param {string} status - current classification status
+     * @param {string} statusDate - date that current classification status was reviewed/approved
      * @param {string} date - datetime current action performed
      * @param {object} submitter - current classification action submitter
      * @param {array} contributors - classification contributor list
