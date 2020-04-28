@@ -211,7 +211,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
 
         // Create data object to be sent to Data Exchange
         const publishDate = provisional.publishDate ? provisional.publishDate : '';
-        let uncData = this.props.setUNCData(provisional, status, publishDate, publishSubmitter, contributors);
+        let uncData = this.props.setUNCData(provisional, status, publishDate, publishDate, publishSubmitter, contributors);
 
         // Post published/unpublished data to Data Exchange
         this.props.postTrackData(uncData).then(response => {

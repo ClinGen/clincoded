@@ -166,7 +166,9 @@ let EvidenceSheet = createReactClass({
      * @param {array} inputIds 
      */
     checkForDuplicateHpo(inputIds) {
-        return inputIds.some((id, index) => inputIds.indexOf(id) !== index)
+        if (inputIds && inputIds.length) {
+            return inputIds.some((id, index) => inputIds.indexOf(id) !== index);
+        }
     },
 
     /**
@@ -181,9 +183,9 @@ let EvidenceSheet = createReactClass({
             hpoData.forEach(obj =>{
                 idsFromHpoData.push(obj.hpoId);
             });
-            if (inputIds.length > idsFromHpoData.length) {
+            if (inputIds && (inputIds.length > idsFromHpoData.length)) {
                 return inputIds.filter(id => !idsFromHpoData.includes(id));
-            } else if (idsFromHpoData.length > inputIds.length) {
+            } else if (inputIds && (idsFromHpoData.length > inputIds.length)) {
                 return idsFromHpoData.filter(id => !inputIds.includes(id));
             }
         }

@@ -282,8 +282,9 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         }
 
         // Create data object to be sent to Data Exchange
+        const reviewDate = provisional.approvalReviewDate ? provisional.approvalReviewDate : (provisional.approvalDate ? provisional.approvalDate : '');
         const approvalDate = provisional.approvalDate ? provisional.approvalDate : '';
-        const uncData = this.props.setUNCData(provisional, 'approved', approvalDate, approvalSubmitter, contributors);
+        const uncData = this.props.setUNCData(provisional, 'approved', reviewDate, approvalDate, approvalSubmitter, contributors);
 
         // Post approval data to Data Exchange
         this.props.postTrackData(uncData).then(response => {
