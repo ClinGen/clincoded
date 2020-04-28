@@ -15,6 +15,7 @@ def includeme(config):
     config.add_route('publish', '/publish')
     config.add_route('generate-clinvar-data', '/generate-clinvar-data')
     config.add_route('track-data', '/track-data')
+    config.add_route('publish-gdm', '/publish-gdm')
     config.scan(__name__)
 
 # Retrieve data from search result(s) using a path (list of keys)
@@ -847,6 +848,100 @@ def publish(request):
 
     except Exception as e:
         return_object['message'] = 'Message delivery failed'
+        return return_object
+
+# Publish GDM - send GDM snapshot data (message) to Data Exchange when GDM is published
+@view_config(route_name='publish-gdm', request_method='POST')
+def publish_gdm(request):
+    return_object = {'status': 'Error',
+        'message': 'Unable to deliver full GDM'}
+
+    # Store JSON-encoded content of data
+    try:
+        resultJSON = request.json
+
+    except Exception as e:
+        sys.stderr.write('**** publish-gdm: Error sending data to Data Exchange - data not in expected format ****\n')
+        return_object['message'] = 'Retrieved data not in expected format'
+        return return_object
+
+    # Construct message
+    try:
+        message = json.dumps(resultJSON, separators=(',', ':'))
+
+    except Exception as e:
+        sys.stderr.write('**** publish-gdm: Error sending data to Data Exchange - failed to build complete message ****\n')
+        if e.args:
+            return_object['message'] = e.args
+        else:
+            return_object['message'] = 'Failed to build complete message'
+        return return_object
+
+    return_object = {'status': 'Error',
+                    'message': message,
+                    'error': 'Unable to deliver full GDM'}
+
+    # Set snapshot uuid and publish date as message key
+    key = resultJSON['uuid'] + '-' + resultJSON['resource']['publishDate']
+
+    # Configure message delivery parameters
+    kafka_cert_pw = ''
+
+    if 'KAFKA_CERT_PW' in os.environ:
+        kafka_cert_pw = os.environ['KAFKA_CERT_PW']
+
+    kafka_conf = {'bootstrap.servers': 'localhost:9093',
+            'log_level': 0,
+            'compression.type': 'gzip',
+            'security.protocol': 'ssl',
+            'ssl.key.location': 'etc/certs/client.key',
+            'ssl.key.password': kafka_cert_pw,
+            'ssl.certificate.location': 'etc/certs/client.crt',
+            'ssl.ca.location': 'etc/certs/server.crt'},
+    kafka_topic = 'test'
+    kafka_timeout = 10
+
+    if request.host != 'localhost:6543':
+        kafka_conf = {'bootstrap.servers': 'exchange.clinicalgenome.org:9093',
+            'log_level': 0,
+            'compression.type': 'gzip',
+            'security.protocol': 'ssl',
+            'ssl.key.location': 'etc/certs/dataexchange/client.key',
+            'ssl.key.password': kafka_cert_pw,
+            'ssl.certificate.location': 'etc/certs/dataexchange/client.crt',
+            'ssl.ca.location': 'etc/certs/dataexchange/server.crt'}
+
+        # kafka topic
+        kafka_topic = 'gene_validity_raw'
+        if request.host != 'curation.clinicalgenome.org':
+            kafka_topic += '_dev'
+
+    # Send message
+    p = Producer(**kafka_conf)
+
+    def delivery_callback(err, msg):
+        nonlocal return_object
+        if err:
+            return_object = {'status': 'Error',
+                        'message': message,
+                        'error': err}
+
+        else:
+            return_object = {'status': 'Success',
+                         'message': message,
+                         'partition': msg.partition(),
+                         'offset': msg.offset()}
+
+    try:
+        p.produce(kafka_topic, message, key, callback=delivery_callback)
+        p.flush(kafka_timeout)
+        if return_object['status'] == 'Error':
+            sys.stderr.write('**** publish-gdm: Error sending data to Data Exchange - kafka sever error\n Data - %s \n ****\n' % message)
+        return return_object
+
+    except Exception as e:
+        return_object['message'] = 'Message delivery failed'
+        sys.stderr.write('**** publish-gdm: Error sending data to Data Exchange - delivery failed\n Data - %s \n ****\n' % message)
         return return_object
 
 # Generate data for a ClinVar submission file

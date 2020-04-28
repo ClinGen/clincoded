@@ -19,8 +19,8 @@ let MasterEvidenceTable = createReactClass({
         session: PropTypes.object,                  // Session object
         viewOnly: PropTypes.bool,                   // If the page is in read-only mode
         deleteEvidenceFunc: PropTypes.func,         // Function to call to delete an evidence
-        evidenceCollectionDone: PropTypes.func,     // Fucntion to call to add or edit an existing one
-        canCurrUserModifyEvidence: PropTypes.func   // Funcition to check if current logged in user can modify the given evidence
+        evidenceCollectionDone: PropTypes.func,     // Function to call to add or edit an existing one
+        canCurrUserModifyEvidence: PropTypes.func   // Function to check if current logged in user can modify the given evidence
     },
 
     getInitialState() {
@@ -106,6 +106,17 @@ let MasterEvidenceTable = createReactClass({
      */
      getTableEvidenceSourceOrder() {
         return ['PMID', 'clinical_lab', 'clinic', 'research_lab', 'public_database', 'other'];
+    },
+
+    /**
+     * Return HPO data in string format for table
+     * @param {array} data 
+     */
+    formatHpoData(data) {
+       let hpoWithTerms = data.map((hpo, i) => {
+           return `${hpo.hpoTerm} (${hpo.hpoId})`;
+        });
+       return hpoWithTerms;
     },
 
     /**
@@ -265,13 +276,18 @@ let MasterEvidenceTable = createReactClass({
                         let rowNum = 0;
                         masterTable().forEach(masterRow => {
                             let val = row.sourceInfo.data[masterRow.key];
+                            const hpoData = row.sourceInfo.data.hpoData ? row.sourceInfo.data.hpoData : [];
+                            const formattedHpo = hpoData.length ? this.formatHpoData(hpoData) : [];
                             let entry = '';
                             let key = masterRow.key;
+                            if (formattedHpo.length && key === 'proband_hpo_ids') {
+                                val = formattedHpo.join(', ');
+                            }
                             // For text column, limit to 25 characters and show full text when mouseover 'more' text.
                             if (key.endsWith('_comment') || key.startsWith('proband') || key === 'comments' || key === 'label') {
                                 const comment = val && val.length > 25
                                                 ? <div>{val.substr(0,25) + ' ...'}
-                                                    <div data-toggle='tooltip' data-placement='top' data-tooltip={val}>
+                                                    <div className="more-text-div" data-toggle='tooltip' data-placement='top' data-tooltip={val}>
                                                         <span className='more-text'>more</span>
                                                     </div>
                                                   </div>
