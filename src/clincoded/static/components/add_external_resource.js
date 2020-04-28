@@ -944,8 +944,6 @@ function carSubmitResource(func) {
 function queryAdditionalTranscriptTitles({
     getRestData, matchBySource, carRawJson, parsedData
 }) {
-    console.log('queryManeTranscriptTitle()');
-    console.log('parsedData', parsedData);
 
     // Validate parameters
 
@@ -970,67 +968,55 @@ function queryAdditionalTranscriptTitles({
         parsedData.gene && parsedData.gene.symbol ?
             [parsedData.gene.symbol] : [];
 
-    console.log('geneList', geneList);
-
-    // if no gene, or 2 or more than 2 genes, then just abort and don't fetch MANE for variant title
+    // if no gene, or 2 or more than 2 genes, then just abort and don't fetch MANE/Canonical title for a preferred title
     if (geneList.length != 1) {
         console.warn('More than 2 genes detected, will not query additional transcript titles.', geneList);
         return Promise.resolve({});
     }
 
-    // extract hgvs_notation
-
-    // if the CAR result has no ClinVar variant ID, just use the CAR data set
+    // Query Ensembl-HGVS-VEP API
+    
     const hgvs_notation = getHgvsNotation(parsedData, 'GRCh38', true);
-
-    console.log('hgvs_notation', hgvs_notation);
-
-    // query ensembl
-
-    const request_params = '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&ExAC=1&MaxEntScan=1&GeneSplicer=1&Conservation=1&numbers=1&domains=1&mane=1&canonical=1&merged=1';
-    console.log('ensembl url:', external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params);
-    if (hgvs_notation) {
-        return getRestData(external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params).then((ensemblResp) => {
-            console.log('ensembl data:', ensemblResp);
-
-            const [{
-                transcript_consequences = []
-            } = {}] = ensemblResp;
-
-            if (!Array.isArray(transcript_consequences)) {
-                throw new Error('In Ensembl data, `transcript_consequences` is not an array') ;
-            }
-
-            // if a ensembl transcript has no hgvsc, it means it has no overlap to the variant
-            // hence it's not of our interest
-            const desiredEnsemblTranscripts = transcript_consequences.filter((transcript) => transcript.hgvsc);
-
-            const resultTitles = {};
-
-            const maneTranscriptTitle = getManeTranscriptTitleFromEnsemblTranscripts({
-                ensemblTranscripts: desiredEnsemblTranscripts,
-                geneSymbol: geneList[0],
-                matchBySource,
-                carRawJson
-            });
-            if (maneTranscriptTitle) {
-                resultTitles.maneTranscriptTitle = maneTranscriptTitle;
-            }
-
-            const canonicalTranscriptTitle = getCanonicalTranscriptTitleFromEnsemblTranscripts({
-                ensemblTranscripts: desiredEnsemblTranscripts,
-                matchBySource,
-                parsedData
-            });
-            if (canonicalTranscriptTitle) {
-                resultTitles.canonicalTranscriptTitle = canonicalTranscriptTitle;
-            }
-
-            return resultTitles;
-        });
+    if (!hgvs_notation) {
+        console.warn('no hgvs_notation, so did not query ensembl', hgvs_notation);
+        return Promise.resolve({});
     }
 
-    console.warn('no hgvs_notation, so did not query ensembl', hgvs_notation);
+    const request_params = '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&ExAC=1&MaxEntScan=1&GeneSplicer=1&Conservation=1&numbers=1&domains=1&mane=1&canonical=1&merged=1';
+    return getRestData(external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params).then((ensemblResp) => {
+        const [{
+            transcript_consequences = []
+        } = {}] = ensemblResp;
 
-    return Promise.resolve({});
+        if (!Array.isArray(transcript_consequences)) {
+            throw new Error('In Ensembl data, `transcript_consequences` is not an array') ;
+        }
+
+        // if a ensembl transcript has no hgvsc, it means it has no overlap to the variant
+        // hence it's not of our interest
+        const desiredEnsemblTranscripts = transcript_consequences.filter((transcript) => transcript.hgvsc);
+
+        const resultTitles = {};
+
+        const maneTranscriptTitle = getManeTranscriptTitleFromEnsemblTranscripts({
+            ensemblTranscripts: desiredEnsemblTranscripts,
+            geneSymbol: geneList[0],
+            matchBySource,
+            carRawJson
+        });
+        if (maneTranscriptTitle) {
+            resultTitles.maneTranscriptTitle = maneTranscriptTitle;
+        }
+
+        const canonicalTranscriptTitle = getCanonicalTranscriptTitleFromEnsemblTranscripts({
+            ensemblTranscripts: desiredEnsemblTranscripts,
+            matchBySource,
+            parsedData
+        });
+        if (canonicalTranscriptTitle) {
+            resultTitles.canonicalTranscriptTitle = canonicalTranscriptTitle;
+        }
+
+        return resultTitles;
+    });
 }
