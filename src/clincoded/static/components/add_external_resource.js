@@ -594,7 +594,6 @@ function clinvarValidateForm() {
 }
 function clinvarQueryResource() {
     // for pinging and parsing data from ClinVar
-    console.log('clinvarQueryResource()');
     this.saveFormValue('resourceId', this.state.inputValue);
     if (clinvarValidateForm.call(this)) {
         var url = external_url_map['ClinVarEutilsVCV'];
@@ -602,11 +601,10 @@ function clinvarQueryResource() {
         var id = this.state.inputValue;
         this.getRestDataXml(url + id).then((xml) => {
             data = parseClinvar(xml, true);
-            console.log('clinvar data (extended parsing)', data);
             if (data.clinvarVariantId) {
                 // found the result we want
 
-                // Only if Clinvar Variant Title is not available,
+                // only if Clinvar Variant Title is not available,
                 // we turn to MANE or canonical transcript for trying to get a preferred title
                 return new Promise((res) => {
                     if (!data.clinvarVariantTitle) {
@@ -639,7 +637,6 @@ function clinvarQueryResource() {
             }
         })
         .catch(e => {
-            console.log('error', e);
             // error handling for ClinVar query
             this.setFormErrors('resourceId', 'Error querying ClinVar. Please check your input and try again.');
             this.setState({queryResourceBusy: false, resourceFetched: false});
@@ -772,12 +769,7 @@ function carQueryResource() {
                 resourceFetched: true
             }
 
-            console.log('CAR raw res', json);
-
             data = parseCAR(json);
-
-            console.log('CAR parsed data', data);
-
             finalState.tempResource = data;
             
             // patch data `finalState.tempResource` based on CAR API call data `json`
