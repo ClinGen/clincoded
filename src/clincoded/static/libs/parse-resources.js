@@ -520,16 +520,14 @@ function parseCarHgvsHandler(hgvs_temp, variant) {
  * When both gene and protein effect not available, will fall back to hgvs format `NM_002496.4:c.64C>T`.
  * 
  * When gene name is unavailable, amino-acid change is unavailable as well, so the format will fallback to hgvs as above.
- * @param {string} props - The argument object for this method
+ * @param {Object} props - The argument object for this method
  * @param {string} props.geneName - Gene name, or gene symbol.
  * @param {string} props.transcriptId - (required) The transcript id, see example above
  * @param {string} props.nucleotideChange - (required) The nucleotide change, see example above
- * @param {object} props.aminoAcidChangeName - The name of amino acid change, see example above.
+ * @param {Object} props.aminoAcidChangeName - The name of amino acid change, see example above.
  * @returns {string} Preferred title of the variant.
  */
 export const generateVariantPreferredTitle = ({geneName, transcriptId, nucleotideChange, aminoAcidChangeName}) => {
-    console.log('generateVariantPreferredTitle: ', geneName, transcriptId, nucleotideChange, aminoAcidChangeName);
-
     // required fields
     if (!(transcriptId && nucleotideChange)) {
         return null;
@@ -546,7 +544,7 @@ export const generateVariantPreferredTitle = ({geneName, transcriptId, nucleotid
 
 /**
  * Method to extract the unique, non-duplicated set of gene symbols in genomic CAR from an array of transcripts for a variant in CAR (Clingen Allele Registry).
- * @param {Array} transcriptAlleles - Transcripts associated with a variant from CAR.
+ * @param {Array<Object>} transcriptAlleles - Transcripts associated with a variant from CAR.
  * @returns {Set<string>} A set of genomic CAR gene urls.
  */
 export const getTranscriptAllelesGeneSymbolSet = (transcriptAlleles) => {
@@ -562,10 +560,10 @@ export const getTranscriptAllelesGeneSymbolSet = (transcriptAlleles) => {
 
 /**
  * This method returns the preferred variant title using Ensembl API data.
- * Note that this method does not try to match a transcript id; instead will just use the `transcriptId` provided
+ * Note that this method does not try to match a transcript id using data from other data source; instead will just use the `transcriptId` provided
  * 
  * @param {string} transcriptId The first portion of the hgvs of a transcript, which is the part before ':', but without the gene symbol (gene name)
- * @param {object} transcriptFromEnsembl The transcript object retreived from Ensembl
+ * @param {Object} transcriptFromEnsembl The transcript object retreived from Ensembl
  */
 export const getPreferredTitleFromEnsemblTranscriptsNoMatch = (transcriptId, transcriptFromEnsembl) => {
     const { hgvsc, hgvsp, gene_symbol } = transcriptFromEnsembl;
@@ -586,7 +584,7 @@ export const getPreferredTitleFromEnsemblTranscriptsNoMatch = (transcriptId, tra
  * This method uses the CAR data to match the transcript id in order to generate the full perferred transcript title
  * 
  * @param {string} transcriptIdToMatch - The first portion of the hgvs of a transcript, which is the part before ':', but without the gene symbol (gene name).
- * @param {object} carJson - Variant CAR json response object.
+ * @param {Object} carJson - Variant CAR json response object.
  * @returns {(string|null)} Variant title for the MANE transcript.
  */
 export const getPreferredTitleFromEnsemblTranscriptsMatchByCar = (transcriptIdToMatch, carJson) => {
@@ -620,7 +618,5 @@ export const getPreferredTitleFromEnsemblTranscriptsMatchByCar = (transcriptIdTo
         }
     }
 
-    // in case there's a inconsistency between LDH and CAR (MANE transcript found in LDH, but no such transcript in CAR, which shouldn't happen), just fall back to no MANE transcript result in CAR
     return null;
 }
-

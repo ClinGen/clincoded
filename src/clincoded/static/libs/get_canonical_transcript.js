@@ -34,11 +34,11 @@ import { getPreferredTitleFromEnsemblTranscriptsNoMatch } from "./parse-resource
  * @see {@link https://github.com/ClinGen/clincoded/issues/2176|Issue 2176}
  * @see getCanonicalTranscriptTitleFromEnsemblTranscripts
  * 
- * @param {array} transcripts - Ensembl transcripts
+ * @param {Array<Object>} transcripts - Ensembl transcripts
  * @param {boolean} extended - If `true`, will return an transcript object; otherwise, will just return the hgvsc string of the transcript
  * 
- * @returns {(string|object|null|undefined)} Returns the hgvs string of canonical transcript, or the entire transcript object from Ensembl API, depending on argument `extended`.
- *      Will return `null` if no canonical transcript found, or found but no `hgvsc` field on it.
+ * @returns {(string|Object|null|undefined)} Returns the hgvs string of canonical transcript, or the entire transcript object from Ensembl API, depending on argument `extended`.
+ *      Will return `null|undefined` if no canonical transcript found, or found but no `hgvsc` field on it.
  */
 export function getCanonicalTranscript(transcripts, extended = false) {
 
@@ -46,7 +46,6 @@ export function getCanonicalTranscript(transcripts, extended = false) {
 
     const canonicalTranscriptsFromEnsembl = transcripts.filter((transcript) => (
         transcript.hgvsc && 
-        // transcript.source === 'RefSeq' &&
         transcript.canonical
     ));
 
@@ -55,8 +54,6 @@ export function getCanonicalTranscript(transcripts, extended = false) {
         return null;
     }
 
-    console.log('canonical transcripts', canonicalTranscriptsFromEnsembl);
-    
     // General Singularity Test
 
     if (canonicalTranscriptsFromEnsembl.length === 1) {
@@ -65,7 +62,7 @@ export function getCanonicalTranscript(transcripts, extended = false) {
 
     // NM Singularity Test
 
-    const canonicalTranscriptsStartByNM = canonicalTranscriptsFromEnsembl.filter(({hgvsc = ''}) => (typeof hgvsc === 'string' && hgvsc.trim().startsWith('NM')))
+    const canonicalTranscriptsStartByNM = canonicalTranscriptsFromEnsembl.filter(({ hgvsc }) => (typeof hgvsc === 'string' && hgvsc.trim().startsWith('NM')))
 
     if (canonicalTranscriptsStartByNM.length === 1) {
         return extended ? canonicalTranscriptsStartByNM[0] : canonicalTranscriptsStartByNM[0].hgvsc;
@@ -73,7 +70,7 @@ export function getCanonicalTranscript(transcripts, extended = false) {
 
     // NR Singularity Test
 
-    const canonicalTranscriptsStartByNR = canonicalTranscriptsFromEnsembl.filter(({hgvsc = ''}) => (typeof hgvsc === 'string' && hgvsc.trim().startsWith('NR')))
+    const canonicalTranscriptsStartByNR = canonicalTranscriptsFromEnsembl.filter(({ hgvsc }) => (typeof hgvsc === 'string' && hgvsc.trim().startsWith('NR')))
 
     if (canonicalTranscriptsStartByNR.length === 1) {
         return extended ? canonicalTranscriptsStartByNR[0] : canonicalTranscriptsStartByNR[0].hgvsc;
@@ -82,28 +79,17 @@ export function getCanonicalTranscript(transcripts, extended = false) {
     console.warn('Did not find qualifying canonical transcript title', canonicalTranscriptsFromEnsembl);
 
     return null;
-
-    let transcript = null;
-    for (let item of transcripts) {
-        // Only if nucleotide transcripts exist
-        if (item.hgvsc && item.source === 'RefSeq' && item.canonical && item.canonical === 1) {
-            transcript = extended ? item : item.hgvsc;
-            // only take the first matching transcript
-        }
-    }
-    if (!transcript) {
-        console.log('did not find canonical transcirpt in ensembl')
-    }
-    return transcript;
 }
 
 /**
+ * This method generates the canonical title, which can be used as a candidate for variant preferred title.
+ * For how a preferred title is contructed, @see generateVariantPreferredTitle
  * @param {Object} props The argument object of this method
- * @param {Array<object>} props.ensemblTranscripts The transcripts in Ensembl API response data
+ * @param {Array<Object>} props.ensemblTranscripts The transcripts in Ensembl API response data
  * @param {'clinvar'|'car'} props.matchBySource Either 'clinvar' or 'car'
- * @param {object} props.parsedData The parsed data originated from either Clinvar or CAR.
+ * @param {Object} props.parsedData The parsed data originated from either Clinvar or CAR.
  * 
- * @returns {?string} The MANE transcript title
+ * @returns {string?} The Canonical transcript title. Returns `null` or `undefined` if not avialable.
  */
 export const getCanonicalTranscriptTitleFromEnsemblTranscripts = ({
     matchBySource,
