@@ -128,8 +128,9 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         }
     
         // Create data object to be sent to Data Exchange
+        const reviewDate = provisional.provisionalReviewDate ? provisional.provisionalReviewDate : (provisional.provisionalDate ? provisional.provisionalDate : '');
         const provisionalDate = provisional.provisionalDate ? provisional.provisionalDate : '';
-        const uncData = this.props.setUNCData(provisional, 'provisionally_approved', provisionalDate, provisionalSubmitter, contributors);
+        const uncData = this.props.setUNCData(provisional, 'provisionally_approved', reviewDate, provisionalDate, provisionalSubmitter, contributors);
 
         // Post provisional data to Data Exchange
         this.props.postTrackData(uncData).then(response => {
