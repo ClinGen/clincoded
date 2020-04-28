@@ -540,7 +540,7 @@ export const generateVariantPreferredTitle = (geneName, hgvs, proteinEffect) => 
  * 
  * (required) transcript id: NM_002496.4
  * (optional) gene name: NDUFS8
- * (required) amino acid change: c.64C>T
+ * (required) nucleotide change: c.64C>T
  * (optional) amino acid change name: p.Pro22Ser
  * 
  * When an optional component above is missing, we give an empty string.
@@ -563,15 +563,15 @@ export const parseVariantPreferredTitle = (variantPreferredTitle) => {
     }
 
     // parse amino acid change and its protein effect name
-    const [aminoAcidChange, aminoAcidChangeName] = aminoAcidChangePart.replace(' ', '').split(/[()]/);
-    if (!aminoAcidChange) {
-        throw `Cannot parse variantPreferredTitle, missing amino acid change: ${variantPreferredTitle}`;
+    const [nucleotideChange, aminoAcidChangeName] = aminoAcidChangePart.replace(' ', '').split(/[()]/);
+    if (!nucleotideChange) {
+        throw `Cannot parse variantPreferredTitle, missing nucleotide change: ${variantPreferredTitle}`;
     }
 
     return {
         transcriptId,
         geneName: geneName || "",
-        aminoAcidChange,
+        nucleotideChange,
         aminoAcidChangeName: aminoAcidChangeName || ""
     };
 }
