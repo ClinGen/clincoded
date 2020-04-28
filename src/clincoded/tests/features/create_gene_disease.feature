@@ -12,7 +12,7 @@ Feature: Create Gene Disease
         Then I should see "Required"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "Any user may explore the demo version of the ClinGen interfaces"
+        Then I should see "ClinGen is a National Institutes of Health (NIH)-funded resource"
 
     Scenario: Add GDM
         When I visit "/logout"
@@ -58,7 +58,7 @@ Feature: Create Gene Disease
         Then I should not see "Required"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "Any user may explore the demo version of the ClinGen interfaces"
+        Then I should see "ClinGen is a National Institutes of Health (NIH)-funded resource"
 
 
     Scenario: Test GDM alert modal
@@ -92,4 +92,4 @@ Feature: Create Gene Disease
         Then I should see an element with the css selector ".pmid-selection-add-btn" within 5 seconds
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "Any user may explore the demo version of the ClinGen interfaces"
+        Then I should see "ClinGen is a National Institutes of Health (NIH)-funded resource"
