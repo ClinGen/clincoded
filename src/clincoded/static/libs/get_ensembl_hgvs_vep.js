@@ -30,7 +30,7 @@ export const getEnsemblHGVSVEP = (getRestFunc, hgvs_notation) => {
             // filter by hgvsc. If a transcipt has no hgvsc, it means it does not overlap with
             // our queried nucleotide change (hgvs_notation) thus not of our interest
             if (Array.isArray(ensemblResponse.transcript_consequences) && ensemblResponse.transcript_consequences.length) {
-                ensemblResponse.transcript_consequences = ensemblResponse.transcript_consequences.filter((transcript) => !!transcript.hgvsc);
+                ensemblResponse.transcript_consequences = ensemblResponse.transcript_consequences.filter((transcript) => transcript.hgvsc);
             }
             
             // get all MANE transcripts
