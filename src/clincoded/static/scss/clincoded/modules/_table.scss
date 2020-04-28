@@ -327,6 +327,7 @@ $status-types:
     min-width: 100px;
     max-width: 250px;
 }
+.masterTable thead tr:nth-child(2) th:nth-child(2),
 .masterTable thead tr:nth-child(n+1) th:nth-child(n+3),
 .masterTable tbody tr td:nth-child(n+3) {
     background-color: $table-row-odd-bg;
