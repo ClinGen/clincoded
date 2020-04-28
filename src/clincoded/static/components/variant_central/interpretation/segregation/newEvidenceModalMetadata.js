@@ -115,6 +115,14 @@ let NewEvidenceModalMetadata = createReactClass({
         let key = this.props.evidenceType;
         if (key && key in extraEvidence.typeMapping) {
             let nodes = [];
+            if (key !== 'PMID') {
+                const note = <p key='non-pub-source-note'>All unpublished patient-specific data entered into the VCI, which is not explicitly consented for public sharing, should be the minimum necessary to inform the clinical significance of genetic variants; and data entered into the VCI should not include <a className="external-link" target="_blank" href="//www.hipaajournal.com/considered-phi-hipaa/">protected health information (PHI)</a> or equivalent identifiable information as defined by regulations in your country or region.</p>;
+                nodes.push(note);
+            }
+            if (extraEvidence.typeMapping[key]['extra']) {
+                const extra = <p key='extra-note'>{extraEvidence.typeMapping[key]['extra']}</p>;
+                nodes.push(extra);
+            }
             extraEvidence.typeMapping[key]['fields'].forEach(obj => {
                 let lbl = [<span key={`span_${obj['name']}`}>{obj['description']}</span>];
                 if (obj.identifier) {

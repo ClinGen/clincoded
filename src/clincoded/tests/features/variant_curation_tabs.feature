@@ -42,7 +42,7 @@ Feature: Variant Curation Tabs
         Then I should see "reviewed by expert panel"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "Any user may explore the demo version of the ClinGen interfaces"
+        Then I should see "ClinGen is a National Institutes of Health (NIH)-funded resource"
 
     Scenario: Testing VCI tab functionality on non-SNV variant (Type: Deletion)
         When I visit "/logout"
@@ -85,7 +85,7 @@ Feature: Variant Curation Tabs
         Then I should see "criteria provided, single submitter"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "Any user may explore the demo version of the ClinGen interfaces"
+        Then I should see "ClinGen is a National Institutes of Health (NIH)-funded resource"
 
 
     Scenario: Testing VCI tab functionality on non-SNV variant (Type: Insertion)
@@ -129,7 +129,7 @@ Feature: Variant Curation Tabs
         Then I should see "no assertion criteria provided"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "Any user may explore the demo version of the ClinGen interfaces"
+        Then I should see "ClinGen is a National Institutes of Health (NIH)-funded resource"
 
 
     Scenario: Testing VCI tab functionality on non-SNV variant (Type: Indel)
@@ -173,7 +173,7 @@ Feature: Variant Curation Tabs
         Then I should see "criteria provided, single submitter"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "Any user may explore the demo version of the ClinGen interfaces"
+        Then I should see "ClinGen is a National Institutes of Health (NIH)-funded resource"
 
     Scenario: Testing VCI tab functionality on SNV variant (Type: Single Nucleotide Variant)
         When I visit "/logout"
@@ -216,4 +216,4 @@ Feature: Variant Curation Tabs
         Then I should see "criteria provided, single submitter"
         When I press "Logout ClinGen Test Curator"
         And I wait for 5 seconds
-        Then I should see "Any user may explore the demo version of the ClinGen interfaces"
+        Then I should see "ClinGen is a National Institutes of Health (NIH)-funded resource"

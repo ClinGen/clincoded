@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import createReactClass from 'create-react-class';
 import _ from 'underscore';
 import moment from 'moment';
-import { curator_page, history_views } from './globals';
+import { curator_page, history_views, external_url_map } from './globals';
 import { RestMixin } from './rest';
 import { Form, FormMixin, Input } from '../libs/bootstrap/form';
 import { Panel } from '../libs/bootstrap/panel';
@@ -14,6 +14,7 @@ import ModalComponent from '../libs/bootstrap/modal';
 import { GdmDisease } from './disease';
 import { getAffiliationName } from '../libs/get_affiliation_name';
 import { isUserAllowedToCreateGdm } from '../libs/allow_create_gdm';
+import { parseHGNC, filterGeneForHGNCComparison } from '../libs/parse-hgnc';
 
 var modesOfInheritance = require('./mapping/modes_of_inheritance.json');
 
@@ -201,19 +202,63 @@ var CreateGeneDisease = createReactClass({
                 let adjective = this.getFormValue('moiAdjective');
                 const diseaseObj = this.state.diseaseObj;
                 let hgncId = '';
+                let geneSelectionError = 'Unexpected response from HGNC';
 
-                // Get the disease and gene objects corresponding to the given Orphanet and Gene IDs in parallel.
-                // If either error out, set the form error fields
-                this.getRestDatas([
-                    '/genes/' + geneId
-                ], [
-                    function() {
-                        this.setFormErrors('hgncgene', 'HGNC gene symbol not found');
-                        this.setState({ submitBusy: false });
-                    }.bind(this)
-                ]).then(response => {
-                    // Save HGNC Id to be used for data tracking
-                    hgncId = response[0]['hgncId'];
+                // Check HGNC for user-supplied gene symbol
+                this.getRestData(this.props.href_url.protocol + external_url_map['HGNCFetch'] + geneId).then(hgncResponse => {
+                    if (hgncResponse.response && hgncResponse.response.numFound > 0) {
+                        const hgncGene = hgncResponse.response.docs ? parseHGNC(hgncResponse.response.docs[0]) : null;
+
+                        if (hgncGene) {
+                            this.saveFormValue('hgncgene', hgncGene.symbol);
+                            geneId = hgncGene.symbol;
+                            hgncId = hgncGene.hgncId;
+                            geneSelectionError = 'Search by HGNC ID failed';
+                        } else {
+                            throw geneSelectionError;
+                        }
+
+                        // Check if gene already present in DB (by HGNC ID)
+                        return this.getRestData('/search?type=gene&hgncId=' + hgncId).then(searchResponse => {
+                            if (searchResponse.total === 0) {
+                                geneSelectionError = 'Failed to save gene data';
+
+                                // Add gene to DB
+                                return this.postRestData('/genes/', hgncGene).then(postResult => {
+                                    geneSelectionError = '';
+                                    return postResult['@graph'] ? postResult['@graph'][0] : postResult;
+                                });
+                            } else if (searchResponse['@graph'] && searchResponse['@graph'][0]) {
+                                geneSelectionError = 'Request for gene data failed';
+
+                                // Retrieve gene from DB
+                                return this.getRestData(searchResponse['@graph'][0]['@id']).then(geneResponse => {
+                                    const localGene = geneResponse.uuid ? filterGeneForHGNCComparison(geneResponse) : null;
+
+                                    if (!_.isEqual(hgncGene, localGene)) {
+                                        geneSelectionError = 'Failed to update gene data';
+
+                                        // Update gene in DB
+                                        return this.putRestData('/genes/' + geneResponse.uuid, hgncGene).then(putResult => {
+                                            geneSelectionError = '';
+                                            return putResult['@graph'] ? putResult['@graph'][0] : putResult;
+                                        });
+                                    } else {
+                                        geneSelectionError = '';
+                                        return geneResponse;
+                                    }
+                                });
+                            } else {
+                                geneSelectionError = 'Unexpected response when verifying HGNC ID';
+                                throw geneSelectionError;
+                            }
+                        });
+                    } else {
+                        geneSelectionError = 'Symbol not found at HGNC';
+                        throw geneSelectionError;
+                    }
+                }).then(response => {
+                    // Check DB for user-supplied disease
                     return this.getRestData('/search?type=disease&diseaseId=' + diseaseObj.diseaseId).then(diseaseSearch => {
                         let diseaseUuid;
                         if (diseaseSearch.total === 0) {
@@ -291,6 +336,9 @@ var CreateGeneDisease = createReactClass({
                     });
                 }).catch(e => {
                     // Some unexpected error happened
+                    if (geneSelectionError) {
+                        this.setFormErrors('hgncgene', geneSelectionError);
+                    }
                     parseAndLogError.bind(undefined, 'fetchedRequest');
                     this.setState({ submitBusy: false });            });
             }

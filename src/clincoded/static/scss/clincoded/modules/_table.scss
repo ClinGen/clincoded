@@ -16,6 +16,10 @@
 }
 
 .table-filter {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
     @media screen and (min-width: $screen-sm-min) {
         text-align: right;
 
@@ -30,6 +34,7 @@
 }
 
 .table-filter-input {
+    display: flex;
     position: relative;
 }
 
@@ -55,6 +60,46 @@
     }
 }
 
+.table-responsive {
+    margin-bottom: 40px;
+
+    td {
+        max-width: 200px;
+        overflow-wrap: break-word;
+    }
+
+    tbody {
+        z-index: -1;
+    }
+    
+}
+
+.fixed-save-button {
+    background: #2697d1;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 50px;
+    display: flex;
+
+    .input-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .submit-feedback {
+        margin-right: 10px;
+        line-height: 32px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        color: white;
+    }
+}
+
+.export-button-spacing {
+    margin-right: 10px;
+}
 
 //**************************************************************************************************
 // GDM table styles (might need to expand this to cover more types of tables, but just GDMs for now)
@@ -262,6 +307,10 @@ $status-types:
         padding: 2px 6px;
     }
 
+    .more-text-div {
+        cursor: default;
+    }
+
     .more-text {
         color: #337ab7;
         font-weight: bold;
@@ -278,6 +327,7 @@ $status-types:
     min-width: 100px;
     max-width: 250px;
 }
+.masterTable thead tr:nth-child(2) th:nth-child(2),
 .masterTable thead tr:nth-child(n+1) th:nth-child(n+3),
 .masterTable tbody tr td:nth-child(n+3) {
     background-color: $table-row-odd-bg;
@@ -315,8 +365,22 @@ $status-types:
     font-weight: normal;
 }
 
-//style for the text displaying the number of entries for each gdm search and for each interpretation search
+// style for the text displaying the number of entries for each gdm search and for each interpretation search
 .number-of-entries {
     color: grey;
     font-size: 50%
+}
+
+// For HPO with terms btns and label in Add Evidence Modal
+.get-terms-btn {
+    margin-bottom: 17px;
+}
+
+.clear-terms-btn {	
+    margin-bottom: 17px;	
+    margin-left: -20px;
+}
+
+.terms-label {
+    padding-bottom: 40px;
 }

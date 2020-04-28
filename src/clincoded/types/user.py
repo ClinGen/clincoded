@@ -52,7 +52,7 @@ class User(Item):
         return {owner: 'role.owner'}
 
 
-@view_config(context=User, permission='view_details', request_method='GET',
+@view_config(context=User, permission='view', request_method='GET',
              name='details')
 def user_details_view(context, request):
     return item_view_object(context, request)
@@ -63,7 +63,7 @@ def user_details_view(context, request):
 def user_basic_view(context, request):
     properties = item_view_object(context, request)
     filtered = {}
-    for key in ['@id', '@type', 'uuid', 'lab', 'title', 'email', 'first_name', 'last_name', 'affiliation']:
+    for key in ['@id', '@type', 'date_created', 'uuid', 'lab', 'title', 'email', 'first_name', 'last_name', 'affiliation', 'user_status', 'institution', 'usage_intent']:
         try:
             filtered[key] = properties[key]
         except KeyError:

@@ -72,6 +72,35 @@ export function BlankWhileLoading(props) {
 listing_titles.register(BlankWhileLoading, 'HTTPForbidden');
 
 
+export class RequestedActivation extends Component {
+    render() {
+        var context = this.props.context;
+        return (
+            <div className="container">
+                <div className={itemClass(context, 'panel-gray')}>
+                    <div className="row">
+                        <div className="col-sm-12">
+                            <div className="page-header"><h1><i className="text-success icon icon-check-circle"></i> Thank you for registering</h1></div>
+                            <div className="panel panel-default">
+                                <div className="panel-body">
+                                    <p>Your request for access to the interfaces has been received. Once your account is activated, you will receive a confirmation email.</p>
+                                    <p>If you are a ClinGen curator, your coordinator will arrange for you to be added to your affiliation. If you are interested in becoming a volunteer curator for ClinGen, please view information at <a href="https://www.clinicalgenome.org/working-groups/c3/" target="_blank" rel="noopener noreferrer">Community Curation</a>.</p>
+                                    <p>If you have any questions, please contact us at <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a>.</p>
+                                </div>
+                            </div>
+                            <div className="alert alert-info">
+                                <span>If you do not wish to continue registering for the interfaces but want to explore a demo version of the interfaces, you may select the "Demo Login" button located at <a href="https://curation-test.clinicalgenome.org" target="_blank" rel="noopener noreferrer">curation-test.clinicalgenome.org</a>. Your name will display as "ClinGen Test Curator" in the interfaces, along with others who use the "Demo Login."</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+}
+
+content_views.register(RequestedActivation, 'RequestedActivation');
+
 export class LoginDenied extends Component {
     render() {
         var context = this.props.context;
@@ -80,25 +109,10 @@ export class LoginDenied extends Component {
                 <div className={itemClass(context, 'panel-gray')}>
                     <div className="row">
                         <div className="col-sm-12">
-                            <div className="page-header"><h1><i className="icon icon-exclamation-triangle"></i> Registration not yet complete</h1></div>
+                            <div className="page-header"><h1><i className="icon icon-exclamation-triangle"></i> Access Denied</h1></div>
                             <div className="panel panel-default">
                                 <div className="panel-body">
-                                    <p>If you wish to continue registering your own account and display name, please follow the instructions below:</p>
-                                    <p><span className="section-header">Step 1 <span className="text-success"><i className="icon icon-check"></i> Completed</span></span>Register your user name and password with <a href="https://auth0.com/signup" target="_blank" rel="noopener noreferrer">Auth0</a>, a third-party system that will manage your password.</p>
-                                    <p><span className="section-header">Step 2</span>Request an account for the ClinGen interfaces by emailing the following information to <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a></p>
-                                    <ol>
-                                        <li>The email address associated with your newly created Auth0 account</li>
-                                        <li>Preferred name for display in the ClinGen interfaces (first and last name)</li>
-                                        <li>Any affiliation you have with ClinGen (note: a ClinGen affiliation is not required for use of the Variant Curation Interface)</li>
-                                        <li>Intended use of ClinGen interface(s) -- select all that apply:
-                                            <ol>
-                                                <li>ClinGen curation activity</li>
-                                                <li>Non-ClinGen variant curation (note: the Variant Curation Interface is open for public use but the Gene Curation Interface is currently restricted to use by ClinGen curators. If you wish to collaborate on gene curation please contact ClinGen at <a href='mailto:clingen@clinicalgenome.org'>clingen@clinicalgenome.org <i className="icon icon-envelope"></i></a>)</li>
-                                                <li>Demo only exploration of the interfaces using test data and your own account and display name</li>
-                                            </ol>
-                                        </li>
-                                    </ol>
-                                    <p>Please contact us with any questions regarding registration at <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a></p>
+                                    <div>If you have any questions, please contact us at <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a>.</div>
                                 </div>
                             </div>
                             <div className="alert alert-info">
@@ -126,9 +140,10 @@ export class LoginNotVerified extends Component {
                             <div className="page-header"><h1><i className="icon icon-exclamation-triangle"></i> Auth0 account not yet verified</h1></div>
                             <div className="panel panel-default">
                                 <div className="panel-body">
-                                    <p>Auth0 account activation requires email verification - please check your inbox for an email from Auth0 and verify it according to their instructions.</p>
-                                    <p>Once you have completed Auth0 account activation you must also register to use the ClinGen interfaces. To complete your registration please send the email address you verified with Auth0 and your preferred display name within the interfaces to <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a></p>
-                                    <p>Please note that access to the ClinGen interfaces is currently restricted to ClinGen curators.</p>
+                                    <p><span className="section-header">Step 1 <span className="text-success"><i className="icon icon-check"></i> Completed</span></span>Sign up with your email and password.</p>
+                                    <p><span className="section-header">Step 2 </span>Please check your inbox for an email from Auth0 and verify your email according to the instructions.</p>
+                                    <p><span className="section-header">Step 3 </span>Please log in to complete the registration of your account.</p>
+                                    <p>If you have any questions, please contact us at <a href='mailto:clingen-helpdesk@lists.stanford.edu'>clingen-helpdesk@lists.stanford.edu <i className="icon icon-envelope"></i></a>.</p>
                                 </div>
                             </div>
                         </div>

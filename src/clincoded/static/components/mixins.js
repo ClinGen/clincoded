@@ -118,8 +118,26 @@ module.exports.Auth0 = {
                 {
                     additionalSignUpFields: [
                         {
-                            name: "name",
-                            placeholder: "Your full name"
+                            name: 'firstName',
+                            placeholder: 'First name'
+                        },
+                        {
+                            name: 'lastName',
+                            placeholder: 'Last name'
+                        },
+                        {
+                            name: 'institution',
+                            placeholder: 'Institution'
+                        },
+                        {
+                            type: 'select',
+                            name: 'usageIntent',
+                            placeholder: 'Intended use of the interfaces',
+                            options: [
+                                { value: 'clingen', label: 'ClinGen Affiliation Curation' },
+                                { value: 'personal', label: 'Personal Variant Interpretation' },
+                                { value: 'other', label: 'Other' }
+                            ]
                         }
                     ],
                     auth: {
@@ -132,10 +150,14 @@ module.exports.Auth0 = {
                         primaryColor: '#294297'
                     },
                     languageDictionary: {
-                        title: "ClinGen Curator Interface"
-                    }
+                        title: "ClinGen Curation Interfaces",
+                        signUpTerms: 'I have read and agree to the <a href="/terms-of-use" target="_blank" rel="noopener noreferrer" style="color: #337ab7; text-decoration: underline;">Terms of Use</a>',
+                        signUpSubmitLabel: 'Request Account'
+                    },
+                    mustAcceptTerms: true
                 }
             );
+            // In Lock, the default for @loginAfterSignUp is true, so this event will trigger after a sign up as well as a login
             this.lock.on('authenticated', this.handleAuth0Login);
         } else {
             // Auth0Lock is not defined, so it either did not load, was blocked by the user, or jest testing is occuring.
@@ -253,44 +275,60 @@ module.exports.Auth0 = {
     handleAuth0Login: function (authResult, retrying) {
         // method that handles what happens after Auth0 Lock modal interaction.
         // most of this logic was in triggerLogin previously
-        var accessToken = authResult.accessToken ? authResult.accessToken : authResult.access_token;
+        const accessToken = authResult.accessToken ? authResult.accessToken : authResult.access_token;
         if (!accessToken) return;
         this.sessionPropertiesRequest = true;
-        this.fetch('/login', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({accessToken: accessToken})
-        }).then(response => {
-            this.lock.hide();
-            if (!response.ok) throw response;
-            return response.json();
-        }).then(session => {
-            this.setState({session: session});
-            // Login was successful, so forward user to dashboard or target URI as necessary
-            var next_url = window.location.href;
-            if (!(window.location.hash == '#logged-out' || window.location.pathname == '' || window.location.pathname == '/')) {
-                this.navigate(next_url, {replace: true}).then(() => {
-                    this.setState({loadingComplete: true});
-                });
-            } else {
-                this.setState({loadingComplete: true});
-            }
-        }, err => {
-            this.sessionPropertiesRequest = null;
-            parseError(err).then(data => {
-                // Server session creds might have changed.
-                if (data.code === 400 && data.detail.indexOf('CSRF') !== -1) {
-                    if (!retrying) {
-                        window.setTimeout(this.handleAuth0Login);
-                        return;
-                    }
+        this.lock.getUserInfo(accessToken, (error, profile) => {
+            if (!error) {
+                const { email, user_metadata } = profile;
+                let firstName, lastName, usageIntent, institution;
+                if (user_metadata) {
+                    ({ firstName, lastName, usageIntent, institution } = user_metadata);
                 }
-                // If there is an error, show the error messages
-                this.setState({context: data});
-            });
+                this.fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        accessToken,
+                        email,
+                        firstName,
+                        lastName,
+                        institution,
+                        usageIntent,
+                    })
+                }).then(response => {
+                    this.lock.hide();
+                    if (!response.ok) throw response;
+                    return response.json();
+                }).then(session => {
+                    this.setState({session: session});
+                    // Login was successful, so forward user to dashboard or target URI as necessary
+                    const next_url = window.location.href;
+                    if (!(window.location.hash == '#logged-out' || window.location.pathname == '' || window.location.pathname == '/')) {
+                        this.navigate(next_url, { replace: true }).then(() => {
+                            this.setState({ loadingComplete: true });
+                        });
+                    } else {
+                        this.setState({ loadingComplete: true });
+                    }
+                }, err => {
+                    this.sessionPropertiesRequest = null;
+                    parseError(err).then(data => {
+                        // Server session creds might have changed.
+                        if (data.code === 400 && data.detail.indexOf('CSRF') !== -1) {
+                            if (!retrying) {
+                                window.setTimeout(this.handleAuth0Login);
+                                return;
+                            }
+                        }
+                        // If there is an error, show the error messages
+                        this.setState({ context: data });
+                    });
+                });
+            }
         });
     },
 
