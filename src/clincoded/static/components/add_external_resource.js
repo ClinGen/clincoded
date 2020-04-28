@@ -772,7 +772,7 @@ function carQueryResource() {
             data = parseCAR(json);
             finalState.tempResource = data;
             
-            // patch data `finalState.tempResource` based on CAR API call data `json`
+            // if ClinVar is available, use it to replace data from CAR
             if (data.clinvarVariantId) {
                 // if the CAR result has a ClinVar variant ID, query ClinVar with it, and use its data
                 url = external_url_map['ClinVarEutilsVCV'];
@@ -791,68 +791,13 @@ function carQueryResource() {
                     // error handling for ClinVar query
 
                     // even if we are initially querying CAR, since Clinvar API does not 
-                    // recognize `data.clinvarVariantId`, this field is corrupted
-                    // and it's likely that other fields in CAR data are corrupted as well
-                    // so we don't want to proceed
+                    // recognize `clinvarVariantId` we provided, this clinvar id field is likely corrupted,
+                    // so is other fields in CAR data, thus we don't want to proceed
                     return carApiCallReject(new Error('Error querying ClinVar for additional data. Please check your input and try again.'));
                 })
             } else if (data.carId) {
                 // if the CAR result has no ClinVar variant ID, just use the CAR data set
-                let hgvs_notation = getHgvsNotation(data, 'GRCh38', true);
-                let request_params = '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&ExAC=1&MaxEntScan=1&GeneSplicer=1&Conservation=1&numbers=1&domains=1&canonical=1&merged=1';
-
-                console.log('hitting ensembl url:', this.props.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params), '...';
-                
-                if (false) {
-                    return this.getRestData(this.props.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params).then((response) => {
-
-                        console.log('ensembl data:', response);
-                        
-                        let ensemblTranscripts = response.length && response[0].transcript_consequences ? response[0].transcript_consequences : [];
-                        if (ensemblTranscripts && ensemblTranscripts.length) {
-                            let canonicalTranscript = getCanonicalTranscript(ensemblTranscripts);
-                            if (canonicalTranscript && canonicalTranscript.length && data.tempAlleles && data.tempAlleles.length) {
-                                data.tempAlleles.forEach(item => {
-                                    if (item.hgvs && item.hgvs.length) {
-                                        for (let transcript of item.hgvs) {
-                                            if (transcript === canonicalTranscript) {
-                                                let proteinChange;
-                                                let transcriptStart = transcript.split(':')[0];
-                                                let transcriptEnd = transcript.split(':')[1];
-                                                if (item.proteinEffect && item.proteinEffect.hgvs) {
-                                                    proteinChange = item.proteinEffect.hgvs.split(':')[1];
-                                                }
-                                                console.log('assigning canonical transcript using previous ensembl');
-                                                data['canonicalTranscriptTitle'] = `${transcriptStart}(${item.geneSymbol}):${transcriptEnd}${proteinChange ? ` (${proteinChange})` : ''}`;
-                                                // delete data['tempAlleles'];
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                            console.log('previous canonical logic result', data);
-                            // Remove the 'tempAlleles' object at this point regardless
-                            // whether the preceding evaluations are executed
-                            // if (data['tempAlleles']) delete data['tempAlleles'];
-                        } else {
-                            // Fall back to CAR data without the canonical transcript title if there is no ensembl transcript
-                            // if (data['tempAlleles']) delete data['tempAlleles'];
-                        }
-                        
-                        return carApiCallResolve(finalState);
-                    })
-                    .catch (err => {
-                        // Error in VEP get request
-                        console.warn('Error in querying Ensembl VEP data = %o', err);
-                        // Fall back to CAR data
-                        // if (data['tempAlleles']) delete data['tempAlleles'];
-                        
-                        return carApiCallResolve(finalState);
-                    });
-                } else {
-                    // Fall back to CAR data without the canonical transcript title if parsing fails
-                    // if (data['tempAlleles']) delete data['tempAlleles'];
-                }
+                return carApiCallResolve(finalState);
             } else {
                 // in case the above two fail (theoretically a 404 json response, but an error is thrown instead (see below))
 
@@ -861,13 +806,9 @@ function carQueryResource() {
                 // we will not check in any data into local state
                 return carApiCallReject(new Error('CA ID not found'));
             }
-
-            // // update all the state once here to ensure state update occurs at the end
-            // this.setState(finalState);
-            return carApiCallResolve(finalState);
         })
             .then((finalState) => {
-                // Only if Clinvar Variant Title is not available,
+                // only if Clinvar Variant Title is not available,
                 // we turn to MANE or canonical transcript for trying to get a preferred title
                 if (finalState.tempResource && !finalState.tempResource.clinvarVariantTitle) {
                     return queryAdditionalTranscriptTitles({
@@ -889,14 +830,14 @@ function carQueryResource() {
 
                 return finalState;
             })
-        // update all the state once here to ensure state update occurs at the end
         ).then((finalState) => {
             // `parseCAR()` generates bi-product `tempAlleles` which is useful for querying
             // additional transcript titles, but should not be checked in to state
             if (finalState.tempResource['tempAlleles']) {
                 delete finalState.tempResource['tempAlleles'];
             }
-            console.log('final store state', finalState);
+
+            // update all the state changes here to ensure state updates once
             this.setState(finalState);
         })
         .catch(e => {
