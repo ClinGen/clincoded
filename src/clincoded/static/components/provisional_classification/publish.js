@@ -222,6 +222,33 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
     },
 
     /**
+     * Method to send full GDM data snapshot to Data Exchange when provisional classification is published
+     */
+    publishGDMToDataExchange(snapshot) {
+        // Post published GDM data snapshot to Data Exchange
+        return new Promise((resolve, reject) => {
+            // Check if snapshot has necessary data
+            if (snapshot && snapshot.resource && snapshot.resourceParent) {
+                this.postRestData('/publish-gdm', snapshot).then(result => {
+                    if (result.status === 'Success') {
+                        console.log('Post full gdm succeeded: %o', result);
+                        resolve(result);
+                    } else {
+                        console.log('Post full gdm failed: %o', result);
+                        reject(result);
+                    }
+                }).catch(error => {
+                    console.log('Post full gdm internal data retrieval error: %o', error);
+                    reject(error);
+                });
+            } else {
+                console.log('Post full gdm Error: Missing expected data');
+                reject({'message': 'Missing expected data'});
+            }
+        });
+    },
+
+    /**
      * Method to handle submitting the publish form
      * @param {object} e - The submitted event object
      */
@@ -282,6 +309,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
 
                 // Always update the "publishStatus" field (set to "true" for published snapshot, deleted for unpublished)
                 // within current provisional object's associated snapshots array (e.g. associatedClassificationSnapshots)
+                // If publishing, for previous published snapshot, delete publishStatus and related published data
                 if (currentProvisional[associatedResourceSnapshots] && currentProvisional[associatedResourceSnapshots].length) {
                     for (let snapshot of currentProvisional[associatedResourceSnapshots]) {
                         if (snapshot.approvalStatus === 'Approved') {
@@ -356,6 +384,11 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                         // Only update provisional state object when publish event is on current approved snapshot
                         if (this.state.isSelectedProvisionalCurrent) {
                             this.props.updateProvisionalObj(resultProvisional['@id']);
+                        }
+
+                        // Send published GDM data (snapshot) to Data Exchange
+                        if (selectedResourceType === 'gdm') {
+                            this.publishGDMToDataExchange(resultSnapshot);
                         }
 
                         // When publish event is a publish, automatically unpublish a previously-published snapshot (if one exists)

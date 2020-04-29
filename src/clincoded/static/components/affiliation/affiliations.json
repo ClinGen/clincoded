@@ -744,6 +744,10 @@
         "affiliation_fullname": "Glaucoma",
         "publish_approval": true,
         "subgroups": {
+            "gcep": {
+                "id": "40053",
+                "fullname": "Glaucoma GCEP"
+            },
             "vcep": {
                 "id": "50053",
                 "fullname": "Glaucoma VCEP"
@@ -773,12 +777,12 @@
     },
     {
         "affiliation_id": "10059",
-        "affiliation_fullname": "Craniosynostosis",
+        "affiliation_fullname": "Craniofacial Malformations",
         "publish_approval": true,
         "subgroups": {
             "gcep": {
                 "id": "40059",
-                "fullname": "Craniosynostosis GCEP"
+                "fullname": "Craniofacial Malformations GCEP"
             }
         }
     },
@@ -908,6 +912,39 @@
             "gcep": {
                 "id": "40070",
                 "fullname": "CAKUT/Obstructive uropathy GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10071",
+        "affiliation_fullname": "Pulmonary Hypertension",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40071",
+                "fullname": "Pulmonary Hypertension GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10072",
+        "affiliation_fullname": "Retinal",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40072",
+                "fullname": "Retinal GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10073",
+        "affiliation_fullname": "Reproduction and Infertility",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40073",
+                "fullname": "Reproduction and Infertility GCEP"
             }
         }
     }
