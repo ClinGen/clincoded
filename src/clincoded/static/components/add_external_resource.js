@@ -615,7 +615,6 @@ function clinvarQueryResource() {
                         })
                             .then((additionalTranscriptTitles) => {
                                 Object.assign(data, additionalTranscriptTitles);
-                                console.log('store state (w/ mane)', data);
                                 return res(data);
                             })
                             .catch((error) => {
