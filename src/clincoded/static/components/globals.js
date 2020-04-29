@@ -152,15 +152,13 @@ export const addQueryKey = function(href, key, value, allowEmptyValue=true) {
  * This method allows you to add multiple queries of the same key.
  * 
  * @param {string} href - the base url the queries will add to
- * @param {Array<{ key: string, value: string } | Array<string>>} keyValuePairs - an array of key value pairs that will be added as queries to `href`
+ * @param {Array<{ key: string, value: string }>} keyValuePairs - an array of key value pairs that will be added as queries to `href`
  * @param {boolean} allowEmptyValue - whether to add empty-valued query to url; if `false`, will ignore queries whose value is empty string, null or undefined. This argument will just be passed to `addQueryKey()`.
  * @returns {string} the url embedded with queries
  */
 module.exports.getQueryUrl = function(href, keyValuePairs=[], allowEmptyValue=true) {
     return keyValuePairs.reduce((accumulatedUrl, currentPair) => {
-        return Array.isArray(currentPair) ? 
-            addQueryKey(accumulatedUrl, currentPair[0], currentPair[1], allowEmptyValue) :
-            addQueryKey(accumulatedUrl, currentPair.key, currentPair.value, allowEmptyValue);
+        return addQueryKey(accumulatedUrl, currentPair.key, currentPair.value, allowEmptyValue);
     }, href);
 }
 

@@ -5,19 +5,19 @@ export const getEnsemblHGVSVEP = (getRestFunc, hgvs_notation) => {
     const url = getQueryUrl(
         '//' + external_url_map["EnsemblHgvsVEP"] + hgvs_notation,
         [
-            ['content-type', 'application/json'],
-            ['hgvs', '1'],
-            ['protein', '1'],
-            ['xref_refseq', '1'],
-            ['ExAC', '1'],
-            ['MaxEntScan', '1'],
-            ['GeneSplicer', '1'],
-            ['Conservation', '1'],
-            ['numbers', '1'],
-            ['domains', '1'],
-            ['mane', '1'],
-            ['canonical', '1'],
-            ['merged', '1'],
+            { key: 'content-type', value: 'application/json' },
+            { key: 'hgvs', value: '1' },
+            { key: 'protein', value: '1' },
+            { key: 'xref_refseq', value: '1' },
+            { key: 'ExAC', value: '1' },
+            { key: 'MaxEntScan', value: '1' },
+            { key: 'GeneSplicer', value: '1' },
+            { key: 'Conservation', value: '1' },
+            { key: 'numbers', value: '1' },
+            { key: 'domains', value: '1' },
+            { key: 'mane', value: '1' },
+            { key: 'canonical', value: '1' },
+            { key: 'merged', value: '1' },
         ]
     );
 
