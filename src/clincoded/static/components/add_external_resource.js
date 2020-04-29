@@ -600,7 +600,8 @@ function clinvarQueryResource() {
         var data;
         var id = this.state.inputValue;
         this.getRestDataXml(url + id).then((xml) => {
-            data = parseClinvar(xml, true);
+            const extendedVariantKeysAdded = [];
+            data = parseClinvar(xml, true, extendedVariantKeysAdded);
             if (data.clinvarVariantId) {
                 // found the result we want
 
@@ -627,6 +628,13 @@ function clinvarQueryResource() {
                     return res(data);
                 })
                 .then((data) => {
+                    // since we have parseClinvar parse extended data,
+                    // we need to remove the additional fields that are not recognized by backend
+                    console.log('additonal keys', extendedVariantKeysAdded);
+                    for (const key of extendedVariantKeysAdded) {
+                        delete data[key];
+                    }
+
                     this.setState({queryResourceBusy: false, tempResource: data, resourceFetched: true});
                 });
             } else {

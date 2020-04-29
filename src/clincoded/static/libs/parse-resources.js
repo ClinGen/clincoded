@@ -132,8 +132,12 @@ A quasi-XSD of the elements we're interested in (refined from the document above
  * Function to parse XML document of ClinVar data for variant object creation
  * @param {string} xml - XML document containing ClinVar data
  * @param {boolean} extended - Indicator that extended parsing needs to happen
+ * @param {Array<string>?} extendedVariantKeysAdded - Provide an array which will be mutated in this method 
+ *      and populated with the additional keys added to the returned variant object. 
+ *      Additional keys are keys that are added by extended parsing. This arg is only effective when `extended=true`. 
+ *      Optional, if not provided will do nothing.
  */
-export function parseClinvar(xml, extended) {
+export function parseClinvar(xml, extended, extendedVariantKeysAdded) {
     let variant = {};
     const docClinVarXML = new DOMParser().parseFromString(xml, 'text/xml');
     const elementClinVarResultSet = docClinVarXML.getElementsByTagName('ClinVarResult-Set')[0];
@@ -298,7 +302,19 @@ export function parseClinvar(xml, extended) {
 
                 // Extract additional data about the variant (if necessary)
                 if (extended) {
+                    const originalVariantKeysSnapshot = new Set(Object.keys(variant));
+
                     parseClinvarExtended(variant, objTranscripts, elementVariationArchive, elementSimpleAllele);
+
+                    // store the diff keys between before extended and after extended
+                    if (extendedVariantKeysAdded) {
+                        const extendedVariantKeysSnapshot = new Set(Object.keys(variant));
+                        for (const key of extendedVariantKeysSnapshot) {
+                            if (!originalVariantKeysSnapshot.has(key)) {
+                                extendedVariantKeysAdded.push(key);
+                            }
+                        }
+                    }
                 }
             }
         }
