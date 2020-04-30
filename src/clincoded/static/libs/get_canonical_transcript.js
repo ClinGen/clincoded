@@ -1,6 +1,6 @@
 'use strict';
 
-import { getPreferredTitleFromEnsemblTranscriptsNoMatch } from "./parse-resources";
+import { getPreferredTitleFromEnsemblTranscriptsNoMatch, generateVariantPreferredTitle } from "./parse-resources";
 
 /**
  * Method to return the canonical transcript given the Ensembl transcripts.
@@ -118,12 +118,20 @@ export const getCanonicalTranscriptTitleFromEnsemblTranscripts = ({
                     for (const transcript of item.hgvs) {
                         if (transcript === canonicalTranscript) {
                             let proteinChange;
-                            const transcriptStart = transcript.split(':')[0];
-                            const transcriptEnd = transcript.split(':')[1];
-                            if (item.proteinEffect && item.proteinEffect.hgvs) {
-                                proteinChange = item.proteinEffect.hgvs.split(':')[1];
+                            const [transcriptStart, transcriptEnd] = transcript.split(':');
+                            if (!(transcriptStart && transcriptEnd)) {
+                                continue;
                             }
-                            return `${transcriptStart}(${item.geneSymbol}):${transcriptEnd}${proteinChange ? ` (${proteinChange})` : ''}`;
+
+                            if (item.proteinEffect && item.proteinEffect.hgvs) {
+                                [, proteinChange] = item.proteinEffect.hgvs.split(':');
+                            }
+                            return generateVariantPreferredTitle({
+                                transcriptId: transcriptStart,
+                                geneName: item.geneSymbol,
+                                nucleotideChange: transcriptEnd,
+                                aminoAcidChangeName: proteinChange
+                            })
                         }
                     }
                 }
