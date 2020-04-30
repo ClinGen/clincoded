@@ -16,7 +16,7 @@ import { getPreferredTitleFromEnsemblTranscriptsNoMatch } from "./parse-resource
  *      c. nomenclature (i.e. `hgvsc`) starts with NM, return it
  * 3. [**NM Singularity Test**] - If there're multiple canonical transcripts whose `hgvsc` starts with NM, 
  *      return null, which also means we don't use canonical transcripts for variant title
- * 4, [**NR Singularity Test**] - If there're no canonical transcript with `NM` prefix, look for canonical transcripts 
+ * 4. [**NR Singularity Test**] - If there're no canonical transcript with `NM` prefix, look for canonical transcripts 
  *      with `NR` prefix; if there's exactly one with `NR` prefix, return it
  * 5. Otherwise return null; this includes cases of multiple caonical transcripts with NR prefix
  * 
@@ -66,6 +66,8 @@ export function getCanonicalTranscript(transcripts, extended = false) {
 
     if (canonicalTranscriptsStartByNM.length === 1) {
         return extended ? canonicalTranscriptsStartByNM[0] : canonicalTranscriptsStartByNM[0].hgvsc;
+    } else if (canonicalTranscriptsStartByNM.length > 1) {
+        return null;
     }
 
     // NR Singularity Test
