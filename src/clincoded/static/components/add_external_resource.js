@@ -954,7 +954,7 @@ function queryAdditionalTranscriptTitles({
     // Validate parameters
 
     if (!(parsedData && getRestData)) {
-        console.warn(`pasrsedData or getRestData not provided`);
+        console.warn(`parsedData or getRestData not provided`);
         return Promise.resolve({});
     }
     if (!(matchBySource === 'car' || matchBySource === 'clinvar')) {
