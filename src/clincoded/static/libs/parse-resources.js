@@ -620,7 +620,7 @@ export const getPreferredTitleFromEnsemblTranscriptsMatchByCar = (transcriptIdTo
             proteinEffect: {
                 hgvs = ''
             } = {}
-        }= transcript;
+        } = transcript;
         const [, aminoAcidChangeName] =  hgvs.split(':');
         if (transcriptId === transcriptIdToMatch) {
             // Only return the transcript preferred title for now.
