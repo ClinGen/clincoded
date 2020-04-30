@@ -614,15 +614,15 @@ function clinvarQueryResource() {
                             matchBySource: 'clinvar',
                             parsedData: data
                         })
-                            .then((additionalTranscriptTitles) => {
-                                Object.assign(data, additionalTranscriptTitles);
-                                return res(data);
-                            })
-                            .catch((error) => {
-                                console.warn('Error in querying MANE transcript data = %o', error);
-                                // best effort to get MANE so just move on
-                                return res(data);
-                            })
+                        .then((additionalTranscriptTitles) => {
+                            Object.assign(data, additionalTranscriptTitles);
+                            return res(data);
+                        })
+                        .catch((error) => {
+                            console.warn('Error in querying MANE transcript data = %o', error);
+                            // best effort to get MANE so just move on
+                            return res(data);
+                        })
                     }
 
                     return res(data);
