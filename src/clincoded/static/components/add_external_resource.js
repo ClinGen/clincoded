@@ -630,7 +630,6 @@ function clinvarQueryResource() {
                 .then((data) => {
                     // since we have parseClinvar parse extended data,
                     // we need to remove the additional fields that are not recognized by backend
-                    console.log('additonal keys', extendedVariantKeysAdded);
                     for (const key of extendedVariantKeysAdded) {
                         delete data[key];
                     }
