@@ -1208,7 +1208,9 @@ def user_5_6(value, system):
         'kgliu@stanford.edu': '2016-11-04T07:00:00+00:00',
         'christinegpreston@gmail.com': '2019-01-17T08:00:00+00:00',
         'josechinton@gmail.com': '2018-07-31T07:00:00+00:00',
-        'alt2172@cumc.columbia.edu': '2017-12-14T08:00:00+00:00'
+        'alt2172@cumc.columbia.edu': '2017-12-14T08:00:00+00:00',
+        'kaitlin.sesock@myriad.com': '2017-12-13T08:00:00+00:00',
+        'david-alexandre.tregouet@inserm.fr': '2020-03-25T07:00:00+00:00'
     }
     email = value['email']
     email = email.lower()
