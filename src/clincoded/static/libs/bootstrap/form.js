@@ -265,7 +265,8 @@ var Input = module.exports.Input = createReactClass({
         key: PropTypes.string,          // Passed to react if this is part of a list of inputs
         inputDisabled: PropTypes.bool,  // If we should disable the input
         handleChange: PropTypes.func,   // Function to handle a change in the input, akin to onChange
-        fieldStyle: PropTypes.object    // Any custom in-line styles to attatch to the input field
+        fieldStyle: PropTypes.object,    // Any custom in-line styles to attatch to the input field
+        autofocus: PropTypes.bool
     },
 
     getInitialState: function() {
@@ -394,7 +395,7 @@ var Input = module.exports.Input = createReactClass({
                     <span>
                         <input className={inputClasses} type={inputType} id={this.props.id} name={this.props.id} placeholder={this.props.placeholder}
                             ref="input" value={this.state.value} onChange={this.handleChange.bind(null, this.props.id)} onBlur={this.props.onBlur} maxLength={this.props.maxLength}
-                            disabled={this.props.inputDisabled} aria-describedby={this.props.helpText ? this.props.helpTextId : null} 
+                            disabled={this.props.inputDisabled} aria-describedby={this.props.helpText ? this.props.helpTextId : null}  autoFocus={this.props.autofocus}
                             style={this.props.fieldStyle}
                             />
                         {this.props.helpText ? <p id={this.props.helpTextId} className="form-text text-muted">{this.props.helpText}</p> : null}
