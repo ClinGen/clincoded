@@ -15,6 +15,7 @@ import { parseClinvarInterpretations } from './helpers/clinvar_interpretations';
 import { CurationInterpretationCriteria } from './interpretation/criteria';
 import { EvaluationSummary } from './interpretation/summary';
 import { curator_page, queryKeyValue, dbxref_prefix_map, external_url_map } from '../globals';
+import { getEnsemblHGVSVEP } from '../../libs/get_ensembl_hgvs_vep';
 
 var SO_terms = require('./interpretation/mapping/SO_term.json');
 var genomic_chr_mapping = require('./interpretation/mapping/NC_genomic_chr_format.json');
@@ -313,9 +314,8 @@ var VariantCurationHub = createReactClass({
     fetchEnsemblHGVSVEP: function(variant) {
         if (variant) {
             let hgvs_notation = getHgvsNotation(variant, 'GRCh38', true);
-            let request_params = '?content-type=application/json&hgvs=1&protein=1&xref_refseq=1&ExAC=1&MaxEntScan=1&GeneSplicer=1&Conservation=1&numbers=1&domains=1&canonical=1&merged=1';
             if (hgvs_notation) {
-                this.getRestData(this.props.href_url.protocol + external_url_map['EnsemblHgvsVEP'] + hgvs_notation + request_params).then(response => {
+                getEnsemblHGVSVEP(this.getRestData, hgvs_notation).then(response => {
                     this.setState({ext_ensemblHgvsVEP: response, loading_ensemblHgvsVEP: false});
                     this.parseEnsemblGeneId(response);
                     this.parseEnsemblHgvsVEP(response);
