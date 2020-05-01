@@ -132,8 +132,12 @@ A quasi-XSD of the elements we're interested in (refined from the document above
  * Function to parse XML document of ClinVar data for variant object creation
  * @param {string} xml - XML document containing ClinVar data
  * @param {boolean} extended - Indicator that extended parsing needs to happen
+ * @param {Array<string>?} extendedVariantKeysAdded - Provide an array which will be mutated in this method 
+ *      and populated with the additional keys added to the returned variant object. 
+ *      Additional keys are keys that are added by extended parsing. This arg is only effective when `extended=true`. 
+ *      Optional, if not provided will do nothing.
  */
-export function parseClinvar(xml, extended) {
+export function parseClinvar(xml, extended, extendedVariantKeysAdded) {
     let variant = {};
     const docClinVarXML = new DOMParser().parseFromString(xml, 'text/xml');
     const elementClinVarResultSet = docClinVarXML.getElementsByTagName('ClinVarResult-Set')[0];
@@ -298,7 +302,19 @@ export function parseClinvar(xml, extended) {
 
                 // Extract additional data about the variant (if necessary)
                 if (extended) {
+                    const originalVariantKeysSnapshot = new Set(Object.keys(variant));
+
                     parseClinvarExtended(variant, objTranscripts, elementVariationArchive, elementSimpleAllele);
+
+                    // store the diff keys between before extended and after extended
+                    if (extendedVariantKeysAdded) {
+                        const extendedVariantKeysSnapshot = new Set(Object.keys(variant));
+                        for (const key of extendedVariantKeysSnapshot) {
+                            if (!originalVariantKeysSnapshot.has(key)) {
+                                extendedVariantKeysAdded.push(key);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -504,6 +520,15 @@ function parseCarHgvsHandler(hgvs_temp, variant) {
 /**
  * Method to return the variant preferred title. Examples given as below.
  * 
+ * `NM_015506.3(MMACHC):c.436_450del (p.Ser146_Ile150del)`
+ *  NM: Chromosome
+ *  015506: Gene on chromosome (a gene produces certain protein)
+ *  MMACHC: Symbol represent the gene
+ *  c.436_450del: Nucleotide change
+ *  p.Ser146_Ile150del: Name of the amino acid (protein) change
+ *  
+ * Regarding the title format, below gives another example:
+ * 
  * When both gene name and protein effect information are available, the format will be `NM_002496.4(Gene):c.64C>T (Amino-acid change)`.
  * 
  * When protein effect is unavailable, the format will be `NM_002496.4(Gene):c.64C>T`.
@@ -511,40 +536,103 @@ function parseCarHgvsHandler(hgvs_temp, variant) {
  * When both gene and protein effect not available, will fall back to hgvs format `NM_002496.4:c.64C>T`.
  * 
  * When gene name is unavailable, amino-acid change is unavailable as well, so the format will fallback to hgvs as above.
- * @param {string} geneName - Gene name, or gene symbol.
- * @param {string} hgvs - A HGVS representation of the variant.
- * @param {object} proteinEffect - An object containing the amino acid change hgvs information.
+ * @param {Object} props - The argument object for this method
+ * @param {string} props.geneName - Gene name, or gene symbol.
+ * @param {string} props.transcriptId - (required) The transcript id, see example above
+ * @param {string} props.nucleotideChange - (required) The nucleotide change, see example above
+ * @param {Object} props.aminoAcidChangeName - The name of amino acid change, see example above.
  * @returns {string} Preferred title of the variant.
  */
-export const generateVariantPreferredTitle = (geneName, hgvs, proteinEffect) => {
-    if (!hgvs.includes(':') || !geneName) {
-        // when gene name is unavailable, then there will be no amino-acid change, where title will fall back to hgvs
-        return hgvs;
+export const generateVariantPreferredTitle = ({geneName, transcriptId, nucleotideChange, aminoAcidChangeName}) => {
+    // required fields
+    if (!(transcriptId && nucleotideChange)) {
+        return null;
     }
 
-    const [transcriptId, aminoAcidChange] = hgvs.split(':');
-    
-    let aminoAcidChangeName = '';
-    if (proteinEffect && proteinEffect.hgvs && proteinEffect.hgvs.includes(':')) {
-        aminoAcidChangeName = proteinEffect.hgvs.split(':')[1];
+    if (!geneName) {
+        // when gene name is unavailable, then there will be no amino-acid change, where title will fall back to hgvs form, i.e. transcriptId:nucleotideChange
+        return `${transcriptId}:${nucleotideChange}`;
     }
 
-    return `${transcriptId}(${geneName}):${aminoAcidChange}${aminoAcidChangeName ? ` (${aminoAcidChangeName})` : ''}`;
+    return `${transcriptId}(${geneName}):${nucleotideChange}${aminoAcidChangeName ? ` (${aminoAcidChangeName})` : ''}`;
 }
 
 
 /**
- * Method to extract the unique, non-duplicated set of gene urls in genomic CAR from an array of transcripts for a variant in CAR (Clingen Allele Registry).
- * @param {Array} transcriptAlleles - Transcripts associated with a variant from CAR.
+ * Method to extract the unique, non-duplicated set of gene symbols in genomic CAR from an array of transcripts for a variant in CAR (Clingen Allele Registry).
+ * @param {Array<Object>} transcriptAlleles - Transcripts associated with a variant from CAR.
  * @returns {Set<string>} A set of genomic CAR gene urls.
  */
-export const getTranscriptAllelesGeneUrlSet = (transcriptAlleles) => {
-    let geneUrls = new Set();
+export const getTranscriptAllelesGeneSymbolSet = (transcriptAlleles) => {
+    let geneSymbols = new Set();
     transcriptAlleles.forEach(transcript => {
-        if (transcript.gene) {
-            geneUrls.add(transcript.gene);
+        if (transcript.geneSymbol) {
+            geneSymbols.add(transcript.geneSymbol);
         }
     })
 
-    return geneUrls;
+    return geneSymbols;
+}
+
+/**
+ * This method returns the preferred variant title using Ensembl API data.
+ * Note that this method does not try to match a transcript id using data from other data source; instead will just use the `transcriptId` provided
+ * 
+ * @param {string} transcriptId The first portion of the hgvs of a transcript, which is the part before ':', but without the gene symbol (gene name)
+ * @param {Object} transcriptFromEnsembl The transcript object retreived from Ensembl
+ */
+export const getPreferredTitleFromEnsemblTranscriptsNoMatch = (transcriptId, transcriptFromEnsembl) => {
+    const { hgvsc, hgvsp, gene_symbol } = transcriptFromEnsembl;
+
+    const [, nucleotideChange] = hgvsc.split(':');
+    const [, aminoAcidChangeName] = hgvsp.split(':');
+
+    return generateVariantPreferredTitle({
+        geneName: gene_symbol,
+        transcriptId,
+        nucleotideChange,
+        aminoAcidChangeName
+    });
+}
+
+/**
+ * Method to return the transcript title given the trnascript id and the json fetched from variant CAR.
+ * This method uses the CAR data to match the transcript id in order to generate the full perferred transcript title
+ * 
+ * @param {string} transcriptIdToMatch - The first portion of the hgvs of a transcript, which is the part before ':', but without the gene symbol (gene name).
+ * @param {Object} carJson - Variant CAR json response object.
+ * @returns {(string|null)} Variant title for the MANE transcript.
+ */
+export const getPreferredTitleFromEnsemblTranscriptsMatchByCar = (transcriptIdToMatch, carJson) => {
+    // given the id of MANE transcript, reverse lookup in CAR to obtain complete transcript info
+    const {
+        transcriptAlleles = []
+    } = carJson;
+
+    for (let transcript of transcriptAlleles) {
+        const { hgvs: [ hgvsValue = '' ] = [] } = transcript;
+        if (!hgvsValue) {
+            continue;
+        }
+        
+        const [transcriptId, nucleotideChange] = hgvsValue.split(':')
+        const {
+            proteinEffect: {
+                hgvs = ''
+            } = {}
+        } = transcript;
+        const [, aminoAcidChangeName] =  hgvs.split(':');
+        if (transcriptId === transcriptIdToMatch) {
+            // Only return the transcript preferred title for now.
+            // Can add more transcript info here if needed in the future.
+            return generateVariantPreferredTitle({
+                geneName: transcript.geneSymbol,
+                transcriptId,
+                nucleotideChange,
+                aminoAcidChangeName
+            });
+        }
+    }
+
+    return null;
 }
