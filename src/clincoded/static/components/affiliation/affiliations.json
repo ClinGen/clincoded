@@ -947,5 +947,31 @@
                 "fullname": "Reproduction and Infertility GCEP"
             }
         }
+    },
+    {
+        "affiliation_id": "10074",
+        "affiliation_fullname": "Catecholaminergic Polymorphic Ventricular Tachycardia",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40074",
+                "fullname": "Catecholaminergic Polymorphic Ventricular Tachycardia GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10075",
+        "affiliation_fullname": "Short QT Syndrome",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40075",
+                "fullname": "Short QT Syndrome GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10076",
+        "affiliation_fullname": "Centre for Translational Genomics - Memorial University of Newfoundland/Eastern Health"
     }
 ]
