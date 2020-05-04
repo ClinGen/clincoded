@@ -28,6 +28,7 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
         updateProvisionalObj: PropTypes.func,
         approveProvisional: PropTypes.func,
         postTrackData: PropTypes.func,
+        postGDMToDataExchange: PropTypes.func,
         getContributors: PropTypes.func,
         setUNCData: PropTypes.func
     },
@@ -203,6 +204,9 @@ const ProvisionalApproval = module.exports.ProvisionalApproval = createReactClas
                         this.props.updateSnapshotList(provisionalSnapshot['@id']);
                         return Promise.resolve(provisionalSnapshot);
                     }).then(snapshot => {
+                        // Send provisionally approved classification and full GDM snapshot to Data Exchange
+                        this.props.postGDMToDataExchange(snapshot);
+
                         // Return old snapshots to provisional before adding latest snapshot
                         if (previousSnapshots) {
                             result.associatedClassificationSnapshots = previousSnapshots;

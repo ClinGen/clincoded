@@ -28,6 +28,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         updateSnapshotList: PropTypes.func,
         updateProvisionalObj: PropTypes.func,
         postTrackData: PropTypes.func,
+        postGDMToDataExchange: PropTypes.func,
         getContributors: PropTypes.func,
         setUNCData: PropTypes.func,
         triggerPublishLinkAlert: PropTypes.func,
@@ -151,6 +152,97 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
         this.setState({ showAlertMessage: false });
     },
 
+    /* TODO: Changes for only publish snapshot to Data Exchange
+    publishGDMToDataExchange() {
+        let alertType = 'alert-danger';
+        let alertClass = 'publish-error';
+        let alertMsg = (<span>Request failed; please try again in a few minutes or contact helpdesk: <a
+            href="mailto:clingen-helpdesk@lists.stanford.edu">clingen-helpdesk@lists.stanford.edu</a></span>);
+
+        if (this.state.selectedProvisional && this.state.selectedProvisional.uuid &&
+                this.state.selectedSnapshot.resource && this.state.selectedSnapshot.resourceParent) {
+            let snapshot = _.clone(this.state.selectedSnapshot);
+            let publishProvisional = _.clone(this.state.selectedProvisional);
+            const submissionTimestamp = new Date();
+
+            // Set published (or unpublished) provisional with form data and set to selected/published snapshot object to be sent to Data Exchange
+            publishProvisional.publishClassification = !this.state.selectedProvisional.publishClassification;
+            publishProvisional.publishSubmitter = this.state.publishSubmitter;
+            publishProvisional.publishAffiliation = this.state.publishAffiliation;
+            publishProvisional.publishDate = moment(submissionTimestamp).toISOString();
+
+            if (this.state.publishComment && this.state.publishComment.length) {
+                publishProvisional.publishComment = this.state.publishComment;
+            } else if (publishProvisional.publishComment) {
+                delete publishProvisional['publishComment'];
+            }
+
+            // Additional provisional data
+            publishProvisional.last_modified = moment(submissionTimestamp).utc().format('Y-MM-DDTHH:mm:ss.SSSZ');
+            publishProvisional.modified_by = this.props.session.user_properties ? this.props.session.user_properties['@id'] : null;
+
+            // Set data to snapshot
+            snapshot.resource = publishProvisional;
+
+            //??? if only for publish, always true
+            if (!this.props.provisional.publishClassification) {
+                snapshot.publishStatus = true;
+            } else if (snapshot.publishStatus) {
+                delete snapshot['publishStatus'];
+            }
+            snapshot.modified_by = this.props.session.user_properties ? this.props.session.user_properties : {};
+            if (snapshot.modified_by) {
+                // Delete unnecessary user data
+                // ??? keep email, @id, affiliation[], uuid title, first_name, last_name, lab, @type[]
+                // delete submits_for, groups, timezone, status, job_title
+                if (snapshot.modified_by.submits_for) delete snapshot.modified_by.submits_for;
+                if (snapshot.modified_by.groups) delete snapshot.modified_by.groups
+                if (snapshot.modified_by.timezone) delete snapshot.modified_by.timezone;
+                if (snapshot.modified_by.status) delete snapshot.modified_by.status;
+                if (snapshot.modified_by.job_title) delete snapshot.modified_by.job_title
+            }
+            snapshot.submitted_by = snapshot.modified_by;
+            snapshot.last_modified = snapshot.resource.publishDate;
+
+            ???
+            return this.props.postGDMToDataExchange(resultSnapshot);
+            OR
+            return new Promise((resolve, reject) => {
+                this.postRestData('/publish-gdm', snapshot).then(result => {
+                    if (result.status === 'Success') {
+                        resolve(result);
+                    } else {
+                        console.log('Message delivery failure: %s', result.message);
+                        this.setState({ submitBusy: false });
+                        this.showAlert(alertType, alertClass, alertMsg);
+                        reject(result);
+                    }
+                }).catch(error => {
+                    console.log('Internal data retrieval error: %o', error);
+                    this.setState({ submitBusy: false });
+                    this.showAlert(alertType, alertClass, alertMsg);
+                    reject(error);
+                });
+            });
+            ???
+        } else {
+            this.setState({ submitBusy: false });
+            this.showAlert(alertType, alertClass, alertMsg);
+            reject(null);
+        }
+    },
+
+    publishToDataExchange() {
+        if (this.state.selectedResourceType === 'gdm') {
+            return this.publishGDMToDataExchange();
+        } else {
+            return this.publishInterpretationToDataExchange(this.state.selectedSnapshot['@type'][0], this.state.selectedSnapshot['@id'].split('/', 3)[2]);
+        }
+    },
+
+    TODO: change existing func to publishInterpretationToDataExchange
+    */
+
     /**
      * Method to publish data to the Data Exchange
      * @param {string} objType - The type of the data's source object (e.g. snapshot)
@@ -222,33 +314,6 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
     },
 
     /**
-     * Method to send full GDM data snapshot to Data Exchange when provisional classification is published
-     */
-    publishGDMToDataExchange(snapshot) {
-        // Post published GDM data snapshot to Data Exchange
-        return new Promise((resolve, reject) => {
-            // Check if snapshot has necessary data
-            if (snapshot && snapshot.resource && snapshot.resourceParent) {
-                this.postRestData('/publish-gdm', snapshot).then(result => {
-                    if (result.status === 'Success') {
-                        console.log('Post full gdm succeeded: %o', result);
-                        resolve(result);
-                    } else {
-                        console.log('Post full gdm failed: %o', result);
-                        reject(result);
-                    }
-                }).catch(error => {
-                    console.log('Post full gdm internal data retrieval error: %o', error);
-                    reject(error);
-                });
-            } else {
-                console.log('Post full gdm Error: Missing expected data');
-                reject({'message': 'Missing expected data'});
-            }
-        });
-    },
-
-    /**
      * Method to handle submitting the publish form
      * @param {object} e - The submitted event object
      */
@@ -272,6 +337,9 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                 resourceName = 'interpretation';
             }
 
+            /* TODO: Changes for only publish snapshot to Data Exchange
+                this.publishToDataExchange().then(response => {
+            */
             this.publishToDataExchange(this.state.selectedSnapshot['@type'][0], this.state.selectedSnapshot['@id'].split('/', 3)[2]).then(response => {
                 let publishProvisional = this.state.selectedProvisional && this.state.selectedProvisional.uuid ? this.state.selectedProvisional : {};
                 let currentProvisional = this.props.provisional && this.props.provisional['@id'] ? curator.flatten(this.props.provisional) : {};
@@ -388,7 +456,7 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
 
                         // Send published GDM data (snapshot) to Data Exchange
                         if (selectedResourceType === 'gdm') {
-                            this.publishGDMToDataExchange(resultSnapshot);
+                            this.props.postGDMToDataExchange(resultSnapshot);
                         }
 
                         // When publish event is a publish, automatically unpublish a previously-published snapshot (if one exists)
@@ -430,9 +498,11 @@ const PublishApproval = module.exports.PublishApproval = createReactClass({
                                         return Promise.reject(responseSnapshot);
                                     }
                                 }).then(resultSnapshot => {
-                                    // Send unpublish GDM provisional data to Data Exchange
+                                    // Send unpublish GDM provisional data and full snapshot to Data Exchange
                                     if (selectedResourceType === 'gdm' && resultSnapshot && resultSnapshot.resource && this.props.gdm && Object.keys(this.props.gdm).length) {
                                         this.sendToDataExchange(resultSnapshot.resource, resultSnapshot['@id']);
+                                        // TODO: Changes for only sending unpublish snapshot to Data Exchange, similiar to publish action
+                                        this.props.postGDMToDataExchange(resultSnapshot);
                                     }
                                 }).catch(error => {
                                     console.log('Automatic unpublishing snapshot error = : %o', error);

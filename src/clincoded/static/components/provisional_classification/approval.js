@@ -31,6 +31,7 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
         updateSnapshotList: PropTypes.func,
         updateProvisionalObj: PropTypes.func,
         postTrackData: PropTypes.func,
+        postGDMToDataExchange: PropTypes.func,
         getContributors: PropTypes.func,
         getGeneEvidenceData: PropTypes.func,
         snapshots: PropTypes.array
@@ -373,6 +374,9 @@ const ClassificationApproval = module.exports.ClassificationApproval = createRea
                         this.props.updateSnapshotList(approvalSnapshot['@id'], true);
                         return Promise.resolve(approvalSnapshot);
                     }).then(snapshot => {
+                        // Send approved classification and full GDM snapshot to Data Exchange
+                        this.props.postGDMToDataExchange(snapshot);
+
                         // Return old snapshots to provisional before adding latest snapshot
                         if (previousSnapshots) {
                             result.associatedClassificationSnapshots = previousSnapshots;

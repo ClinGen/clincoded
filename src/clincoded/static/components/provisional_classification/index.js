@@ -126,6 +126,34 @@ const ProvisionalClassification = createReactClass({
     },
 
     /**
+     * Method to post full GDM data snapshot to Data Exchange
+     * @param {object} snapshot - snapshot data object
+     */
+    postGDMToDataExchange(snapshot) {
+        // Post published GDM data snapshot to Data Exchange
+        return new Promise((resolve, reject) => {
+            // Check if snapshot has necessary data
+            if (snapshot && snapshot.resource && snapshot.resourceParent) {
+                this.postRestData('/publish-gdm', snapshot).then(result => {
+                    if (result.status === 'Success') {
+                        console.log('Post full gdm succeeded: %o', result);
+                        resolve(result);
+                    } else {
+                        console.log('Post full gdm failed: %o', result);
+                        reject(result);
+                    }
+                }).catch(error => {
+                    console.log('Post full gdm internal data retrieval error: %o', error);
+                    reject(error);
+                });
+            } else {
+                console.log('Post full gdm Error: Missing expected data');
+                reject({'message': 'Missing expected data'});
+            }
+        });
+    },
+
+    /**
      * Method to post data to /track-data which sends data to Data Exchange for UNC tracking system
      * @param {object} data - data object
      */
@@ -777,6 +805,7 @@ const ProvisionalClassification = createReactClass({
                                                     updateSnapshotList={this.updateSnapshotList}
                                                     updateProvisionalObj={this.updateProvisionalObj}
                                                     postTrackData={this.postTrackData}
+                                                    postGDMToDataExchange={this.postGDMToDataExchange}
                                                     getContributors={this.getContributors}
                                                     setUNCData={this.setUNCData}
                                                 />
@@ -807,6 +836,7 @@ const ProvisionalClassification = createReactClass({
                                                     updateSnapshotList={this.updateSnapshotList}
                                                     updateProvisionalObj={this.updateProvisionalObj}
                                                     postTrackData={this.postTrackData}
+                                                    postGDMToDataExchange={this.postGDMToDataExchange}
                                                     getContributors={this.getContributors}
                                                     setUNCData={this.setUNCData}
                                                     snapshots={sortedSnapshotList}
@@ -844,6 +874,7 @@ const ProvisionalClassification = createReactClass({
                                                     updateSnapshotList={this.updateSnapshotList}
                                                     updateProvisionalObj={this.updateProvisionalObj}
                                                     postTrackData={this.postTrackData}
+                                                    postGDMToDataExchange={this.postGDMToDataExchange}
                                                     getContributors={this.getContributors}
                                                     setUNCData={this.setUNCData}
                                                     clearPublishState={this.clearPublishState}

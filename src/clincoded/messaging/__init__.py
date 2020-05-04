@@ -865,6 +865,11 @@ def publish_gdm(request):
         return_object['message'] = 'Retrieved data not in expected format'
         return return_object
 
+    # Check that required data is found in json
+    if not('resource' in resultJSON and 'resourceParent' in resultJSON):
+        return_object['message'] = 'Required data missing in request'
+        return return_object
+
     # Construct message
     try:
         message = json.dumps(resultJSON, separators=(',', ':'))
@@ -881,8 +886,17 @@ def publish_gdm(request):
                     'message': message,
                     'error': 'Unable to deliver full GDM'}
 
-    # Set snapshot uuid and publish date as message key
-    key = resultJSON['uuid'] + '-' + resultJSON['resource']['publishDate']
+    # Set snapshot uuid and action submitted date as message key
+    if 'publishClassification' in resultJSON['resource'] and resultJSON['resource']['publishClassification'] and 'publishDate' in resultJSON['resource']:
+        submittedDate = resultJSON['resource']['publishDate']
+    elif 'approvedClassification' in resultJSON['resource'] and resultJSON['resource']['approvedClassification'] and 'approvalDate' in resultJSON['resource']:
+        submittedDate = resultJSON['resource']['approvalDate']
+    elif 'provisionalDate' in resultJSON['resource']:
+        submittedDate = resultJSON['resource']['provisionalDate']
+    else:
+        submittedDate = resultJSON['last_modified']
+
+    key = resultJSON['uuid'] + '-' + submittedDate
 
     # Configure message delivery parameters
     kafka_cert_pw = ''
