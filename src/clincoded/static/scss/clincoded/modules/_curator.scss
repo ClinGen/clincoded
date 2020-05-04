@@ -702,7 +702,10 @@
 }
 
 .title-ellipsis {
-    word-break: break-all;
+    overflow: hidden;
+    display: inline-block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     max-width: 100%;
     vertical-align: bottom;
 
@@ -1570,6 +1573,8 @@
             .basic-info .table.refseq-transcript td,
             .basic-info .table.ensembl-transcript th,
             .basic-info .table.ensembl-transcript td {
+                word-break: break-all;
+
                 /* 4 columns, sum up with .exon-column's width to a total of 100% */
                 width: 28%;
                 &.hgvs-term {
