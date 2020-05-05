@@ -973,5 +973,16 @@
     {
         "affiliation_id": "10076",
         "affiliation_fullname": "Centre for Translational Genomics - Memorial University of Newfoundland/Eastern Health"
+    },
+    {
+        "affiliation_id": "10077",
+        "affiliation_fullname": "Glaucoma/Neuro",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40077",
+                "fullname": "Glaucoma/Neuro GCEP"
+            }
+        }
     }
 ]
