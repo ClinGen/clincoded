@@ -455,7 +455,7 @@ var ProvisionalCuration = createReactClass({
         } else {
             replicatedOverTime = false;
         }
-        this.setState({replicatedOverTime: replicatedOverTime}, this.calculateClassifications(this.state.totalScore, replicatedOverTime));
+        this.setState({replicatedOverTime: replicatedOverTime}, this.calculateClassifications(this.state.totalScore, this.state.scoreTableValues['geneticEvidenceTotalPoints'], this.state.contradictingEvidence, replicatedOverTime));
     },
 
     familyScraper: function(user, families, annotation, segregationCountCandidate, segregationCountExome, segregationPointsCandidate, segregationPointsExome, individualMatched) {

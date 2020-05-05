@@ -1563,10 +1563,25 @@
 
             .basic-info .table th,
             .basic-info .table td {
-                width: 25%;
+                /* by default, table accomodates 5 columns, but you can customize this below if the table has different column number */
+                width: 20%;                
+            }
 
-                .title-ellipsis {
-                    max-width: 250px;
+            .basic-info .table.clinvar-primary-transcript th,
+            .basic-info .table.clinvar-primary-transcript td,
+            .basic-info .table.refseq-transcript th,
+            .basic-info .table.refseq-transcript td,
+            .basic-info .table.ensembl-transcript th,
+            .basic-info .table.ensembl-transcript td {
+                word-break: break-all;
+
+                /* 4 columns, sum up with .exon-column's width to a total of 100% */
+                width: 28%;
+                &.hgvs-term {
+                    width: 35%;
+                }
+                &.exon-column {
+                    width: 9%;
                 }
             }
 
@@ -1714,13 +1729,10 @@
                 margin: 0 4px;
             }
 
-            .basic-info .table .primary-transcript td:last-child:after {
-                content: "\f069";
-                font-family: 'FontAwesome';
-                color: #31708f;
-                float: right;
-                position: relative;
-                right: 0;
+            .basic-info .table .marked-transcript td {
+                & .label {
+                    margin-left: .5em;
+                }
             }
 
             .population .table tfoot .count:first-child td {
@@ -2136,7 +2148,7 @@
             margin-left: 20px;
         }
 
-        .help-note span {
+        .help-note span:not(.label) {
             font-style: italic;
         }
 

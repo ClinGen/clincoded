@@ -209,11 +209,23 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
     //Render RefSeq or Ensembl transcripts table rows
     renderRefSeqEnsemblTranscripts: function(item, key, source) {
         // Only if nucleotide transcripts exist
-        if (item.hgvsc && item.source === source) {
+        if (item.source === source) {
+            const isCanonicalTranscript = item.canonical && item.canonical === 1;
+            
+            // only enable MANE transcript label in RefSeq Transcripts section
+            const isMANETranscript = !!item.mane;
+
             return (
-                <tr key={key} className={(item.canonical && item.canonical === 1) ? 'primary-transcript' : null}>
-                    <td className="hgvs-term"><span className="title-ellipsis">{item.hgvsc}</span></td>
-                    <td>{(item.exon) ? item.exon : '--'}</td>
+                <tr key={key} className={isCanonicalTranscript || isMANETranscript ? "marked-transcript" : null}>
+                    <td className="hgvs-term">
+                        <span>{item.hgvsc || item.transcript_id} {item.gene_symbol && `(${item.gene_symbol})`}</span>
+                        {/* show label for canonical transcript */}
+                        {isCanonicalTranscript && <span className="label label-primary" data-toggle="tooltip" data-placement="top" data-tooltip="Canonical Transcript">C</span>}
+
+                        {/* show label for MANE transcript */}
+                        {isMANETranscript && <span className="label label-warning" data-toggle="tooltip" data-placement="top" data-tooltip="MANE Preferred">MANE</span>}
+                    </td>
+                    <td className="exon-column">{(item.exon) ? item.exon : '--'}</td>
                     <td>{(item.hgvsp) ? item.hgvsp : '--'}</td>
                     <td className="clearfix">
                         {(item.consequence_terms) ? this.handleSOTerms(item.consequence_terms) : '--'}
@@ -657,11 +669,11 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                     <div className="panel-content-wrapper">
                         {this.state.loading_clinvarEutils ? showActivityIndicator('Retrieving data... ') : null}
                         {(primary_transcript && primary_transcript.nucleotide) && ensembl_data.length ?
-                            <table className="table">
+                            <table className="table clinvar-primary-transcript">
                                 <thead>
                                     <tr>
                                         <th>Nucleotide Change</th>
-                                        <th>Exon</th>
+                                        <th className="exon-column">Exon</th>
                                         <th>Protein Change</th>
                                         <th>Molecular Consequence</th>
                                     </tr>
@@ -669,9 +681,9 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                 <tbody>
                                     <tr>
                                         <td className="hgvs-term">
-                                            <span className="title-ellipsis">{primary_transcript.nucleotide}</span>
+                                            <span>{primary_transcript.nucleotide}</span>
                                         </td>
-                                        <td>
+                                        <td className="exon-column">
                                             {primary_transcript.exon}
                                         </td>
                                         <td>
@@ -691,20 +703,16 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <h3 className="panel-title">RefSeq Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a>
-                            {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length && transcriptsWithHgvsc.length ?
-                                <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
-                                : null}
-                        </h3>
+                        <h3 className="panel-title">RefSeq Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a></h3>
                     </div>
                     <div className="panel-content-wrapper">
                         {this.state.loading_ensemblHgvsVEP ? showActivityIndicator('Retrieving data... ') : null}
                         {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length && transcriptsWithHgvsc.length ?
-                            <table className="table">
+                            <table className="table refseq-transcript">
                                 <thead>
                                     <tr>
                                         <th>Nucleotide Change</th>
-                                        <th>Exon</th>
+                                        <th className="exon-column">Exon</th>
                                         <th>Protein Change</th>
                                         <th>Molecular Consequence</th>
                                     </tr>
@@ -725,20 +733,16 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
 
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <h3 className="panel-title">Ensembl Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a>
-                            {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length && transcriptsWithHgvsc.length ?
-                                <span className="help-note panel-subtitle pull-right"><i className="icon icon-asterisk"></i> Canonical transcript</span>
-                                : null}
-                        </h3>
+                        <h3 className="panel-title">Ensembl Transcripts<a href="#credit-vep" className="credit-vep" title="VEP"><span>VEP</span></a></h3>
                     </div>
                     <div className="panel-content-wrapper">
                         {this.state.loading_ensemblHgvsVEP ? showActivityIndicator('Retrieving data... ') : null}
                         {(this.state.hasHgvsGRCh38 && GRCh38) && ensembl_data.length && transcriptsWithHgvsc.length ?
-                            <table className="table">
+                            <table className="table ensembl-transcript">
                                 <thead>
                                     <tr>
                                         <th>Nucleotide Change</th>
-                                        <th>Exon</th>
+                                        <th className="exon-column">Exon</th>
                                         <th>Protein Change</th>
                                         <th>Molecular Consequence</th>
                                     </tr>
