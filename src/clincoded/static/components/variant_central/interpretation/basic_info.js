@@ -218,7 +218,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
             return (
                 <tr key={key} className={isCanonicalTranscript || isMANETranscript ? "marked-transcript" : null}>
                     <td className="hgvs-term">
-                        <span className="title-ellipsis">{item.hgvsc || item.transcript_id} {item.gene_symbol && `(${item.gene_symbol})`}</span>
+                        <span>{item.hgvsc || item.transcript_id} {item.gene_symbol && `(${item.gene_symbol})`}</span>
                         {/* show label for canonical transcript */}
                         {isCanonicalTranscript && <span className="label label-primary" data-toggle="tooltip" data-placement="top" data-tooltip="Canonical Transcript">C</span>}
 
@@ -681,7 +681,7 @@ var CurationInterpretationBasicInfo = module.exports.CurationInterpretationBasic
                                 <tbody>
                                     <tr>
                                         <td className="hgvs-term">
-                                            <span className="title-ellipsis">{primary_transcript.nucleotide}</span>
+                                            <span>{primary_transcript.nucleotide}</span>
                                         </td>
                                         <td className="exon-column">
                                             {primary_transcript.exon}

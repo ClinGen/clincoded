@@ -1573,11 +1573,15 @@
             .basic-info .table.refseq-transcript td,
             .basic-info .table.ensembl-transcript th,
             .basic-info .table.ensembl-transcript td {
-                /* sum up with .exon-column's width to a total of 100% */
-                width: 29%;
+                word-break: break-all;
 
+                /* 4 columns, sum up with .exon-column's width to a total of 100% */
+                width: 28%;
+                &.hgvs-term {
+                    width: 35%;
+                }
                 &.exon-column {
-                    width: 13%;
+                    width: 9%;
                 }
             }
 
