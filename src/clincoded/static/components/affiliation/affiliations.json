@@ -35,12 +35,12 @@
     },
     {
         "affiliation_id": "10003",
-        "affiliation_fullname": "Arrythmogenic Right Ventricular Cardiomyopathy",
+        "affiliation_fullname": "Arrhythmogenic Right Ventricular Cardiomyopathy",
         "publish_approval": true,
         "subgroups": {
             "gcep": {
                 "id": "40003",
-                "fullname": "Arrythmogenic Right Ventricular Cardiomyopathy GCEP"
+                "fullname": "Arrhythmogenic Right Ventricular Cardiomyopathy GCEP"
             }
         },
         "approver": [
@@ -428,7 +428,9 @@
             },
             "vcep": {
                 "id": "50027",
-                "fullname": "Mitochondrial Diseases VCEP"
+                "fullname": "Mitochondrial Diseases VCEP",
+                "guidelines_name": "ClinGen Mitochondrial Disease Nuclear and Mitochondrial Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_url": "https://www.clinicalgenome.org/affiliation/50027/docs/assertion-criteria"
             }
         }
     },
@@ -595,7 +597,9 @@
         "subgroups": {
             "vcep": {
                 "id": "50040",
-                "fullname": "Platelet Disorders VCEP"
+                "fullname": "Platelet Disorders VCEP",
+                "guidelines_name": "ClinGen Platelet Disorders Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines Version 1",
+                "guidelines_url": "https://www.clinicalgenome.org/affiliation/50040/docs/assertion-criteria"
             }
         }
     },
@@ -862,12 +866,12 @@
     },
     {
         "affiliation_id": "10066",
-        "affiliation_fullname": "Cystic/Tubulointerstitial",
+        "affiliation_fullname": "Cystic and Ciliopathy Disorders",
         "publish_approval": true,
         "subgroups": {
             "gcep": {
                 "id": "40066",
-                "fullname": "Cystic/Tubulointerstitial GCEP"
+                "fullname": "Cystic and Ciliopathy Disorders GCEP"
             }
         }
     },
@@ -928,12 +932,12 @@
     },
     {
         "affiliation_id": "10072",
-        "affiliation_fullname": "Retinal",
+        "affiliation_fullname": "Retina",
         "publish_approval": true,
         "subgroups": {
             "gcep": {
                 "id": "40072",
-                "fullname": "Retinal GCEP"
+                "fullname": "Retina GCEP"
             }
         }
     },
@@ -982,6 +986,39 @@
             "gcep": {
                 "id": "40077",
                 "fullname": "Glaucoma/Neuro GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10078",
+        "affiliation_fullname": "GRIN Disorders",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50078",
+                "fullname": "GRIN Disorders VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10079",
+        "affiliation_fullname": "Parkinson's disease",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40079",
+                "fullname": "Parkinson's disease GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10080",
+        "affiliation_fullname": "Humoral Defects",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40080",
+                "fullname": "Humoral Defects GCEP"
             }
         }
     }
