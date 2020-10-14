@@ -1019,6 +1019,32 @@
             "gcep": {
                 "id": "40080",
                 "fullname": "Humoral Defects GCEP"
+            },
+            "vcep": {
+                "id": "50080",
+                "fullname": "Humoral Defects VCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10081",
+        "affiliation_fullname": "SCID-CID",
+        "publish_approval": true,
+        "subgroups": {
+            "gcep": {
+                "id": "40081",
+                "fullname": "SCID-CID GCEP"
+            }
+        }
+    },
+    {
+        "affiliation_id": "10082",
+        "affiliation_fullname": "Leber Congenital Amaurosis/early onset Retinal Dystrophy",
+        "publish_approval": true,
+        "subgroups": {
+            "vcep": {
+                "id": "50082",
+                "fullname": "Leber Congenital Amaurosis/early onset Retinal Dystrophy VCEP"
             }
         }
     }
