@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import * as evidenceCodes from '../variant_central/interpretation/mapping/evidence_code.json';
+import { sortByStrength } from '../../libs/sort_eval_criteria';
 
 class VariantInterpretationSummaryEvaluation extends Component {
     constructor(props) {
@@ -10,8 +11,8 @@ class VariantInterpretationSummaryEvaluation extends Component {
 
     render() {
         const { interpretation, classification } = this.props;
-        let evaluations = interpretation ? interpretation.evaluations : null;
-        let sortedEvaluations = evaluations ? sortByStrength(evaluations) : null;
+        let evaluations = interpretation ? interpretation.evaluations : undefined;
+        let sortedEvaluations = sortByStrength(evaluations);
 
         return (
             <div className="evaluation-summary panel-evaluation-summary">
@@ -19,7 +20,7 @@ class VariantInterpretationSummaryEvaluation extends Component {
                     <div className="panel-heading">
                         <h3 className="panel-title">Criteria meeting an evaluation strength</h3>
                     </div>
-                    {sortedEvaluations && sortedEvaluations.met ?
+                    {sortedEvaluations && sortedEvaluations.met && sortedEvaluations.met.length ?
                         <table className="table">
                             <thead>
                                 {tableHeader()}
@@ -41,7 +42,7 @@ class VariantInterpretationSummaryEvaluation extends Component {
                     <div className="panel-heading">
                         <h3 className="panel-title">Criteria evaluated as "Not met"</h3>
                     </div>
-                    {sortedEvaluations && sortedEvaluations.not_met ?
+                    {sortedEvaluations && sortedEvaluations.not_met && sortedEvaluations.not_met.length ?
                         <table className="table">
                             <thead>
                                 {tableHeader()}
@@ -63,22 +64,22 @@ class VariantInterpretationSummaryEvaluation extends Component {
                     <div className="panel-heading">
                         <h3 className="panel-title">Criteria "Not yet evaluated"</h3>
                     </div>
-                    {sortedEvaluations && sortedEvaluations.not_evaluated ?
-                        <table className="table">
-                            <thead>
-                                {tableHeader()}
-                            </thead>
+                    <table className="table">
+                        <thead>
+                            {tableHeader()}
+                        </thead>
+                        {sortedEvaluations && sortedEvaluations.not_evaluated && sortedEvaluations.not_evaluated.length ?
                             <tbody>
                                 {sortedEvaluations.not_evaluated.map(function(item, i) {
                                     return (renderNotEvalCriteriaRow(item, i));
                                 })}
                             </tbody>
-                        </table>
-                        :
-                        <div className="panel-body">
-                            <span>No criteria yet to be evaluated.</span>
-                        </div>
-                    }
+                            :
+                            <div className="panel-body">
+                                <span>No criteria yet to be evaluated.</span>
+                            </div>
+                        }
+                    </table>
                 </div>
             </div>
         );
@@ -314,181 +315,4 @@ function getModifiedLevel(entry) {
         }
     }
     return modifiedLevel;
-}
-
-// Function to sort evaluations by criteria strength level
-// Sort Order: very strong or stand alone >> strong >> moderate >> supporting
-// Input: array, interpretation.evaluations
-// output: object as
-//      {
-//          met: array of sorted met evaluations,
-//          not_met: array of sorted not-met evaluations,
-//          not_evaluated: array of sorted not-evaluated and untouched objects;
-//                         untouched obj has only one key:value element (criteria: code)
-//      }
-
-function sortByStrength(evaluations) {
-    // Get all criteria codes
-    let criteriaCodes = Object.keys(evidenceCodes);
-
-    let evaluationMet = [];
-    let evaluationNotMet = [];
-    let evaluationNotEvaluated = [];
-
-    for (let evaluation of evaluations) {
-        if (evaluation.criteriaStatus === 'met') {
-            evaluationMet.push(evaluation);
-            criteriaCodes.splice(criteriaCodes.indexOf(evaluation.criteria), 1);
-        } else if (evaluation.criteriaStatus === 'not-met') {
-            evaluationNotMet.push(evaluation);
-            criteriaCodes.splice(criteriaCodes.indexOf(evaluation.criteria), 1);
-        } else {
-            evaluationNotEvaluated.push(evaluation);
-            criteriaCodes.splice(criteriaCodes.indexOf(evaluation.criteria), 1);
-        }
-    }
-
-    // Generate object for earch untouched criteria
-    let untouchedCriteriaObjList = [];
-    if (criteriaCodes.length) {
-        for (let criterion of criteriaCodes) {
-            untouchedCriteriaObjList.push({
-                criteria: criterion
-            });
-        }
-    }
-    // merge not-evaluated and untouched together
-    evaluationNotEvaluated = evaluationNotEvaluated.concat(untouchedCriteriaObjList);
-
-    let sortedMetList = [];
-    let sortedNotMetList = [];
-    let sortedNotEvaluatedList = [];
-
-    // sort Met
-    if (evaluationMet.length) {
-        // setup count strength values
-        const MODIFIER_VS = 'very-strong';
-        const MODIFIER_SA = 'stand-alone';
-        const MODIFIER_S = 'strong';
-        const MODIFIER_M = 'moderate';
-        const MODIFIER_P = 'supporting';
-
-        // temp storage
-        let vs_sa_level = [];
-        let strong_level = [];
-        let moderate_level = [];
-        let supporting_level = [];
-
-        for (let evaluation of evaluationMet) {
-            let modified = evaluation.criteriaModifier ? evaluation.criteriaModifier : null;
-            if (modified) {
-                if (modified === MODIFIER_VS || modified === MODIFIER_SA) {
-                    vs_sa_level.push(evaluation);
-                } else if (modified === MODIFIER_S) {
-                    strong_level.push(evaluation);
-                } else if (modified === MODIFIER_M) {
-                    moderate_level.push(evaluation);
-                } else if (modified === MODIFIER_P) {
-                    supporting_level.push(evaluation);
-                }
-            } else {
-                if (evaluation.criteria === 'PVS1' || evaluation.criteria === 'BA1') {
-                    vs_sa_level.push(evaluation);
-                } else if (evaluation.criteria[1] === 'S') {
-                    strong_level.push(evaluation);
-                } else if (evaluation.criteria[1] === 'M') {
-                    moderate_level.push(evaluation);
-                } else if (evaluation.criteria[1] === 'P') {
-                    supporting_level.push(evaluation);
-                }
-            }
-        }
-
-        if (vs_sa_level.length) {
-            sortedMetList = sortedMetList .concat(vs_sa_level);
-        }
-        if (strong_level.length) {
-            sortedMetList = sortedMetList.concat(strong_level);
-        }
-        if (moderate_level.length) {
-            sortedMetList = sortedMetList.concat(moderate_level);
-        }
-        if (supporting_level.length) {
-            sortedMetList = sortedMetList.concat(supporting_level);
-        }
-    }
-
-    // sort Not-Met
-    if (evaluationNotMet.length) {
-        // temp storage
-        let vs_sa_level = [];
-        let strong_level = [];
-        let moderate_level = [];
-        let supporting_level = [];
-
-        for (let evaluation of evaluationNotMet) {
-            if (evaluation.criteria === 'PVS1' || evaluation.criteria === 'BA1') {
-                vs_sa_level.push(evaluation);
-            } else if (evaluation.criteria[1] === 'S') {
-                strong_level.push(evaluation);
-            } else if (evaluation.criteria[1] === 'M') {
-                moderate_level.push(evaluation);
-            } else if (evaluation.criteria[1] === 'P') {
-                supporting_level.push(evaluation);
-            }
-        }
-
-        if (vs_sa_level.length) {
-            sortedNotMetList = sortedNotMetList .concat(vs_sa_level);
-        }
-        if (strong_level.length) {
-            sortedNotMetList = sortedNotMetList.concat(strong_level);
-        }
-        if (moderate_level.length) {
-            sortedNotMetList = sortedNotMetList.concat(moderate_level);
-        }
-        if (supporting_level.length) {
-            sortedNotMetList = sortedNotMetList.concat(supporting_level);
-        }
-    }
-
-    //sort Not-Evaluated and untouched
-    if (evaluationNotEvaluated.length) {
-        // temp storage
-        let vs_sa_level = [];
-        let strong_level = [];
-        let moderate_level = [];
-        let supporting_level = [];
-
-        for (let evaluation of evaluationNotEvaluated) {
-            if (evaluation.criteria === 'PVS1' || evaluation.criteria === 'BA1') {
-                vs_sa_level.push(evaluation);
-            } else if (evaluation.criteria[1] === 'S') {
-                strong_level.push(evaluation);
-            } else if (evaluation.criteria[1] === 'M') {
-                moderate_level.push(evaluation);
-            } else if (evaluation.criteria[1] === 'P') {
-                supporting_level.push(evaluation);
-            }
-        }
-
-        if (vs_sa_level.length) {
-            sortedNotEvaluatedList = sortedNotEvaluatedList .concat(vs_sa_level);
-        }
-        if (strong_level.length) {
-            sortedNotEvaluatedList = sortedNotEvaluatedList.concat(strong_level);
-        }
-        if (moderate_level.length) {
-            sortedNotEvaluatedList = sortedNotEvaluatedList.concat(moderate_level);
-        }
-        if (supporting_level.length) {
-            sortedNotEvaluatedList = sortedNotEvaluatedList.concat(supporting_level);
-        }
-    }
-
-    return ({
-        met: sortedMetList,
-        not_met: sortedNotMetList,
-        not_evaluated: sortedNotEvaluatedList
-    });
 }

@@ -16,6 +16,7 @@ import CurationSnapshots from '../../provisional_classification/snapshots';
 import { renderSelectedModeInheritance } from '../../../libs/render_mode_inheritance';
 import { sortListByDate } from '../../../libs/helpers/sort';
 import { allowPublishGlobal } from '../../../libs/allow_publish';
+import { sortByStrength } from '../../../libs/sort_eval_criteria';
 
 var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
     mixins: [FormMixin, RestMixin],
@@ -44,7 +45,7 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
     getInitialState() {
         return {
             interpretation: this.props.interpretation,
-            calculatedAssertion: this.props.calculatedAssertion,
+            calculatedAssertion: this.props.calculatedAssertion || 'Uncertain significance - insufficient evidence',
             autoClassification: null,
             modifiedPathogenicity: null,
             provisionalPathogenicity: this.props.provisionalPathogenicity,
@@ -581,8 +582,8 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
 
     render() {
         let interpretation = this.state.interpretation;
-        let evaluations = interpretation ? interpretation.evaluations : null;
-        let sortedEvaluations = evaluations ? sortByStrength(evaluations) : null;
+        let evaluations = interpretation ? interpretation.evaluations : undefined;
+        let sortedEvaluations = sortByStrength(evaluations);
         let calculatedAssertion = this.state.autoClassification ? this.state.autoClassification : this.state.calculatedAssertion;
         let provisionalVariant = null;
         let alteredClassification = null;
@@ -627,318 +628,312 @@ var EvaluationSummary = module.exports.EvaluationSummary = createReactClass({
         return (
             <div className="container evaluation-summary">
                 <h2><span>Evaluation Summary</span></h2>
-
-                {(evaluations && evaluations.length) ?
-                    <div className="summary-content-wrapper">
-
-                        <div className="panel panel-info datasource-evaluation-summary-provision">
-                            <div className="panel-body">
-                                <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
-                                    <div className="col-md-12 provisional-static-content-wrapper">
-                                        <div className="col-xs-12 col-sm-6">
-                                            <dl className="inline-dl clearfix">
-                                                <dt>Calculated Pathogenicity:</dt>
-                                                <dd>{calculatedAssertion ? calculatedAssertion : 'None'}</dd>
-                                            </dl>
-                                            <dl className="inline-dl clearfix">
-                                                <dt>Modified Pathogenicity:</dt>
-                                                <dd>{modifiedPathogenicity ? modifiedPathogenicity : 'None'}</dd>
-                                            </dl>
+                <div className="summary-content-wrapper">
+                    <div className="panel panel-info datasource-evaluation-summary-provision">
+                        <div className="panel-body">
+                            <Form submitHandler={this.submitForm} formClassName="form-horizontal form-std">
+                                <div className="col-md-12 provisional-static-content-wrapper">
+                                    <div className="col-xs-12 col-sm-6">
+                                        <dl className="inline-dl clearfix">
+                                            <dt>Calculated Pathogenicity:</dt>
+                                            <dd>{calculatedAssertion ? calculatedAssertion : 'None'}</dd>
+                                        </dl>
+                                        <dl className="inline-dl clearfix">
+                                            <dt>Modified Pathogenicity:</dt>
+                                            <dd>{modifiedPathogenicity ? modifiedPathogenicity : 'None'}</dd>
+                                        </dl>
+                                    </div>
+                                    <div className="col-xs-12 col-sm-6">
+                                        <dl className="inline-dl clearfix">
+                                            <dt>Disease:</dt>
+                                            <dd>{interpretation && interpretation.disease && interpretation.disease.term ? interpretation.disease.term : 'None'}</dd>
+                                        </dl>
+                                        <dl className="inline-dl clearfix">
+                                            <dt>Mode of Inheritance:</dt>
+                                            <dd className="modeInheritance">{renderSelectedModeInheritance(interpretation)}</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                                {!this.state.isClassificationViewOnly ?
+                                    <div>
+                                        <div className="col-md-12 provisional-form-content-wrapper">
+                                            <div className="col-xs-12 col-sm-6">
+                                                <div className="evaluation-provision provisional-pathogenicity">
+                                                    <Input type="select" ref="provisional-pathogenicity" label={<span>Modify Pathogenicity:<i>(optional)</i></span>}
+                                                        defaultValue={provisionalPathogenicity} handleChange={this.handleChange}
+                                                        labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
+                                                        <option value='none'>No Selection</option>
+                                                        <option disabled="disabled"></option>
+                                                        <option value="Benign">Benign</option>
+                                                        <option value="Likely benign">Likely Benign</option>
+                                                        <option value="Uncertain significance">Uncertain Significance</option>
+                                                        <option value="Likely pathogenic">Likely Pathogenic</option>
+                                                        <option value="Pathogenic">Pathogenic</option>
+                                                    </Input>
+                                                    <Input type="textarea" ref="provisional-reason" label={<span>Explain reason(s) for change:<i>(<strong>required</strong> for modified pathogenicity)</i></span>}
+                                                        value={provisionalReason} handleChange={this.handleChange} rows="5"
+                                                        placeholder="Note: If you selected a pathogenicity different from the Calculated Pathogenicity, you must provide a reason for the change here."
+                                                        labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
+                                                </div>
+                                            </div>
+                                            <div className="col-xs-12 col-sm-6">
+                                                <div className="evaluation-provision evidence-summary">
+                                                    <Input type="textarea" ref="evaluation-evidence-summary" label="Evidence Summary:"
+                                                        value={evidenceSummary} handleChange={this.handleChange}
+                                                        placeholder="Summary of the evidence and rationale for the clinical significance (optional)." rows="8"
+                                                        labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" />
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="col-xs-12 col-sm-6">
-                                            <dl className="inline-dl clearfix">
-                                                <dt>Disease:</dt>
-                                                <dd>{interpretation.disease && interpretation.disease.term ? interpretation.disease.term : 'None'}</dd>
-                                            </dl>
-                                            <dl className="inline-dl clearfix">
-                                                <dt>Mode of Inheritance:</dt>
-                                                <dd className="modeInheritance">{renderSelectedModeInheritance(interpretation)}</dd>
-                                            </dl>
+                                        <div className="col-md-12 classification-submit clearfix">
+                                            <div className="classification-submit-note pull-left">
+                                                <i className="icon icon-info-circle"></i> An Interpretation will remain In Progress until Saved as Provisional.
+                                            </div>
+                                            <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
+                                                submitBusy={this.state.submitBusy} inputDisabled={disabledFormSumbit} />
                                         </div>
                                     </div>
-                                    {!this.state.isClassificationViewOnly ?
-                                        <div>
-                                            <div className="col-md-12 provisional-form-content-wrapper">
-                                                <div className="col-xs-12 col-sm-6">
-                                                    <div className="evaluation-provision provisional-pathogenicity">
-                                                        <Input type="select" ref="provisional-pathogenicity" label={<span>Modify Pathogenicity:<i>(optional)</i></span>}
-                                                            defaultValue={provisionalPathogenicity} handleChange={this.handleChange}
-                                                            labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group">
-                                                            <option value='none'>No Selection</option>
-                                                            <option disabled="disabled"></option>
-                                                            <option value="Benign">Benign</option>
-                                                            <option value="Likely benign">Likely Benign</option>
-                                                            <option value="Uncertain significance">Uncertain Significance</option>
-                                                            <option value="Likely pathogenic">Likely Pathogenic</option>
-                                                            <option value="Pathogenic">Pathogenic</option>
-                                                        </Input>
-                                                        <Input type="textarea" ref="provisional-reason" label={<span>Explain reason(s) for change:<i>(<strong>required</strong> for modified pathogenicity)</i></span>}
-                                                            value={provisionalReason} handleChange={this.handleChange} rows="5"
-                                                            placeholder="Note: If you selected a pathogenicity different from the Calculated Pathogenicity, you must provide a reason for the change here."
-                                                            labelClassName="col-sm-6 control-label" wrapperClassName="col-sm-6" groupClassName="form-group" />
+                                    :
+                                    <div>
+                                        <div className="col-md-12 provisional-form-content-wrapper">
+                                            <div className="col-xs-12 col-sm-6">
+                                                <div className="evaluation-provision provisional-pathogenicity">
+                                                    <div>    
+                                                        <dl className="inline-dl clearfix">
+                                                            <dt><span>Modify Pathogenicity:</span></dt>
+                                                            <dd>{provisionalPathogenicity}</dd>
+                                                        </dl>
                                                     </div>
-                                                </div>
-                                                <div className="col-xs-12 col-sm-6">
-                                                    <div className="evaluation-provision evidence-summary">
-                                                        <Input type="textarea" ref="evaluation-evidence-summary" label="Evidence Summary:"
-                                                            value={evidenceSummary} handleChange={this.handleChange}
-                                                            placeholder="Summary of the evidence and rationale for the clinical significance (optional)." rows="8"
-                                                            labelClassName="col-sm-4 control-label" wrapperClassName="col-sm-8" groupClassName="form-group" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="col-md-12 classification-submit clearfix">
-                                                <div className="classification-submit-note pull-left">
-                                                    <i className="icon icon-info-circle"></i> An Interpretation will remain In Progress until Saved as Provisional.
-                                                </div>
-                                                <Input type="submit" inputClassName="btn-primary pull-right btn-inline-spacer" id="submit" title="Save"
-                                                    submitBusy={this.state.submitBusy} inputDisabled={disabledFormSumbit} />
-                                            </div>
-                                        </div>
-                                        :
-                                        <div>
-                                            <div className="col-md-12 provisional-form-content-wrapper">
-                                                <div className="col-xs-12 col-sm-6">
-                                                    <div className="evaluation-provision provisional-pathogenicity">
-                                                        <div>    
-                                                            <dl className="inline-dl clearfix">
-                                                                <dt><span>Modify Pathogenicity:</span></dt>
-                                                                <dd>{provisionalPathogenicity}</dd>
-                                                            </dl>
-                                                        </div>
-                                                        <div>
-                                                            <dl className="inline-dl clearfix">
-                                                                <dt><span>Explain reason(s) for change:</span></dt>
-                                                                <dd>{provisionalReason && provisionalReason.length ? provisionalReason : 'None'}</dd>
-                                                            </dl>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="col-xs-12 col-sm-6">
-                                                    <div className="evaluation-provision evidence-summary">
-                                                        <dl className="inline-dl clearfix preview-provisional-comment">
-                                                            <dt><span>Evidence Summary:</span></dt>
-                                                            <dd><span>{evidenceSummary && evidenceSummary.length ? evidenceSummary : 'None'}</span></dd>
+                                                    <div>
+                                                        <dl className="inline-dl clearfix">
+                                                            <dt><span>Explain reason(s) for change:</span></dt>
+                                                            <dd>{provisionalReason && provisionalReason.length ? provisionalReason : 'None'}</dd>
                                                         </dl>
                                                     </div>
                                                 </div>
                                             </div>
-                                            {classificationStatus === 'In progress' ?
-                                                <div className="col-md-12 classification-edit">
-                                                    <button type="button" className="btn btn-info btn-inline-spacer pull-right"
-                                                        onClick={this.handleEditClassification}>Edit <i className="icon icon-pencil"></i></button>
+                                            <div className="col-xs-12 col-sm-6">
+                                                <div className="evaluation-provision evidence-summary">
+                                                    <dl className="inline-dl clearfix preview-provisional-comment">
+                                                        <dt><span>Evidence Summary:</span></dt>
+                                                        <dd><span>{evidenceSummary && evidenceSummary.length ? evidenceSummary : 'None'}</span></dd>
+                                                    </dl>
                                                 </div>
-                                                : null}
-                                        </div>
-                                    }
-                                </Form>
-                            </div>
-                        </div>
-                        {provisionalVariant && showProvisional ?
-                            <div className="provisional-approval-content-wrapper">
-                                {shouldProvisionClassification ?
-                                    <div>
-                                        <div className="provisional-interpretation-note">
-                                            <p className="alert alert-info">
-                                                <i className="icon icon-info-circle"></i> Save this Interpretation as Provisional if you have finished all your evaluations and wish to mark it as complete. Once
-                                                you have saved it as Provisional, you will not be able to undo it, but you will be able to make a new current Provisional Interpretation, archiving the current
-                                                one, with access to its Evaluation Summary.
-                                            </p>
-                                        </div>
-                                        <div className="panel panel-warning approval-process provisional-approval">
-                                            <div className="panel-heading">
-                                                <h3 className="panel-title">Save Interpretation as Provisional</h3>
-                                            </div>
-                                            <div className="panel-body">
-                                                <ProvisionalApproval
-                                                    session={this.props.session}
-                                                    interpretation={interpretation}
-                                                    classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
-                                                    classificationStatus={classificationStatus}
-                                                    provisional={provisionalVariant}
-                                                    affiliation={affiliation}
-                                                    updateSnapshotList={this.props.updateSnapshotList}
-                                                    updateProvisionalObj={this.props.updateProvisionalObj}
-                                                    approveProvisional={this.approveProvisional}
-                                                />
                                             </div>
                                         </div>
-                                    </div>
-                                    :
-                                    <div className="provisional-interpretation-note">
-                                        <p className="alert alert-warning">
-                                            <i className="icon icon-exclamation-circle"></i> The option to save an Interpretation as Provisional will not appear when the saved calculated or modified value
-                                            is "Likely Pathogenic" or "Pathogenic" and there is no associated disease.
-                                        </p>
+                                        {classificationStatus === 'In progress' ?
+                                            <div className="col-md-12 classification-edit">
+                                                <button type="button" className="btn btn-info btn-inline-spacer pull-right"
+                                                    onClick={this.handleEditClassification}>Edit <i className="icon icon-pencil"></i></button>
+                                            </div>
+                                            : null}
                                     </div>
                                 }
-                            </div>
-                            : null}
-                        {provisionalVariant && showApproval ?
-                            <div className="final-approval-content-wrapper"> 
-                                <div className="final-approval-note">
-                                    <p className="alert alert-info">
-                                        <i className="icon icon-info-circle"></i> When ready, you may save this Provisional Interpretation as Approved. Once you have saved it as Approved it will become
-                                        uneditable, but you will be able to save a new current Approved Interpretation, thus archiving this current one and retaining access to its Evaluation Summary.
+                            </Form>
+                        </div>
+                    </div>
+                    {provisionalVariant && showProvisional ?
+                        <div className="provisional-approval-content-wrapper">
+                            {shouldProvisionClassification ?
+                                <div>
+                                    <div className="provisional-interpretation-note">
+                                        <p className="alert alert-info">
+                                            <i className="icon icon-info-circle"></i> Save this Interpretation as Provisional if you have finished all your evaluations and wish to mark it as complete. Once
+                                            you have saved it as Provisional, you will not be able to undo it, but you will be able to make a new current Provisional Interpretation, archiving the current
+                                            one, with access to its Evaluation Summary.
+                                        </p>
+                                    </div>
+                                    <div className="panel panel-warning approval-process provisional-approval">
+                                        <div className="panel-heading">
+                                            <h3 className="panel-title">Save Interpretation as Provisional</h3>
+                                        </div>
+                                        <div className="panel-body">
+                                            <ProvisionalApproval
+                                                session={this.props.session}
+                                                interpretation={interpretation}
+                                                classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
+                                                classificationStatus={classificationStatus}
+                                                provisional={provisionalVariant}
+                                                affiliation={affiliation}
+                                                updateSnapshotList={this.props.updateSnapshotList}
+                                                updateProvisionalObj={this.props.updateProvisionalObj}
+                                                approveProvisional={this.approveProvisional}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                                :
+                                <div className="provisional-interpretation-note">
+                                    <p className="alert alert-warning">
+                                        <i className="icon icon-exclamation-circle"></i> The option to save an Interpretation as Provisional will not appear when the saved calculated or modified value
+                                        is "Likely Pathogenic" or "Pathogenic" and there is no associated disease.
                                     </p>
                                 </div>
-                                <div className="panel panel-warning approval-process final-approval">
-                                    <div className="panel-heading">
-                                        <h3 className="panel-title">Approve Interpretation</h3>
-                                    </div>
-                                    <div className="panel-body">
-                                        <ClassificationApproval
-                                            session={this.props.session}
-                                            interpretation={interpretation}
-                                            classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
-                                            classificationStatus={classificationStatus}
-                                            provisional={provisionalVariant}
-                                            affiliation={affiliation}
-                                            updateSnapshotList={this.props.updateSnapshotList}
-                                            updateProvisionalObj={this.props.updateProvisionalObj}
-                                            snapshots={sortedSnapshotList}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            : null}
-                        {provisionalVariant && (showPublish || showUnpublish) ?
-                            <div className={'publish-approval-content-wrapper' + (showUnpublish ? ' unpublish' : '')}>
-                                <div className="publish-approval-note">
-                                    {isPublishActive === 'auto' ?
-                                        <p className="alert alert-info">
-                                            <i className="icon icon-info-circle"></i> Publish the current (<i className="icon icon-flag"></i>)
-                                                Approved Interpretation to the Evidence Repository.
-                                        </p>
-                                        :
-                                        <p className="alert alert-info">
-                                            <i className="icon icon-info-circle"></i> {showUnpublish ? 'Unpublish' : 'Publish'} the selected
-                                                Approved Interpretation {showUnpublish ? 'from' : 'to'} the Evidence Repository.
-                                        </p>
-                                    }
-                                </div>
-                                <div className={'panel panel-warning approval-process publish-approval' + (showUnpublish ? ' unpublish' : '')}>
-                                    <div className="panel-heading">
-                                        <h3 className="panel-title">{showUnpublish ? 'Unpublish Interpretation from' : 'Publish Interpretation to'} the Evidence Repository</h3>
-                                    </div>
-                                    <div className="panel-body">
-                                        <PublishApproval
-                                            session={this.props.session}
-                                            interpretation={interpretation}
-                                            classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
-                                            classificationStatus={classificationStatus}
-                                            provisional={provisionalVariant}
-                                            affiliation={affiliation}
-                                            updateSnapshotList={this.props.updateSnapshotList}
-                                            updateProvisionalObj={this.props.updateProvisionalObj}
-                                            snapshots={sortedSnapshotList}
-                                            selectedSnapshotUUID={snapshotUUID}
-                                            triggerPublishLinkAlert={this.triggerPublishLinkAlert}
-                                            clearPublishState={this.clearPublishState}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            : null}
-                        {!showProvisional && !showApproval && !allowPublishButton ?
-                            <div className="publish-unavailable-note">
+                            }
+                        </div>
+                        : null}
+                    {provisionalVariant && showApproval ?
+                        <div className="final-approval-content-wrapper"> 
+                            <div className="final-approval-note">
                                 <p className="alert alert-info">
-                                    <i className="icon icon-info-circle"></i> The option to publish an approved interpretation to the Evidence Repository is
-                                        currently only available for VCEPs that have guidelines approved by the Sequence Variant Interpretation Working Group.
+                                    <i className="icon icon-info-circle"></i> When ready, you may save this Provisional Interpretation as Approved. Once you have saved it as Approved it will become
+                                    uneditable, but you will be able to save a new current Approved Interpretation, thus archiving this current one and retaining access to its Evaluation Summary.
                                 </p>
                             </div>
-                            : null}
-                        {sortedSnapshotList.length ?
-                            <div className="panel panel-info snapshot-list">
+                            <div className="panel panel-warning approval-process final-approval">
                                 <div className="panel-heading">
-                                    <h3 className="panel-title">Saved Provisional and Approved Interpretation(s)</h3>
+                                    <h3 className="panel-title">Approve Interpretation</h3>
                                 </div>
                                 <div className="panel-body">
-                                    <CurationSnapshots
-                                        snapshots={sortedSnapshotList}
-                                        approveProvisional={this.approveProvisional}
-                                        addPublishState={this.addPublishState}
-                                        isApprovalActive={isApprovalActive}
-                                        isPublishEventActive={isPublishActive || isUnpublishActive ? true : false}
+                                    <ClassificationApproval
+                                        session={this.props.session}
+                                        interpretation={interpretation}
+                                        classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
                                         classificationStatus={classificationStatus}
-                                        demoVersion={demoVersion}
-                                        allowPublishButton={allowPublishButton}
-                                        showPublishLinkAlert={showPublishLinkAlert}
-                                        clearPublishLinkAlert={this.clearPublishLinkAlert} />
+                                        provisional={provisionalVariant}
+                                        affiliation={affiliation}
+                                        updateSnapshotList={this.props.updateSnapshotList}
+                                        updateProvisionalObj={this.props.updateProvisionalObj}
+                                        snapshots={sortedSnapshotList}
+                                    />
                                 </div>
                             </div>
-                            : null}
-
-                        <div className="panel panel-info datasource-evaluation-summary">
-                            <div className="panel-heading">
-                                <h3 className="panel-title">Criteria meeting an evaluation strength</h3>
+                        </div>
+                        : null}
+                    {provisionalVariant && (showPublish || showUnpublish) ?
+                        <div className={'publish-approval-content-wrapper' + (showUnpublish ? ' unpublish' : '')}>
+                            <div className="publish-approval-note">
+                                {isPublishActive === 'auto' ?
+                                    <p className="alert alert-info">
+                                        <i className="icon icon-info-circle"></i> Publish the current (<i className="icon icon-flag"></i>)
+                                            Approved Interpretation to the Evidence Repository.
+                                    </p>
+                                    :
+                                    <p className="alert alert-info">
+                                        <i className="icon icon-info-circle"></i> {showUnpublish ? 'Unpublish' : 'Publish'} the selected
+                                            Approved Interpretation {showUnpublish ? 'from' : 'to'} the Evidence Repository.
+                                    </p>
+                                }
                             </div>
+                            <div className={'panel panel-warning approval-process publish-approval' + (showUnpublish ? ' unpublish' : '')}>
+                                <div className="panel-heading">
+                                    <h3 className="panel-title">{showUnpublish ? 'Unpublish Interpretation from' : 'Publish Interpretation to'} the Evidence Repository</h3>
+                                </div>
+                                <div className="panel-body">
+                                    <PublishApproval
+                                        session={this.props.session}
+                                        interpretation={interpretation}
+                                        classification={provisionalPathogenicity && provisionalPathogenicity !== 'none' ? provisionalPathogenicity : calculatedAssertion}
+                                        classificationStatus={classificationStatus}
+                                        provisional={provisionalVariant}
+                                        affiliation={affiliation}
+                                        updateSnapshotList={this.props.updateSnapshotList}
+                                        updateProvisionalObj={this.props.updateProvisionalObj}
+                                        snapshots={sortedSnapshotList}
+                                        selectedSnapshotUUID={snapshotUUID}
+                                        triggerPublishLinkAlert={this.triggerPublishLinkAlert}
+                                        clearPublishState={this.clearPublishState}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        : null}
+                    {!showProvisional && !showApproval && !allowPublishButton ?
+                        <div className="publish-unavailable-note">
+                            <p className="alert alert-info">
+                                <i className="icon icon-info-circle"></i> The option to publish an approved interpretation to the Evidence Repository is
+                                    currently only available for VCEPs that have guidelines approved by the Sequence Variant Interpretation Working Group.
+                            </p>
+                        </div>
+                        : null}
+                    {sortedSnapshotList.length ?
+                        <div className="panel panel-info snapshot-list">
+                            <div className="panel-heading">
+                                <h3 className="panel-title">Saved Provisional and Approved Interpretation(s)</h3>
+                            </div>
+                            <div className="panel-body">
+                                <CurationSnapshots
+                                    snapshots={sortedSnapshotList}
+                                    approveProvisional={this.approveProvisional}
+                                    addPublishState={this.addPublishState}
+                                    isApprovalActive={isApprovalActive}
+                                    isPublishEventActive={isPublishActive || isUnpublishActive ? true : false}
+                                    classificationStatus={classificationStatus}
+                                    demoVersion={demoVersion}
+                                    allowPublishButton={allowPublishButton}
+                                    showPublishLinkAlert={showPublishLinkAlert}
+                                    clearPublishLinkAlert={this.clearPublishLinkAlert} />
+                            </div>
+                        </div>
+                        : null}
+
+                    <div className="panel panel-info datasource-evaluation-summary">
+                        <div className="panel-heading">
+                            <h3 className="panel-title">Criteria meeting an evaluation strength</h3>
+                        </div>
+                        {sortedEvaluations && sortedEvaluations.met && sortedEvaluations.met.length ?
                             <table className="table">
                                 <thead>
                                     {tableHeader()}
                                 </thead>
-                                {sortedEvaluations.met ?
-                                    <tbody>
-                                        {sortedEvaluations.met.map(function(item, i) {
-                                            return (renderMetCriteriaRow(item, i));
-                                        })}
-                                    </tbody>
-                                    :
-                                    <div className="panel-body">
-                                        <span>No criteria meeting an evaluation strength.</span>
-                                    </div>
-                                }
+                                <tbody>
+                                    {sortedEvaluations.met.map(function(item, i) {
+                                        return (renderMetCriteriaRow(item, i));
+                                    })}
+                                </tbody>
                             </table>
-                        </div>
-
-                        <div className="panel panel-info datasource-evaluation-summary">
-                            <div className="panel-heading">
-                                <h3 className="panel-title">Criteria evaluated as "Not met"</h3>
+                            :
+                            <div className="panel-body">
+                                <span>No criteria meeting an evaluation strength.</span>
                             </div>
-                            <table className="table">
-                                <thead>
-                                    {tableHeader()}
-                                </thead>
-                                {sortedEvaluations.not_met ?
-                                    <tbody>
-                                        {sortedEvaluations.not_met.map(function(item, i) {
-                                            return (renderNotMetCriteriaRow(item, i));
-                                        })}
-                                    </tbody>
-                                    :
-                                    <div className="panel-body">
-                                        <span>No criteria evaluated as "Not met".</span>
-                                    </div>
-                                }
-                            </table>
-                        </div>
-
-                        <div className="panel panel-info datasource-evaluation-summary">
-                            <div className="panel-heading">
-                                <h3 className="panel-title">Criteria "Not yet evaluated"</h3>
-                            </div>
-                            <table className="table">
-                                <thead>
-                                    {tableHeader()}
-                                </thead>
-                                {sortedEvaluations.not_evaluated ?
-                                    <tbody>
-                                        {sortedEvaluations.not_evaluated.map(function(item, i) {
-                                            return (renderNotEvalCriteriaRow(item, i));
-                                        })}
-                                    </tbody>
-                                    :
-                                    <div className="panel-body">
-                                        <span>No criteria yet to be evaluated.</span>
-                                    </div>
-                                }
-                            </table>
-                        </div>
-
+                        }
                     </div>
-                    :
-                    <div className="summary-content-wrapper"><p>No evaluations found in this interpretation.</p></div>
-                }
+
+                    <div className="panel panel-info datasource-evaluation-summary">
+                        <div className="panel-heading">
+                            <h3 className="panel-title">Criteria evaluated as "Not met"</h3>
+                        </div>
+                        {sortedEvaluations && sortedEvaluations.not_met && sortedEvaluations.not_met.length ?
+                            <table className="table">
+                                <thead>
+                                    {tableHeader()}
+                                </thead>
+                                <tbody>
+                                    {sortedEvaluations.not_met.map(function(item, i) {
+                                        return (renderNotMetCriteriaRow(item, i));
+                                    })}
+                                </tbody>
+                            </table>
+                            :
+                            <div className="panel-body">
+                                <span>No criteria evaluated as "Not met".</span>
+                            </div>
+                        }
+                    </div>
+
+                    <div className="panel panel-info datasource-evaluation-summary">
+                        <div className="panel-heading">
+                            <h3 className="panel-title">Criteria "Not yet evaluated"</h3>
+                        </div>
+                        <table className="table">
+                            <thead>
+                                {tableHeader()}
+                            </thead>
+                            {sortedEvaluations && sortedEvaluations.not_evaluated && sortedEvaluations.not_evaluated.length ?
+                                <tbody>
+                                    {sortedEvaluations.not_evaluated.map(function(item, i) {
+                                        return (renderNotEvalCriteriaRow(item, i));
+                                    })}
+                                </tbody>
+                                :
+                                <div className="panel-body">
+                                    <span>No criteria yet to be evaluated.</span>
+                                </div>
+                            }
+                        </table>
+                    </div>
+
+                </div>
             </div>
         );
     }
@@ -1166,181 +1161,4 @@ function getModifiedLevel(entry) {
         }
     }
     return modifiedLevel;
-}
-
-// Function to sort evaluations by criteria strength level
-// Sort Order: very strong or stand alone >> strong >> moderate >> supporting
-// Input: array, interpretation.evaluations
-// output: object as
-//      {
-//          met: array of sorted met evaluations,
-//          not_met: array of sorted not-met evaluations,
-//          not_evaluated: array of sorted not-evaluated and untouched objects;
-//                         untouched obj has only one key:value element (criteria: code)
-//      }
-
-function sortByStrength(evaluations) {
-    // Get all criteria codes
-    let criteriaCodes = Object.keys(evidenceCodes);
-
-    let evaluationMet = [];
-    let evaluationNotMet = [];
-    let evaluationNotEvaluated = [];
-
-    for (let evaluation of evaluations) {
-        if (evaluation.criteriaStatus === 'met') {
-            evaluationMet.push(evaluation);
-            criteriaCodes.splice(criteriaCodes.indexOf(evaluation.criteria), 1);
-        } else if (evaluation.criteriaStatus === 'not-met') {
-            evaluationNotMet.push(evaluation);
-            criteriaCodes.splice(criteriaCodes.indexOf(evaluation.criteria), 1);
-        } else {
-            evaluationNotEvaluated.push(evaluation);
-            criteriaCodes.splice(criteriaCodes.indexOf(evaluation.criteria), 1);
-        }
-    }
-
-    // Generate object for earch untouched criteria
-    let untouchedCriteriaObjList = [];
-    if (criteriaCodes.length) {
-        for (let criterion of criteriaCodes) {
-            untouchedCriteriaObjList.push({
-                criteria: criterion
-            });
-        }
-    }
-    // merge not-evaluated and untouched together
-    evaluationNotEvaluated = evaluationNotEvaluated.concat(untouchedCriteriaObjList);
-
-    let sortedMetList = [];
-    let sortedNotMetList = [];
-    let sortedNotEvaluatedList = [];
-
-    // sort Met
-    if (evaluationMet.length) {
-        // setup count strength values
-        const MODIFIER_VS = 'very-strong';
-        const MODIFIER_SA = 'stand-alone';
-        const MODIFIER_S = 'strong';
-        const MODIFIER_M = 'moderate';
-        const MODIFIER_P = 'supporting';
-
-        // temp storage
-        let vs_sa_level = [];
-        let strong_level = [];
-        let moderate_level = [];
-        let supporting_level = [];
-
-        for (let evaluation of evaluationMet) {
-            let modified = evaluation.criteriaModifier ? evaluation.criteriaModifier : null;
-            if (modified) {
-                if (modified === MODIFIER_VS || modified === MODIFIER_SA) {
-                    vs_sa_level.push(evaluation);
-                } else if (modified === MODIFIER_S) {
-                    strong_level.push(evaluation);
-                } else if (modified === MODIFIER_M) {
-                    moderate_level.push(evaluation);
-                } else if (modified === MODIFIER_P) {
-                    supporting_level.push(evaluation);
-                }
-            } else {
-                if (evaluation.criteria === 'PVS1' || evaluation.criteria === 'BA1') {
-                    vs_sa_level.push(evaluation);
-                } else if (evaluation.criteria[1] === 'S') {
-                    strong_level.push(evaluation);
-                } else if (evaluation.criteria[1] === 'M') {
-                    moderate_level.push(evaluation);
-                } else if (evaluation.criteria[1] === 'P') {
-                    supporting_level.push(evaluation);
-                }
-            }
-        }
-
-        if (vs_sa_level.length) {
-            sortedMetList = sortedMetList .concat(vs_sa_level);
-        }
-        if (strong_level.length) {
-            sortedMetList = sortedMetList.concat(strong_level);
-        }
-        if (moderate_level.length) {
-            sortedMetList = sortedMetList.concat(moderate_level);
-        }
-        if (supporting_level.length) {
-            sortedMetList = sortedMetList.concat(supporting_level);
-        }
-    }
-
-    // sort Not-Met
-    if (evaluationNotMet.length) {
-        // temp storage
-        let vs_sa_level = [];
-        let strong_level = [];
-        let moderate_level = [];
-        let supporting_level = [];
-
-        for (let evaluation of evaluationNotMet) {
-            if (evaluation.criteria === 'PVS1' || evaluation.criteria === 'BA1') {
-                vs_sa_level.push(evaluation);
-            } else if (evaluation.criteria[1] === 'S') {
-                strong_level.push(evaluation);
-            } else if (evaluation.criteria[1] === 'M') {
-                moderate_level.push(evaluation);
-            } else if (evaluation.criteria[1] === 'P') {
-                supporting_level.push(evaluation);
-            }
-        }
-
-        if (vs_sa_level.length) {
-            sortedNotMetList = sortedNotMetList .concat(vs_sa_level);
-        }
-        if (strong_level.length) {
-            sortedNotMetList = sortedNotMetList.concat(strong_level);
-        }
-        if (moderate_level.length) {
-            sortedNotMetList = sortedNotMetList.concat(moderate_level);
-        }
-        if (supporting_level.length) {
-            sortedNotMetList = sortedNotMetList.concat(supporting_level);
-        }
-    }
-
-    //sort Not-Evaluated and untouched
-    if (evaluationNotEvaluated.length) {
-        // temp storage
-        let vs_sa_level = [];
-        let strong_level = [];
-        let moderate_level = [];
-        let supporting_level = [];
-
-        for (let evaluation of evaluationNotEvaluated) {
-            if (evaluation.criteria === 'PVS1' || evaluation.criteria === 'BA1') {
-                vs_sa_level.push(evaluation);
-            } else if (evaluation.criteria[1] === 'S') {
-                strong_level.push(evaluation);
-            } else if (evaluation.criteria[1] === 'M') {
-                moderate_level.push(evaluation);
-            } else if (evaluation.criteria[1] === 'P') {
-                supporting_level.push(evaluation);
-            }
-        }
-
-        if (vs_sa_level.length) {
-            sortedNotEvaluatedList = sortedNotEvaluatedList .concat(vs_sa_level);
-        }
-        if (strong_level.length) {
-            sortedNotEvaluatedList = sortedNotEvaluatedList.concat(strong_level);
-        }
-        if (moderate_level.length) {
-            sortedNotEvaluatedList = sortedNotEvaluatedList.concat(moderate_level);
-        }
-        if (supporting_level.length) {
-            sortedNotEvaluatedList = sortedNotEvaluatedList.concat(supporting_level);
-        }
-    }
-
-    return ({
-        met: sortedMetList,
-        not_met: sortedNotMetList,
-        not_evaluated: sortedNotEvaluatedList
-    });
 }
