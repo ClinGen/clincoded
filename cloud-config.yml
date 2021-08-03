@@ -120,13 +120,11 @@ runcmd:
 - mkdir /opt/cloudwatchmon
 - chown build:build /opt/cloudwatchmon
 - sudo -u build virtualenv --python=python2.7 /opt/cloudwatchmon
-- sudo -u build /opt/cloudwatchmon/bin/pip install --upgrade pip
-- sudo -u build /opt/cloudwatchmon/bin/pip install -r cloudwatchmon-requirements.txt
+- sudo -u build /opt/cloudwatchmon/bin/pip install -i https://pypi.org/simple -r cloudwatchmon-requirements.txt
 - mkdir /opt/wal-e
 - chown postgres:postgres /opt/wal-e
 - sudo -u postgres virtualenv --python=python2.7 /opt/wal-e
-- sudo -u postgres /opt/wal-e/bin/pip install --upgrade pip
-- sudo -u postgres /opt/wal-e/bin/pip install -r wal-e-requirements.txt
+- sudo -u postgres /opt/wal-e/bin/pip install -i https://pypi.org/simple -r wal-e-requirements.txt
 # Restore DB
 # (load data from s3)
 - if test "%(BACKUPDB)s" = "s3_data"
