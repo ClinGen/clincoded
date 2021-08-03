@@ -90,7 +90,7 @@ runcmd:
 - set -ex
 - echo "America/Los_Angeles" | sudo tee /etc/timezone
 - sudo dpkg-reconfigure --frontend noninteractive tzdata
-- sudo echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
+- sudo echo "deb https://apt-archive.postgresql.org/pub/repos/apt/ trusty-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
 - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 - wget --quiet -O - https://packages.confluent.io/deb/4.1/archive.key | sudo apt-key add -
 - sudo add-apt-repository "deb [arch=amd64] https://packages.confluent.io/deb/4.1 stable main"
