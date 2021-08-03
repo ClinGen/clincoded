@@ -117,10 +117,10 @@ runcmd:
 - sudo -u clincoded git checkout %(COMMIT)s
 # Enable messaging/publication code (committed as comment in order to pass Trusty-based Travis build testing)
 - sudo -u clincoded git checkout 46742b6326baa3db660d0cebd26e9eb8f4116f77 src/clincoded/__init__.py
-- mkdir /opt/cloudwatchmon
-- chown build:build /opt/cloudwatchmon
-- sudo -u build virtualenv --python=python2.7 /opt/cloudwatchmon
-- sudo -u build /opt/cloudwatchmon/bin/pip install -r cloudwatchmon-requirements.txt
+# - mkdir /opt/cloudwatchmon
+# - chown build:build /opt/cloudwatchmon
+# - sudo -u build virtualenv --python=python2.7 /opt/cloudwatchmon
+# - sudo -u build /opt/cloudwatchmon/bin/pip install -r cloudwatchmon-requirements.txt
 - mkdir /opt/wal-e
 - chown postgres:postgres /opt/wal-e
 - sudo -u postgres virtualenv --python=python2.7 /opt/wal-e
@@ -206,9 +206,9 @@ write_files:
     Unattended-Upgrade::Automatic-Reboot "true";
     Unattended-Upgrade::Automatic-Reboot-Time "01:00";
 
-- path: /etc/cron.d/cloudwatchmon
-  content: |
-    */5 * * * * nobody /opt/cloudwatchmon/bin/mon-put-instance-stats.py --mem-util --swap-util --disk-space-util --disk-path=/ --from-cron
+#- path: /etc/cron.d/cloudwatchmon
+#  content: |
+#    */5 * * * * nobody /opt/cloudwatchmon/bin/mon-put-instance-stats.py --mem-util --swap-util --disk-space-util --disk-path=/ --from-cron
 
 - path: /etc/default/elasticsearch
   content: |
