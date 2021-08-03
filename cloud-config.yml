@@ -98,7 +98,7 @@ runcmd:
 - sudo mv /etc/postgresql/9.4/main/recovery.conf /etc/postgresql/9.4/main/recovery-demo.conf
 - sudo apt-get -y install postgresql-9.4
 - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
-- sudo apt-get install -y nodejs
+- sudo apt-get install -y --force-yes nodejs
 - update-rc.d elasticsearch defaults
 - service elasticsearch start
 - chown postgres:postgres /etc/postgresql/9.4/main/*.conf
